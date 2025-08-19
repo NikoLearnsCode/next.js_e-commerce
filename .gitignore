@@ -14,6 +14,8 @@ ToDo.txt
 # testing
 /coverage
 
+# migrations
+/drizzle/migrations
 
 
 

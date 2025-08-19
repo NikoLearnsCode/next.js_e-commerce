@@ -1,22 +1,23 @@
-// Ladda miljövariabler från .env.local
-import * as dotenv from 'dotenv';
-dotenv.config({path: '.env'});
+// Ladda miljövariabler
+import 'dotenv/config';
 
-import {createClient} from '@supabase/supabase-js';
+import {drizzle} from 'drizzle-orm/node-postgres';
+import {Pool} from 'pg';
+import * as schema from '../drizzle/src/db/schema';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const {productsTable} = schema;
 
-if (!supabaseUrl || !supabaseServiceKey) {
-  throw new Error('Supabase URL och service role key måste anges i .env.local');
-}
-
-const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false,
-  },
+// Skapa pool för PostgreSQL med samma inställningar som drizzle.config.ts
+const pool = new Pool({
+  host: 'localhost',
+  port: 5432,
+  user: 'niklas',
+  database: 'db',
+  ssl: false,
 });
+
+// Skapa Drizzle-instans
+const db = drizzle(pool, {schema});
 
 const baseProducts = [
   // HERRKLÄDER
@@ -230,33 +231,36 @@ const baseProducts = [
 
 // Funktion för att hämta befintliga produkter
 async function getExistingProductsInfo() {
-  // Hämta alla befintliga slug och name värden
-  const {data, error} = await supabase
-    .from('products')
-    .select('slug, name')
-    .order('created_at', {ascending: false});
+  try {
+    // Hämta alla befintliga slug och name värden
+    const data = await db
+      .select({
+        slug: productsTable.slug,
+        name: productsTable.name,
+      })
+      .from(productsTable)
+      .orderBy(productsTable.created_at);
 
-  if (error) {
+    // Extrahera unika slugs och names
+    const slugs = data.map((product) => product.slug);
+
+    // Hitta högsta index från befintliga slug-mönster (slug-XX)
+    let highestIndex = 0;
+    slugs.forEach((slug) => {
+      const match = slug.match(/-(\d+)$/);
+      if (match && match[1]) {
+        const index = parseInt(match[1]);
+        if (index > highestIndex) {
+          highestIndex = index;
+        }
+      }
+    });
+
+    return {slugs, highestIndex};
+  } catch (error) {
     console.error('Fel vid hämtning av befintliga produkter:', error);
     return {slugs: [], highestIndex: 0};
   }
-
-  // Extrahera unika slugs och names
-  const slugs = data.map((product) => product.slug);
-
-  // Hitta högsta index från befintliga slug-mönster (slug-XX)
-  let highestIndex = 0;
-  slugs.forEach((slug) => {
-    const match = slug.match(/-(\d+)$/);
-    if (match && match[1]) {
-      const index = parseInt(match[1]);
-      if (index > highestIndex) {
-        highestIndex = index;
-      }
-    }
-  });
-
-  return {slugs, highestIndex};
 }
 
 // Funktion som skapar en ny produkt baserat på originalet med unika värden
@@ -309,10 +313,7 @@ async function seedProducts(count: number = 50) {
   console.log(`Börjar seeda produkter...`);
 
   // Hämta information om befintliga produkter
-  const {
-    slugs: existingSlugs,
-    highestIndex,
-  } = await getExistingProductsInfo();
+  const {slugs: existingSlugs, highestIndex} = await getExistingProductsInfo();
 
   const startIndex = highestIndex + 1;
   console.log(
@@ -364,17 +365,13 @@ async function seedProducts(count: number = 50) {
   }
 
   // Spara produkter i databasen
-  const {data, error} = await supabase
-    .from('products')
-    .insert(productRows)
-    .select();
-
-  if (error) {
+  try {
+    const data = await db.insert(productsTable).values(productRows).returning();
+    console.log(`Framgångsrikt lagt till ${data.length} produkter!`);
+  } catch (error) {
     console.error('Fel vid insättning av produkter:', error);
     return;
   }
-
-  console.log(`Framgångsrikt lagt till ${data.length} produkter!`);
 }
 
 (async () => {
@@ -385,6 +382,8 @@ async function seedProducts(count: number = 50) {
   } catch (error) {
     console.error('❌ Fel vid seeding:', error);
   } finally {
+    // Stäng databasanslutningen
+    await pool.end();
     process.exit(0);
   }
 })();
