@@ -12,7 +12,7 @@ export const cartItemSchema = z.object({
   id: z.string().uuid(),
   product_id: z.string().uuid(),
   quantity: z.number().int().min(1),
-  price: z.number().positive(),
+  price: z.number().positive().min(0.01),
   gender: z.string(),
   color: z.string(),
   brand: z.string(),
@@ -20,7 +20,7 @@ export const cartItemSchema = z.object({
   description: z.string().optional(),
   slug: z.string(),
   category: z.string(),
-  specs: z.array(z.string()).optional().default([]),
+  specs: z.array(z.string()).optional(),
   images: z.array(z.string()).default([]),
   size: z.string(),
 });

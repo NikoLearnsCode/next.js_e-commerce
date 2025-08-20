@@ -51,9 +51,6 @@ export default function CartPage() {
       {isLoading && (
         <div className='flex flex-col  justify-center items-center min-h-[calc(100vh-310px)]'>
           <SpinningLogo className='pb-4' />
-          {/* <div className='text-xs font-bold text-center mx-auto pl-5 font-syne uppercase text-gray-500 '>
-            Laddar...
-          </div> */}
         </div>
       )}
 

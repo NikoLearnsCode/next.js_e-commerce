@@ -112,7 +112,7 @@ export function CartProvider({children}: {children: React.ReactNode}) {
       setRemovingItems((prev) => ({...prev, [itemId]: true}));
       const result = await removeFromCart(itemId);
       if (result.success) {
-        setCartItems(result.cartItems);
+        setCartItems(result.cartItems || []);
       } else {
         console.error('Error removing item via backend:', result.error);
         // fallback
@@ -137,7 +137,7 @@ export function CartProvider({children}: {children: React.ReactNode}) {
 
         const result = await updateCartItemQuantity(itemId, quantity);
         if (result.success) {
-          setCartItems(result.cartItems);
+          setCartItems(result.cartItems || []);
         } else {
           console.error('Error updating quantity via backend:', result.error);
           await refreshCart();

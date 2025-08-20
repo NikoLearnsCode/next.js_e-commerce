@@ -24,9 +24,9 @@ export const productsTable = pgTable('products', {
   category: varchar('category', {length: 255}).notNull(),
   color: varchar('color', {length: 255}).notNull(),
   slug: varchar('slug', {length: 255}).notNull().unique(),
-  specs: jsonb('specs').notNull(),
-  images: jsonb('images').notNull(),
-  sizes: jsonb('sizes').notNull(),
+  specs: jsonb('specs').$type<string[]>().notNull(),
+  images: jsonb('images').$type<string[]>().notNull(),
+  sizes: jsonb('sizes').$type<string[]>().notNull(),
 });
 
 // CARTS

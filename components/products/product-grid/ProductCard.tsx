@@ -48,7 +48,7 @@ export default function ProductCard({
         </div>
         <div className='p-1.5 overflow-hidden'>
           <h2 className='truncate font-medium'>{product.name}</h2>
-          <p className='mt-2 font-semibold'>{product.price.toFixed(2)} kr</p>
+          <p className='mt-2 font-semibold'>{product.price} kr</p>
         </div>
       </div>
     );
@@ -117,7 +117,6 @@ export default function ProductCard({
             >
               {product.images.map((imgSrc, idx) => (
                 <SwiperSlide key={idx}>
-                  {/* ⬇⬇ ENDA ÄNDRINGEN: gör slidelänken icke-tabbbar */}
                   <Link
                     href={`/${product.slug}`}
                     className='relative block  h-full w-full'
@@ -176,7 +175,6 @@ export default function ProductCard({
             )}
           </>
         ) : (
-          // Fallback om ovanstående failar
           <Link
             href={`/${product.slug}`}
             className='block relative aspect-[7/9] h-full w-full'

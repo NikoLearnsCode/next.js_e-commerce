@@ -35,18 +35,15 @@ export default function AddToCartButton({
         id: uuidv4(),
         product_id: product.id,
         quantity: quantity,
-        price: product.price,
-        name: product.name,
+        price: Number(product.price),
+        gender: product.gender,
+        color: product.color,
         brand: product.brand,
-        description: product.description,
+        name: product.name,
         slug: product.slug,
         category: product.category,
-        size: selectedSize,
-        color:
-          product.color &&
-          product.color.charAt(0).toUpperCase() + product.color?.slice(1),
+        size: selectedSize || '',
         images: product.images.slice(0, 1),
-        specs: product.specs,
       };
 
       const result = await addToCart(cartItem);

@@ -6,7 +6,6 @@ import {formatPrice} from '@/lib/helpers';
 type CartSummaryProps = {
   totalPrice: number;
   compact?: boolean;
-
   onCartClick?: () => void;
 };
 
@@ -20,7 +19,9 @@ export default function CartSummary({
       <div className='p-3 border-t border-gray-100'>
         <div className='flex justify-between items-center'>
           <span className='font-syne text-xs md:text-sm'>Totalsumma:</span>
-          <span className='font-medium text-xs md:text-base'>{formatPrice(totalPrice)}</span>
+          <span className='font-medium text-xs md:text-base'>
+            {formatPrice(totalPrice)}
+          </span>
         </div>
         <div className='flex'>
           <Link
