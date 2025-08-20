@@ -3,11 +3,14 @@
 import {createClient} from '@/utils/supabase/server';
 import {getSessionId} from '@/utils/cookies';
 import {CartItem, DeliveryFormData} from '@/lib/validators';
+import {db} from '@/drizzle/src/index';
+import {ordersTable, orderItemsTable} from '@/drizzle/src/db/schema';
+import {eq, desc, inArray} from 'drizzle-orm';
+import {clearCart} from './cart';
+import {PaymentInfo} from '@/lib/types';
 
-interface PaymentInfo {
-  method: 'card' | 'swish' | 'klarna';
-}
 
+/* ------------------------------------------------- */
 export async function createOrder(
   cartItems: CartItem[],
   deliveryInfo: DeliveryFormData,
@@ -21,81 +24,85 @@ export async function createOrder(
       data: {user},
     } = await supabase.auth.getUser();
 
-    // Calculate total amount
+    // Calculate total amount (ensure we're working with numbers)
     const totalAmount = cartItems.reduce(
-      (sum, item) => sum + item.price * item.quantity,
+      (sum, item) => sum + Number(item.price) * item.quantity,
       0
     );
 
     // Create order
-    const {data: order, error: orderError} = await supabase
-      .from('orders')
-      .insert({
-        user_id: user?.id,
-        session_id: user ? null : await getSessionId(),
-        status: 'pending',
-        total_amount: totalAmount,
-        delivery_info: deliveryInfo,
-        payment_info: paymentInfo,
-      })
-      .select()
-      .single();
+    const newOrder = {
+      user_id: user?.id,
+      session_id: user ? null : await getSessionId(),
+      status: 'pending',
+      total_amount: totalAmount.toFixed(2),
+      delivery_info: deliveryInfo,
+      payment_info: paymentInfo.method,
+    };
 
-    if (orderError) throw orderError;
+    const order = await db.insert(ordersTable).values(newOrder).returning();
+
+    if (!order[0]) throw new Error('Failed to create order');
 
     // Create order items
     const orderItems = cartItems.map((item) => ({
-      order_id: order.id,
+      order_id: order[0].id,
       product_id: item.product_id,
       quantity: item.quantity,
-      price: item.price,
+      price: Number(item.price).toFixed(2),
       name: item.name,
       size: item.size,
       color: item.color,
       image: item.images[0],
     }));
 
-    const {error: itemsError} = await supabase
-      .from('order_items')
-      .insert(orderItems);
+    await db.insert(orderItemsTable).values(orderItems);
 
-    if (itemsError) throw itemsError;
+    // Clear cart using the cart function
+    await clearCart();
 
-    // Clear cart
-    if (user) {
-      await supabase.from('carts').delete().eq('user_id', user.id);
-    } else {
-      const sessionId = await getSessionId();
-      await supabase.from('carts').delete().eq('session_id', sessionId);
-    }
-
-    return {success: true, orderId: order.id};
+    return {success: true, orderId: order[0].id};
   } catch (error) {
     console.error('Error creating order:', error);
     return {success: false, error: 'Failed to create order'};
   }
 }
-
+/* ------------------------------------------------- */
 export async function getOrder(orderId: string) {
   try {
-    const supabase = await createClient();
+    // Get the order first
+    const orderResult = await db
+      .select()
+      .from(ordersTable)
+      .where(eq(ordersTable.id, orderId))
+      .limit(1);
 
-    const {data: order, error: orderError} = await supabase
-      .from('orders')
-      .select('*, order_items(*)')
-      .eq('id', orderId)
-      .single();
+    if (!orderResult.length) {
+      return {success: false, error: 'Order not found'};
+    }
 
-    if (orderError) throw orderError;
+    const order = orderResult[0];
 
-    return {success: true, order};
+    // Get order items separately
+    const orderItems = await db
+      .select()
+      .from(orderItemsTable)
+      .where(eq(orderItemsTable.order_id, orderId));
+
+    // Combine order with items
+    const orderWithItems = {
+      ...order,
+      order_items: orderItems,
+    };
+
+    return {success: true, order: orderWithItems};
   } catch (error) {
     console.error('Error fetching order:', error);
     return {success: false, error: 'Failed to fetch order'};
   }
 }
 
-// New Server Action to get orders for the current user
+/* ------------------------------------------------- */
 export async function getUserOrders() {
   try {
     const supabase = await createClient();
@@ -110,27 +117,27 @@ export async function getUserOrders() {
       return {success: false, error: 'User not authenticated', orders: []};
     }
 
-    // Fetch orders and their related items
-    const {data: orders, error: ordersError} = await supabase
-      .from('orders')
-      .select(
-        `
-        id, 
-        created_at, 
-        total_amount, 
-        status,
-        order_items ( product_id, name, quantity, price, size, image ) 
-      `
-      )
-      .eq('user_id', user.id)
-      .order('created_at', {ascending: false}); 
+    // Get all user orders
+    const orders = await db
+      .select()
+      .from(ordersTable)
+      .where(eq(ordersTable.user_id, user.id))
+      .orderBy(desc(ordersTable.created_at));
 
-    if (ordersError) {
-      console.error('Error fetching user orders:', ordersError);
-      return {success: false, error: 'Failed to fetch orders', orders: []};
-    }
+    // Get all order items for user's orders
+    const orderIds = orders.map((order) => order.id);
+    const allOrderItems = await db
+      .select()
+      .from(orderItemsTable)
+      .where(inArray(orderItemsTable.order_id, orderIds));
 
-    return {success: true, orders: orders || []};
+    // Group order items by order
+    const ordersWithItems = orders.map((order) => ({
+      ...order,
+      order_items: allOrderItems.filter((item) => item.order_id === order.id),
+    }));
+
+    return {success: true, orders: ordersWithItems};
   } catch (error) {
     console.error('Unexpected error in getUserOrders:', error);
     return {success: false, error: 'Unexpected error', orders: []};

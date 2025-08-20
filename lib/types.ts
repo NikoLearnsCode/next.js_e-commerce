@@ -9,6 +9,10 @@ export interface SortParams {
   order: SortOrder;
 }
 
+export interface PaymentInfo {
+  method: 'card' | 'swish' | 'klarna';
+}
+
 export type Params = {
   limit?: number;
   query?: string;

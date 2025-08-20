@@ -2,11 +2,10 @@
 
 import {createClient} from '@/utils/supabase/server';
 import {headers} from 'next/headers';
-import {getSessionId} from '@/utils/cookies';
 import {cookies} from 'next/headers';
+import {transferCartOnLogin} from './cart';
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-// Register user
+/* ------------------------------------------------- */
 export const signUpAction = async (
   formData: FormData
 ): Promise<{
@@ -92,8 +91,7 @@ export const signUpAction = async (
   };
 };
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-// Log in user
+/* ------------------------------------------------- */
 export const signInAction = async (formData: FormData) => {
   const supabase = await createClient();
   const email = formData.get('email') as string;
@@ -148,8 +146,7 @@ export const signInAction = async (formData: FormData) => {
   // return redirect(callbackUrl);
 };
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-// Forgot password
+/* ------------------------------------------------- */
 export const forgotPasswordAction = async (
   formData: FormData
 ): Promise<{success: boolean; error?: string; message?: string}> => {
@@ -192,8 +189,7 @@ export const forgotPasswordAction = async (
   };
 };
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-// Reset password
+/* ------------------------------------------------- */
 export const resetPasswordAction = async (
   formData: FormData
 ): Promise<{success: boolean; error?: string; message?: string}> => {
@@ -242,8 +238,7 @@ export const resetPasswordAction = async (
   };
 };
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-// Log out user
+/* ------------------------------------------------- */
 export const signOutAction = async () => {
   // const cookieStore = await cookies();
   const supabase = await createClient();
@@ -273,8 +268,7 @@ export const signOutAction = async () => {
   }
 };
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-// Change password
+/* ------------------------------------------------- */
 export const changePasswordAction = async (
   formData: FormData
 ): Promise<{success: boolean; error?: string; message?: string}> => {
@@ -355,130 +349,3 @@ export const changePasswordAction = async (
     message: 'Lösenordet har uppdaterats',
   };
 };
-
-// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-// Transfer cart from session to user
-export async function transferCartOnLogin(userId: string) {
-  try {
-    const supabase = await createClient();
-    const sessionId = await getSessionId();
-
-    // If no session_id, do nothing
-    if (!sessionId) {
-      console.log('No session_id found, nothing to transfer');
-      return {success: true, message: 'No session_id found'};
-    }
-
-    console.log(
-      'Starting cart transfer with sessionId:',
-      sessionId,
-      'and userId:',
-      userId
-    );
-
-    // Find cart associated with current session_id
-    const {data: sessionCart, error: sessionCartError} = await supabase
-      .from('carts')
-      .select('*')
-      .eq('session_id', sessionId)
-      .is('user_id', null)
-      .maybeSingle();
-
-    if (sessionCartError) {
-      console.error('Error fetching session cart:', sessionCartError);
-      return {success: false, error: sessionCartError};
-    }
-
-    // If no anonymous cart found, do nothing
-    if (!sessionCart) {
-      console.log('No session cart found');
-      return {success: true, message: 'No session cart found'};
-    }
-
-    console.log('Found session cart:', sessionCart);
-
-    // Check if user already has a cart
-    const {data: userCart, error: userCartError} = await supabase
-      .from('carts')
-      .select('*')
-      .eq('user_id', userId)
-      .maybeSingle();
-
-    if (userCartError) {
-      console.error('Error fetching user cart:', userCartError);
-      return {success: false, error: userCartError};
-    }
-
-    if (userCart) {
-      console.log('Found user cart, merging items');
-      // User already has a cart - merge contents
-      const combinedItems = [...(userCart.items || [])];
-
-      // Add each item from sessionCart
-      for (const item of sessionCart.items || []) {
-        const existingItemIndex = combinedItems.findIndex(
-          (existingItem) =>
-            existingItem.product_id === item.product_id &&
-            existingItem.size === item.size
-        );
-
-        if (existingItemIndex >= 0) {
-          // If product already exists, update quantity
-          combinedItems[existingItemIndex].quantity += item.quantity;
-        } else {
-          // Otherwise add as new product
-          combinedItems.push(item);
-        }
-      }
-
-      // Update user's cart with the merged contents
-      const {error: updateError} = await supabase
-        .from('carts')
-        .update({
-          items: combinedItems,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', userCart.id);
-
-      if (updateError) {
-        console.error('Error updating user cart:', updateError);
-        return {success: false, error: updateError};
-      }
-
-      // Delete the anonymous cart
-      const {error: deleteError} = await supabase
-        .from('carts')
-        .delete()
-        .eq('id', sessionCart.id);
-
-      if (deleteError) {
-        console.error('Error deleting session cart:', deleteError);
-      }
-
-      console.log('Cart merged and session cart deleted');
-    } else {
-      console.log('No user cart found, transferring session cart');
-      // User has no cart - transfer the anonymous cart
-      const {error: updateError} = await supabase
-        .from('carts')
-        .update({
-          user_id: userId,
-          session_id: null,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', sessionCart.id);
-
-      if (updateError) {
-        console.error('Error transferring cart:', updateError);
-        return {success: false, error: updateError};
-      }
-
-      console.log('Session cart transferred to user');
-    }
-
-    return {success: true};
-  } catch (error) {
-    console.error('Unexpected error transferring cart on login:', error);
-    return {success: false, error};
-  }
-}

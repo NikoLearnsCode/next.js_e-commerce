@@ -80,7 +80,6 @@ export async function getProductSlugAndRelatedProducts(slug: string): Promise<{
    Get products SSR and client-side - SEARCH + GENDER/CATEGORY 
 ----------------------------------------------------------------  */
 
-
 // Creates WHERE conditions for text search across product fields
 function createTextSearchFilters(query: string | undefined) {
   const sanitizedQuery = query

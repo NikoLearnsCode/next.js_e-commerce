@@ -36,7 +36,7 @@ export const cartsTable = pgTable('carts', {
   session_id: varchar('session_id', {length: 255}),
   created_at: timestamp('created_at').defaultNow(),
   updated_at: timestamp('updated_at').defaultNow(),
-  items: jsonb('items').$type<CartItem>().notNull(),
+  items: jsonb('items').$type<CartItem[]>().notNull(),
 });
 
 // ORDERS

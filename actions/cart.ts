@@ -2,9 +2,12 @@
 
 import {createClient} from '@/utils/supabase/server';
 import {getOrCreateSessionId, getSessionId} from '@/utils/cookies';
-import type {CartItem} from '@/lib/validators';
+import type {CartItem, NewCart} from '@/lib/validators';
+import {db} from '@/drizzle/src/index';
+import {cartsTable} from '@/drizzle/src/db/schema';
+import {eq, and, isNull} from 'drizzle-orm';
 
-// Get cart based on session or user ID
+/* ------------------------------------------------- */
 export async function getCart() {
   try {
     const supabase = await createClient();
@@ -18,13 +21,13 @@ export async function getCart() {
 
     if (user) {
       // If logged in, try to find user's cart
-      const {data} = await supabase
-        .from('carts')
-        .select('*')
-        .eq('user_id', user.id)
-        .maybeSingle();
+      const cartData = await db
+        .select()
+        .from(cartsTable)
+        .where(eq(cartsTable.user_id, user.id))
+        .limit(1);
 
-      cart = data;
+      cart = cartData[0] || null;
     } else {
       // If not logged in, check if there is a session_id
       const sessionId = await getSessionId();
@@ -35,14 +38,15 @@ export async function getCart() {
       }
 
       // Otherwise get the cart associated with session_id
-      const {data} = await supabase
-        .from('carts')
-        .select('*')
-        .eq('session_id', sessionId)
-        .is('user_id', null)
-        .maybeSingle();
+      const cartData = await db
+        .select()
+        .from(cartsTable)
+        .where(
+          and(eq(cartsTable.session_id, sessionId), isNull(cartsTable.user_id))
+        )
+        .limit(1);
 
-      cart = data;
+      cart = cartData[0] || null;
     }
 
     // If no cart found, return an empty cart without creating a new one
@@ -56,8 +60,8 @@ export async function getCart() {
     return {cart: null, cartItems: [], error: 'Failed to fetch cart'};
   }
 }
-// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-// Add/update product to cart
+
+/* ------------------------------------------------- */
 export async function addToCart(cartItem: CartItem) {
   try {
     const supabase = await createClient();
@@ -75,32 +79,29 @@ export async function addToCart(cartItem: CartItem) {
 
     // If no cart exists, create a new one
     if (!cart) {
-      const newCart = {
+      const newCart: NewCart = {
         session_id: user ? null : sessionId,
         user_id: user?.id || null,
         items: [],
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
       };
 
-      const {data: createdCart, error: createError} = await supabase
-        .from('carts')
-        .insert(newCart)
-        .select()
-        .single();
+      const createdCart = await db
+        .insert(cartsTable)
+        .values(newCart)
+        .returning();
 
-      if (createError) throw createError;
-      cart = createdCart;
+      if (!createdCart[0]) throw new Error('Failed to create cart');
+      cart = createdCart[0];
     }
 
     // Check if product already exists in cart
-    const currentCartItems = cart.items || [];
+    const currentCartItems = (cart.items as CartItem[]) || [];
     const existingItemIndex = currentCartItems.findIndex(
       (item: CartItem) =>
         item.product_id === cartItem.product_id && item.size === cartItem.size
     );
 
-    let updatedCartItems;
+    let updatedCartItems: CartItem[];
 
     if (existingItemIndex >= 0) {
       // Update quantity if product already exists
@@ -112,15 +113,13 @@ export async function addToCart(cartItem: CartItem) {
     }
 
     // Update cart
-    const {error: updateError} = await supabase
-      .from('carts')
-      .update({
+    await db
+      .update(cartsTable)
+      .set({
         items: updatedCartItems,
-        updated_at: new Date().toISOString(),
+        updated_at: new Date(),
       })
-      .eq('id', cart.id);
-
-    if (updateError) throw updateError;
+      .where(eq(cartsTable.id, cart.id));
 
     return {
       success: true,
@@ -133,12 +132,9 @@ export async function addToCart(cartItem: CartItem) {
   }
 }
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-// Remove product from cart
+/* ------------------------------------------------- */
 export async function removeFromCart(itemId: string) {
   try {
-    const supabase = await createClient();
-
     // Get cart
     const {cart} = await getCart();
 
@@ -147,36 +143,25 @@ export async function removeFromCart(itemId: string) {
       return {success: true, cartItems: []};
     }
 
-    const currentCartItems = cart.items || [];
+    const currentCartItems = (cart.items as CartItem[]) || [];
     const updatedCartItems = currentCartItems.filter(
       (item: CartItem) => item.id !== itemId
     );
 
     // If cart becomes empty after removal, delete the entire cart from the database
     if (updatedCartItems.length === 0) {
-      const {error: deleteError} = await supabase
-        .from('carts')
-        .delete()
-        .eq('id', cart.id);
-
-      if (deleteError) {
-        console.error('Error deleting empty cart:', deleteError);
-        return {success: false, error: 'Failed to delete empty cart'};
-      }
-
+      await db.delete(cartsTable).where(eq(cartsTable.id, cart.id));
       return {success: true, cartItems: []};
     }
 
     // Otherwise update cart with the remaining products
-    const {error: updateError} = await supabase
-      .from('carts')
-      .update({
+    await db
+      .update(cartsTable)
+      .set({
         items: updatedCartItems,
-        updated_at: new Date().toISOString(),
+        updated_at: new Date(),
       })
-      .eq('id', cart.id);
-
-    if (updateError) throw updateError;
+      .where(eq(cartsTable.id, cart.id));
 
     return {success: true, cartItems: updatedCartItems};
   } catch (error) {
@@ -185,12 +170,9 @@ export async function removeFromCart(itemId: string) {
   }
 }
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-// Update quantity for a product
+/* ------------------------------------------------- */
 export async function updateCartItemQuantity(itemId: string, quantity: number) {
   try {
-    const supabase = await createClient();
-
     // If quantity is 0 or less, remove product from cart
     if (quantity <= 0) {
       return removeFromCart(itemId);
@@ -204,7 +186,7 @@ export async function updateCartItemQuantity(itemId: string, quantity: number) {
       return {success: false, error: 'Cart not found'};
     }
 
-    const currentCartItems = cart.items || [];
+    const currentCartItems = (cart.items as CartItem[]) || [];
     const itemIndex = currentCartItems.findIndex(
       (item: CartItem) => item.id === itemId
     );
@@ -213,19 +195,17 @@ export async function updateCartItemQuantity(itemId: string, quantity: number) {
       return {success: false, error: 'Item not found in cart'};
     }
 
-    const updatedCartItems = [...currentCartItems];
+    const updatedCartItems: CartItem[] = [...currentCartItems];
     updatedCartItems[itemIndex].quantity = quantity;
 
     // Update cart
-    const {error: updateError} = await supabase
-      .from('carts')
-      .update({
+    await db
+      .update(cartsTable)
+      .set({
         items: updatedCartItems,
-        updated_at: new Date().toISOString(),
+        updated_at: new Date(),
       })
-      .eq('id', cart.id);
-
-    if (updateError) throw updateError;
+      .where(eq(cartsTable.id, cart.id));
 
     return {success: true, cartItems: updatedCartItems};
   } catch (error) {
@@ -234,20 +214,14 @@ export async function updateCartItemQuantity(itemId: string, quantity: number) {
   }
 }
 
-//Clear cart
+/* ------------------------------------------------- */
 export async function clearCart() {
   try {
-    const supabase = await createClient();
     const {cart} = await getCart();
     if (!cart) {
       return {success: true, cartItems: []};
     }
-    const {error: deleteError} = await supabase
-      .from('carts')
-      .delete()
-      .eq('id', cart.id);
-
-    if (deleteError) throw deleteError;
+    await db.delete(cartsTable).where(eq(cartsTable.id, cart.id));
     return {success: true, cartItems: []};
   } catch (error) {
     console.error('Error clearing cart:', error);
@@ -255,44 +229,105 @@ export async function clearCart() {
   }
 }
 
-// Clean up empty carts from database
-// This function can be called regularly via a cron job or similar
-/*
-export async function cleanupEmptyCarts() {
+/* ------------------------------------------------- */
+export async function transferCartOnLogin(userId: string) {
   try {
-    const supabase = await createClient();
-    
-    // Delete carts with an empty items array
-    const {error: deleteEmptyError} = await supabase
-      .from('carts')
-      .delete()
-      .is('items', null)
-      .or('items.length.eq.0');
-    
-    if (deleteEmptyError) {
-      console.error('Error deleting empty carts:', deleteEmptyError);
-      return {success: false, error: deleteEmptyError};
+    const sessionId = await getSessionId();
+
+    // If no session_id, do nothing
+    if (!sessionId) {
+      console.log('No session_id found, nothing to transfer');
+      return {success: true, message: 'No session_id found'};
     }
-    
-    // Delete old anonymous carts (older than 30 days)
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    
-    const {error: deleteOldError} = await supabase
-      .from('carts')
-      .delete()
-      .is('user_id', null)
-      .lt('updated_at', thirtyDaysAgo.toISOString());
-    
-    if (deleteOldError) {
-      console.error('Error deleting old anonymous carts:', deleteOldError);
-      return {success: false, error: deleteOldError};
+
+    console.log(
+      'Starting cart transfer with sessionId:',
+      sessionId,
+      'and userId:',
+      userId
+    );
+
+    // Find cart associated with current session_id
+    const sessionCartData = await db
+      .select()
+      .from(cartsTable)
+      .where(
+        and(eq(cartsTable.session_id, sessionId), isNull(cartsTable.user_id))
+      )
+      .limit(1);
+
+    const sessionCart = sessionCartData[0] || null;
+
+    // If no anonymous cart found, do nothing
+    if (!sessionCart) {
+      console.log('No session cart found');
+      return {success: true, message: 'No session cart found'};
     }
-    
+
+    console.log('Found session cart:', sessionCart);
+
+    // Check if user already has a cart
+    const userCartData = await db
+      .select()
+      .from(cartsTable)
+      .where(eq(cartsTable.user_id, userId))
+      .limit(1);
+
+    const userCart = userCartData[0] || null;
+
+    if (userCart) {
+      console.log('Found user cart, merging items');
+      // User already has a cart - merge contents
+      const combinedItems = [...((userCart.items as CartItem[]) || [])];
+
+      // Add each item from sessionCart
+      for (const item of (sessionCart.items as CartItem[]) || []) {
+        const existingItemIndex = combinedItems.findIndex(
+          (existingItem) =>
+            existingItem.product_id === item.product_id &&
+            existingItem.size === item.size
+        );
+
+        if (existingItemIndex >= 0) {
+          // If product already exists, update quantity
+          combinedItems[existingItemIndex].quantity += item.quantity;
+        } else {
+          // Otherwise add as new product
+          combinedItems.push(item);
+        }
+      }
+
+      // Update user's cart with the merged contents
+      await db
+        .update(cartsTable)
+        .set({
+          items: combinedItems,
+          updated_at: new Date(),
+        })
+        .where(eq(cartsTable.id, userCart.id));
+
+      // Delete the anonymous cart
+      await db.delete(cartsTable).where(eq(cartsTable.id, sessionCart.id));
+
+      console.log('Cart merged and session cart deleted');
+    } else {
+      console.log('No user cart found, transferring session cart');
+      // User has no cart - transfer the anonymous cart
+      await db
+        .update(cartsTable)
+        .set({
+          user_id: userId,
+          session_id: null,
+          updated_at: new Date(),
+        })
+        .where(eq(cartsTable.id, sessionCart.id));
+
+      console.log('Session cart transferred to user');
+    }
+
     return {success: true};
   } catch (error) {
-    console.error('Error cleaning up carts:', error);
+    console.error('Unexpected error transferring cart on login:', error);
     return {success: false, error};
   }
 }
-*/
