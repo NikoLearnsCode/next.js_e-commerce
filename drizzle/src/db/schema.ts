@@ -9,6 +9,8 @@ import {
   varchar,
 } from 'drizzle-orm/pg-core';
 
+import type {CartItem} from '@/lib/validators';
+
 // PRODUCTS
 export const productsTable = pgTable('products', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -34,7 +36,7 @@ export const cartsTable = pgTable('carts', {
   session_id: varchar('session_id', {length: 255}),
   created_at: timestamp('created_at').defaultNow(),
   updated_at: timestamp('updated_at').defaultNow(),
-  items: jsonb('items').notNull(),
+  items: jsonb('items').$type<CartItem>().notNull(),
 });
 
 // ORDERS
@@ -45,7 +47,7 @@ export const ordersTable = pgTable('orders', {
   status: varchar('status', {length: 255}).notNull(),
   total_amount: numeric('total_amount', {precision: 10, scale: 2}).notNull(),
   delivery_info: jsonb('delivery_info').notNull(),
-  payment_info: jsonb('payment_info').notNull(),
+  payment_info: varchar('payment_info', {length: 255}).notNull(),
   created_at: timestamp('created_at').defaultNow(),
   updated_at: timestamp('updated_at').defaultNow(),
 });

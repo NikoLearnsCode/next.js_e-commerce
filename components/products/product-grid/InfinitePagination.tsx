@@ -2,10 +2,10 @@
 import {useEffect, useRef} from 'react';
 import {useInView} from 'react-intersection-observer';
 import {useSearchParams} from 'next/navigation';
-import {Product} from '@/lib/validators';
+import type {Product} from '@/lib/validators';
 import ProductGrid from '@/components/products/product-grid/ProductGrid';
 import {useInfiniteProducts} from '@/hooks/useInfiniteProducts';
-import {useScrollRestoration} from '@/hooks/useScrollRestoration';
+// import {useScrollRestoration} from '@/hooks/useScrollRestoration';
 import SpinningLogo from '@/components/shared/SpinningLogo';
 
 type InfiniteScrollProductsProps = {
@@ -24,8 +24,8 @@ export default function InfiniteScrollProducts({
   category,
 }: InfiniteScrollProductsProps) {
   const searchParams = useSearchParams();
-  const {restoreScrollPosition} = useScrollRestoration();
-  const hasRestoredRef = useRef(false);
+    // const {restoreScrollPosition} = useScrollRestoration();
+    // const hasRestoredRef = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Extract filter parameters from URL
@@ -40,7 +40,7 @@ export default function InfiniteScrollProducts({
     hasNextPage,
     isFetchingNextPage,
     error,
-    isSuccess,
+    // isSuccess,
     isLoading,
   } = useInfiniteProducts({
     category,
@@ -75,7 +75,7 @@ export default function InfiniteScrollProducts({
   const displayProducts =
     !isLoading && products.length > 0 ? products : initialProducts;
 
-  // Reset scroll restoration flag when URL changes (new filters applied)
+/*   // Reset scroll restoration flag when URL changes (new filters applied)
   useEffect(() => {
     hasRestoredRef.current = false;
   }, [searchParams]);
@@ -87,7 +87,7 @@ export default function InfiniteScrollProducts({
       restoreScrollPosition();
       hasRestoredRef.current = true;
     }
-  }, [isSuccess, restoreScrollPosition, isLoading]);
+  }, [isSuccess, restoreScrollPosition, isLoading]); */
 
   // Error state
   if (error) {

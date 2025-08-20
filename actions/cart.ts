@@ -2,7 +2,7 @@
 
 import {createClient} from '@/utils/supabase/server';
 import {getOrCreateSessionId, getSessionId} from '@/utils/cookies';
-import {CartItem} from '@/lib/validators';
+import type {CartItem} from '@/lib/validators';
 
 // Get cart based on session or user ID
 export async function getCart() {

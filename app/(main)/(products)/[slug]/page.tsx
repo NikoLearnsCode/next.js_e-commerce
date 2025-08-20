@@ -1,5 +1,5 @@
 import {notFound} from 'next/navigation';
-import {getProductDetailsBySlug} from '@/actions/product';
+import {getProductSlugAndRelatedProducts} from '@/actions/product';
 import type {Metadata} from 'next';
 import ProductPage from '@/components/products/product-detail/Product';
 
@@ -10,7 +10,7 @@ interface PageProps {
 
 export async function generateMetadata({params}: PageProps): Promise<Metadata> {
   const {slug} = await params;
-  const {product} = await getProductDetailsBySlug(slug);
+  const {product} = await getProductSlugAndRelatedProducts(slug);
 
   if (!product) {
     notFound();
@@ -25,7 +25,7 @@ export async function generateMetadata({params}: PageProps): Promise<Metadata> {
 export default async function ProductDetailPage({params}: PageProps) {
   const {slug} = await params;
   const {product, categoryProducts, genderProducts} =
-    await getProductDetailsBySlug(slug);
+    await getProductSlugAndRelatedProducts(slug);
 
   if (!product) {
     notFound();

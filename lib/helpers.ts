@@ -1,18 +1,12 @@
 import {clsx, type ClassValue} from 'clsx';
 import {twMerge} from 'tailwind-merge';
+import type {SortParams} from '@/lib/types';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export type SortField = 'id' | 'price' | 'name';
 
-export type SortOrder = 'asc' | 'desc';
-
-export interface SortParams {
-  sort: SortField;
-  order: SortOrder;
-}
 
 // Gemensam funktion för att parsa sort-parametrar
 export function parseSortParam(sortParam?: string | null): SortParams {

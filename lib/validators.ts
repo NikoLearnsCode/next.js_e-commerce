@@ -1,51 +1,31 @@
+// import {createInsertSchema, createSelectSchema} from 'drizzle-zod';
 import {z} from 'zod';
-
-export const productSchema = z.object({
-  id: z.string().uuid('Ogiltigt produkt-ID format'),
-  created_at: z.string().datetime(),
-  name: z.string().min(1, 'Produktnamn är obligatoriskt'),
-  description: z.string().optional().nullable(),
-  price: z.number().positive('Pris måste vara större än 0'),
-  brand: z.string().optional().nullable(),
-  gender: z.string().optional().nullable(),
-  color: z.string().optional().nullable(),
-  slug: z.string(),
-  category: z.string().optional().nullable(),
-  specs: z.array(z.string()).default([]),
-  images: z.array(z.string()).default([]),
-  sizes: z.array(z.string()).default([]),
-});
-
-export type Product = z.infer<typeof productSchema>;
+import {
+  productsTable,
+  cartsTable,
+  ordersTable,
+  orderItemsTable,
+  categoriesTable,
+} from '@/drizzle/src/db/schema';
 
 export const cartItemSchema = z.object({
-  id: z.string().uuid('Ogiltigt kart-ID format'),
-  product_id: z.string().uuid('Ogiltigt produkt-ID format'),
-  quantity: z.number().int().min(1, 'Antal måste vara minst 1'),
-  price: z.number().positive('Pris måste vara större än 0'),
-  gender: z.string().optional().nullable(),
-  color: z.string().optional().nullable(),
-  brand: z.string().optional().nullable(),
-  name: z.string().min(1, 'Produktnamn är obligatoriskt'),
-  description: z.string().optional().nullable(),
+  id: z.string().uuid(),
+  product_id: z.string().uuid(),
+  quantity: z.number().int().min(1),
+  price: z.number().positive(),
+  gender: z.string(),
+  color: z.string(),
+  brand: z.string(),
+  name: z.string().min(1),
+  description: z.string().optional(),
   slug: z.string(),
-  category: z.string().optional().nullable(),
+  category: z.string(),
   specs: z.array(z.string()).optional().default([]),
   images: z.array(z.string()).default([]),
-  size: z.string().optional().nullable(),
+  size: z.string(),
 });
 
 export type CartItem = z.infer<typeof cartItemSchema>;
-
-export const cartSchema = z.object({
-  user_id: z.string().uuid('Ogiltigt användar-ID format').nullable(),
-  session_id: z.string().uuid('Ogiltigt session-ID format').nullable(),
-  items: z.array(cartItemSchema).default([]),
-  created_at: z.string().datetime(),
-  updated_at: z.string().datetime(),
-});
-
-export type Cart = z.infer<typeof cartSchema>;
 
 export const deliverySchema = z.object({
   deliveryMethod: z.string(),
@@ -83,3 +63,19 @@ export const paymentSchema = z.object({
 });
 
 export type PaymentFormData = z.infer<typeof paymentSchema>;
+
+export type Product = typeof productsTable.$inferSelect;
+
+export type NewProduct = typeof productsTable.$inferInsert;
+
+export type Cart = typeof cartsTable.$inferSelect;
+export type NewCart = typeof cartsTable.$inferInsert;
+
+export type Order = typeof ordersTable.$inferSelect;
+export type NewOrder = typeof ordersTable.$inferInsert;
+
+export type OrderItem = typeof orderItemsTable.$inferSelect;
+export type NewOrderItem = typeof orderItemsTable.$inferInsert;
+
+export type Category = typeof categoriesTable.$inferSelect;
+export type NewCategory = typeof categoriesTable.$inferInsert;

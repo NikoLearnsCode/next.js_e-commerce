@@ -1,23 +1,7 @@
-// Ladda miljövariabler
-import 'dotenv/config';
+// Seed products
 
-import {drizzle} from 'drizzle-orm/node-postgres';
-import {Pool} from 'pg';
-import * as schema from '../drizzle/src/db/schema';
-
-const {productsTable} = schema;
-
-// Skapa pool för PostgreSQL med samma inställningar som drizzle.config.ts
-const pool = new Pool({
-  host: 'localhost',
-  port: 5432,
-  user: 'niklas',
-  database: 'db',
-  ssl: false,
-});
-
-// Skapa Drizzle-instans
-const db = drizzle(pool, {schema});
+import {db} from '@/drizzle/src/index';
+import {productsTable} from '@/drizzle/src/db/schema';
 
 const baseProducts = [
   // HERRKLÄDER
@@ -383,7 +367,7 @@ async function seedProducts(count: number = 50) {
     console.error('❌ Fel vid seeding:', error);
   } finally {
     // Stäng databasanslutningen
-    await pool.end();
+    await db.$client.end();
     process.exit(0);
   }
 })();
