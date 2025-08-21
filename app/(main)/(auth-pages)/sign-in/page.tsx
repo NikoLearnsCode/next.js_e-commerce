@@ -1,8 +1,6 @@
 import type {Metadata} from 'next';
 import SignInForm from './sign-in-form';
 import {Suspense} from 'react';
-
-import AnimatedContainer from '@/components/shared/AnimatedContainer';
 import {authOptions} from '@/lib/auth';
 import {getServerSession} from 'next-auth';
 import {redirect} from 'next/navigation';
@@ -19,9 +17,7 @@ export default async function Login() {
   }
   return (
     <Suspense fallback={null}>
-      <AnimatedContainer direction='down'>
-        <SignInForm />
-      </AnimatedContainer>
+      <SignInForm />
     </Suspense>
   );
 }

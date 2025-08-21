@@ -26,7 +26,7 @@ export default function LogoutButton({className, ...props}: LogoutButtonProps) {
       disabled={isPending}
       variant='underline'
       className={twMerge(
-        'uppercase text-sm px-0 text-red-700 font-medium',
+        'uppercase text-base px-0 text-red-700 font-medium',
         'flex items-center gap-2',
         className
       )}

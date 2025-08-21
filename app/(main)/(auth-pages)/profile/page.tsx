@@ -16,15 +16,21 @@ export default async function ProfilePage() {
     return redirect('/sign-in');
   }
 
+  const user = session?.user?.name?.split(' ')[0];
+
+
   return (
-    <div className=' py-8 font-syne '>
-      <h1 className='text-4xl  mb-12  border-black w-fit '>Mitt konto</h1>
+    
+    <div className=' py-8  '>
+      <h1 className='text-4xl  mb-16 mx-auto border-black w-fit '>
+        Hej {user}
+      </h1>
       <div className='flex flex-col justify-center items-center space-y-6'>
         <Link
           href='/profile/orders'
-          className='text-lg font-normal uppercase hover:underline w-fit'
+          className='text-lg font-normal uppercase hover:underline w-fit underline-offset-4'
         >
-          Mina ordrar
+          Beställningar
         </Link>
 
         <LogoutButton className='mt-10' />

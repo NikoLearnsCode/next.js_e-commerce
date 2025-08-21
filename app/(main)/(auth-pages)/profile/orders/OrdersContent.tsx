@@ -36,7 +36,7 @@ export default function OrdersClientContent({
   orders,
 }: OrdersClientContentProps) {
   return (
-    <AnimatedAuthContainer direction='right' className='max-w-4xl w-full '>
+    <AnimatedAuthContainer direction='up' className='max-w-4xl w-full '>
       <span className='px-4 flex justify-between items-center mb-8 max-w-md mx-auto'>
         <h1 className='text-xl uppercase font-syne font-medium '>
           Mina Ordrar

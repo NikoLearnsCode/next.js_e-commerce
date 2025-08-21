@@ -20,31 +20,23 @@ export default function SignInForm() {
     ? `${callbackUrl}&guest=true`
     : `${callbackUrl}?guest=true`;
 
-  // --- NY HJÄLPFUNKTION ---
-  // En enda funktion som hanterar inloggning för alla providers.
   const handleSignIn = async (provider: 'google' | 'github') => {
     setProvider(provider);
     setIsLoading(true);
     setErrorMessage(null);
 
     try {
-      // Hämta sparad redirect-URL från sessionStorage
       const savedRedirect = sessionStorage.getItem('postLoginRedirect');
       const finalCallbackUrl = savedRedirect || callbackUrl;
 
-      // Rensa den sparade URL:en nu när vi använder den
       if (savedRedirect) {
         sessionStorage.removeItem('postLoginRedirect');
       }
 
-      // Använd provider-parametern för att anropa rätt inloggning
       await signIn(provider, {
         callbackUrl: finalCallbackUrl,
         redirect: true,
       });
-
-      // Koden nedan kommer inte att köras om `redirect: true` fungerar som det ska,
-      // men behålls som en fallback för felhantering.
     } catch (error) {
       setErrorMessage(
         error instanceof Error ? error.message : 'Något gick fel. Försök igen.'
@@ -76,7 +68,7 @@ export default function SignInForm() {
       )}
 
       <div className='space-y-4'>
-        {/* --- UPPDATERAD onClick --- */}
+
         <Button
           variant='outline'
           onClick={() => handleSignIn('google')}
@@ -109,7 +101,7 @@ export default function SignInForm() {
             </>
           )}
         </Button>
-        {/* --- UPPDATERAD onClick --- */}
+
         <Button
           variant='outline'
           onClick={() => handleSignIn('github')}
@@ -143,13 +135,15 @@ export default function SignInForm() {
               <div className='flex-grow border-t border-gray-400'></div>
             </div>
             <div className='flex flex-col gap-4 '>
-
-                <Link href={guestCallbackUrl} variant='outline' className='w-full h-12 md:h-14 mt-8   font-medium'>
-                  {source === 'checkout'
-                    ? 'Fortsätt som gäst'
-                    : 'Fortsätt som gäst'}
-                </Link>
-
+              <Link
+                href={guestCallbackUrl}
+                variant='outline'
+                className='w-full h-12 md:h-14 mt-8   font-medium'
+              >
+                {source === 'checkout'
+                  ? 'Fortsätt som gäst'
+                  : 'Fortsätt som gäst'}
+              </Link>
             </div>
           </>
         ) : (
