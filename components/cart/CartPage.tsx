@@ -50,7 +50,10 @@ export default function CartPage() {
       {/* Loading state */}
       {isLoading && (
         <div className='flex flex-col  justify-center items-center min-h-[calc(100vh-310px)]'>
-          <SpinningLogo className='pb-4' />
+          <SpinningLogo height='35' className='pb-4' />
+          <p className='text-sm font-medium italic mt-4 text-gray-500'>
+            Laddar varukorg...
+          </p>
         </div>
       )}
 
@@ -75,9 +78,7 @@ export default function CartPage() {
               ref={normalSummaryRef}
               className='w-full  lg:min-w-[370px] lg:max-w-[370px] lg:border  lg:sticky lg:top-20 lg:self-start   lg:p-8 border-gray-200 bg-white mt-4 lg:mt-0 transition-all duration-300'
             >
-              <h2 className='text-lg lg:text-xl  mb-5'>
-                Ordersammanställning
-              </h2>
+              <h2 className='text-lg lg:text-xl  mb-5'>Ordersammanställning</h2>
               <CartSummary totalPrice={totalPrice} />
             </div>
           </div>

@@ -4,12 +4,54 @@ import {
   jsonb,
   numeric,
   pgTable,
+  text,
   timestamp,
   uuid,
   varchar,
+  primaryKey,
 } from 'drizzle-orm/pg-core';
 
 import type {CartItem} from '@/lib/validators';
+import type {AdapterAccount} from '@/lib/types';
+
+// LAGRAR INFO OM ANVÄNDARE
+export const usersTable = pgTable('users', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  name: text('name'),
+  email: text('email').notNull(),
+  emailVerified: timestamp('emailVerified', {mode: 'date'}),
+  image: text('image'),
+  role: integer('role').notNull().default(0),
+});
+
+// KOPPLAR OAUTH-KONTON (TYP. GOOGLE, GITHUB) TILL usersTable
+export const accountsTable = pgTable(
+  'accounts',
+  {
+    userId: uuid('userId')
+      .notNull()
+      .references(() => usersTable.id, {onDelete: 'cascade'}),
+    type: text('type').$type<AdapterAccount['type']>().notNull(),
+    provider: text('provider').notNull(),
+    providerAccountId: text('providerAccountId').notNull(),
+    refresh_token: text('refresh_token'),
+    access_token: text('access_token'),
+    expires_at: integer('expires_at'),
+    token_type: text('token_type'),
+    scope: text('scope'),
+    id_token: text('id_token'),
+    session_state: text('session_state'),
+  },
+  (table) => [primaryKey({columns: [table.provider, table.providerAccountId]})]
+);
+// LAGRAR SESSIONER FÖR usersTable
+export const sessionsTable = pgTable('sessions', {
+  sessionToken: text('sessionToken').notNull().primaryKey(),
+  userId: uuid('userId')
+    .notNull()
+    .references(() => usersTable.id, {onDelete: 'cascade'}),
+  expires: timestamp('expires', {mode: 'date'}).notNull(),
+});
 
 // PRODUCTS
 export const productsTable = pgTable('products', {
@@ -32,7 +74,9 @@ export const productsTable = pgTable('products', {
 // CARTS
 export const cartsTable = pgTable('carts', {
   id: uuid('id').primaryKey().defaultRandom(),
-  user_id: uuid('user_id'),
+  user_id: uuid('user_id').references(() => usersTable.id, {
+    onDelete: 'cascade',
+  }),
   session_id: varchar('session_id', {length: 255}),
   created_at: timestamp('created_at').defaultNow(),
   updated_at: timestamp('updated_at').defaultNow(),
@@ -42,7 +86,9 @@ export const cartsTable = pgTable('carts', {
 // ORDERS
 export const ordersTable = pgTable('orders', {
   id: uuid('id').primaryKey().defaultRandom(),
-  user_id: uuid('user_id'),
+  user_id: uuid('user_id').references(() => usersTable.id, {
+    onDelete: 'cascade',
+  }),
   session_id: varchar('session_id', {length: 255}),
   status: varchar('status', {length: 255}).notNull(),
   total_amount: numeric('total_amount', {precision: 10, scale: 2}).notNull(),

@@ -1,8 +1,11 @@
-import {type NextRequest} from 'next/server';
-import {updateSession} from '@/utils/supabase/middleware';
+import {NextResponse} from 'next/server';
+import type {NextRequest} from 'next/server';
 
-export async function middleware(request: NextRequest) {
-  return await updateSession(request);
+// Simplified middleware for database sessions
+// Route protection is handled at page level with getServerSession()
+export function middleware(_request: NextRequest) {
+  // Just allow all requests - auth protection happens in pages
+  return NextResponse.next();
 }
 
 export const config = {
@@ -12,8 +15,9 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
+     * - api/auth (NextAuth API routes)
      * - images - .svg, .png, .jpg, .jpeg, .gif, .webp
      */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|api/auth|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };

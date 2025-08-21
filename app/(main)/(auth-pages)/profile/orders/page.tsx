@@ -1,6 +1,7 @@
-import {createClient} from '@/utils/supabase/server';
+import {getServerSession} from 'next-auth';
 import {redirect} from 'next/navigation';
 import {Metadata} from 'next';
+import {authOptions} from '@/lib/auth';
 import {getUserOrders} from '@/actions/orders';
 import OrdersClientContent from './OrdersContent';
 
@@ -9,13 +10,9 @@ export const metadata: Metadata = {
 };
 
 export default async function ProfileOrdersPage() {
-  const supabase = await createClient();
+  const session = await getServerSession(authOptions);
 
-  const {
-    data: {user},
-  } = await supabase.auth.getUser();
-
-  if (!user) {
+  if (!session?.user) {
     return redirect('/sign-in?next=/profile/orders');
   }
 
@@ -33,7 +30,5 @@ export default async function ProfileOrdersPage() {
     );
   }
 
-  return (
-    <OrdersClientContent orders={orders} />
-  );
+  return <OrdersClientContent orders={orders} />;
 }

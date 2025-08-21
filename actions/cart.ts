@@ -1,21 +1,24 @@
 'use server';
 
-import {createClient} from '@/utils/supabase/server';
-import {getOrCreateSessionId, getSessionId} from '@/utils/cookies';
+import {getServerSession} from 'next-auth';
+import {authOptions} from '@/lib/auth';
+import {
+  CART_SESSION_COOKIE,
+  getOrCreateSessionId,
+  getSessionId,
+} from '@/utils/cookies';
 import type {CartItem, NewCart} from '@/lib/validators';
 import {db} from '@/drizzle/src/index';
 import {cartsTable} from '@/drizzle/src/db/schema';
 import {eq, and, isNull} from 'drizzle-orm';
+import {cookies} from 'next/headers';
 
 /* ------------------------------------------------- */
 export async function getCart() {
   try {
-    const supabase = await createClient();
-
-    // Check if user is logged in
-    const {
-      data: {user},
-    } = await supabase.auth.getUser();
+    // Check if user is logged in with NextAuth
+    const session = await getServerSession(authOptions);
+    const user = session?.user;
 
     let cart;
 
@@ -64,12 +67,9 @@ export async function getCart() {
 /* ------------------------------------------------- */
 export async function addToCart(cartItem: CartItem) {
   try {
-    const supabase = await createClient();
-
-    // Check if user is logged in
-    const {
-      data: {user},
-    } = await supabase.auth.getUser();
+    // Check if user is logged in with NextAuth
+    const session = await getServerSession(authOptions);
+    const user = session?.user;
 
     // Get or create session_id (only if user is not logged in)
     const sessionId = user ? null : await getOrCreateSessionId();
@@ -151,6 +151,8 @@ export async function removeFromCart(itemId: string) {
     // If cart becomes empty after removal, delete the entire cart from the database
     if (updatedCartItems.length === 0) {
       await db.delete(cartsTable).where(eq(cartsTable.id, cart.id));
+      const cookieStore = await cookies();
+      cookieStore.delete(CART_SESSION_COOKIE);
       return {success: true, cartItems: []};
     }
 
@@ -325,9 +327,12 @@ export async function transferCartOnLogin(userId: string) {
       console.log('Session cart transferred to user');
     }
 
-    return {success: true};
+    return {
+      success: true,
+      message: `Cart transferred successfully (${sessionCart.items.length} items)`,
+    };
   } catch (error) {
     console.error('Unexpected error transferring cart on login:', error);
-    return {success: false, error};
+    return {success: false, error, message: 'Failed to transfer cart'};
   }
 }

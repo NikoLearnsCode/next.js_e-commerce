@@ -6,6 +6,8 @@ import AuthProvider from '@/context/AuthProvider';
 import {CartProvider} from '@/context/CartProvider';
 import {SpeedInsights} from '@vercel/speed-insights/next';
 import QueryProvider from '@/context/QueryProvider';
+import {getServerSession} from 'next-auth';
+import {authOptions} from '@/lib/auth';
 
 import {NavigatedHistoryProvider} from '@/context/NavigatedHistoryProvider';
 
@@ -41,14 +43,22 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-export default function RootLayout({children}: {children: React.ReactNode}) {
+export default async function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  // Get server-side session for hydration
+  const session = await getServerSession(authOptions);
+  // console.log('RootLayout - Server session:', session?.user?.id);
+
   return (
     <html lang='sv'>
       <body
         className={`${arimo.variable} ${syne.variable} ${arimo.className} `}
       >
         <QueryProvider>
-          <AuthProvider>
+          <AuthProvider session={session}>
             <CartProvider>
               <NavigatedHistoryProvider>
                 <SpeedInsights />

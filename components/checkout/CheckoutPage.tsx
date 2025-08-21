@@ -16,7 +16,7 @@ import {ProductListMobile} from './ProductList';
 export type CheckoutStep = 'delivery' | 'payment' | 'confirmation';
 
 export default function CheckoutPage() {
-  const {cartItems} = useCart();
+  const {cartItems, loading} = useCart();
   const router = useRouter();
   const searchParams = useSearchParams();
   const currentStep = (searchParams.get('step') as CheckoutStep) || 'delivery';
@@ -25,7 +25,7 @@ export default function CheckoutPage() {
     null
   );
 
-  if (cartItems.length === 0) {
+  if (cartItems.length === 0 && !loading) {
     return (
       <div className='flex flex-col justify-center items-center min-h-[calc(100vh-310px)]'>
         <h2 className='text-xl  text-gray-700'>Din varukorg är tom</h2>

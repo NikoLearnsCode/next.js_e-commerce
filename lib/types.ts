@@ -9,6 +9,10 @@ export interface SortParams {
   order: SortOrder;
 }
 
+export type AdapterAccount = {
+  type: 'oauth' | 'oidc' | 'email';
+};
+
 export interface PaymentInfo {
   method: 'card' | 'swish' | 'klarna';
 }

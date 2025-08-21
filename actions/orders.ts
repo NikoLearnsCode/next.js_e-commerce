@@ -1,6 +1,7 @@
 'use server';
 
-import {createClient} from '@/utils/supabase/server';
+import {getServerSession} from 'next-auth';
+import {authOptions} from '@/lib/auth';
 import {getSessionId} from '@/utils/cookies';
 import {CartItem, DeliveryFormData} from '@/lib/validators';
 import {db} from '@/drizzle/src/index';
@@ -9,7 +10,6 @@ import {eq, desc, inArray} from 'drizzle-orm';
 import {clearCart} from './cart';
 import {PaymentInfo} from '@/lib/types';
 
-
 /* ------------------------------------------------- */
 export async function createOrder(
   cartItems: CartItem[],
@@ -17,12 +17,9 @@ export async function createOrder(
   paymentInfo: PaymentInfo
 ) {
   try {
-    const supabase = await createClient();
-
-    // Check if user is logged in
-    const {
-      data: {user},
-    } = await supabase.auth.getUser();
+    // Check if user is logged in with NextAuth
+    const session = await getServerSession(authOptions);
+    const user = session?.user;
 
     // Calculate total amount (ensure we're working with numbers)
     const totalAmount = cartItems.reduce(
@@ -105,14 +102,14 @@ export async function getOrder(orderId: string) {
 /* ------------------------------------------------- */
 export async function getUserOrders() {
   try {
-    const supabase = await createClient();
-    const {
-      data: {user},
-      error: authError,
-    } = await supabase.auth.getUser();
+    // Check if user is logged in with NextAuth
+    const session = await getServerSession(authOptions);
+    const user = session?.user;
 
-    if (authError || !user) {
-      console.error('Authentication error fetching user orders:', authError);
+    if (!user) {
+      console.error(
+        'Authentication error fetching user orders: User not authenticated'
+      );
       // If not logged in, return empty array or handle as needed
       return {success: false, error: 'User not authenticated', orders: []};
     }

@@ -11,7 +11,7 @@ import {
 } from 'react';
 import {getCart, removeFromCart, updateCartItemQuantity} from '@/actions/cart';
 import {CartItem} from '@/lib/validators';
-import {useAuth} from './AuthProvider';
+import {useAuth} from '@/hooks/useAuth';
 
 //TS
 interface CartContextType {
@@ -60,8 +60,16 @@ export function CartProvider({children}: {children: React.ReactNode}) {
     {}
   );
 
-  // Hämta användarinformation från AuthContext
-  const {user} = useAuth();
+  // Hämta användarinformation från NextAuth
+  const {user, loading: authLoading} = useAuth();
+
+  // Debug logging
+  console.log('CartProvider - Auth status:', {
+    user: user,
+    userId: user?.id,
+    authLoading,
+  });
+
   // Spara userId i en ref för att undvika onödiga renderingar
   const userIdRef = useRef<string | undefined>(user?.id);
 
@@ -159,12 +167,25 @@ export function CartProvider({children}: {children: React.ReactNode}) {
 
   // När användaren loggar in eller ut
   useEffect(() => {
+    console.log('CartProvider - User ID change detected:', {
+      oldUserId: userIdRef.current,
+      newUserId: user?.id,
+      authLoading,
+    });
+
+    // Vänta tills auth inte längre laddar
+    if (authLoading) {
+      console.log('CartProvider - Waiting for auth to finish loading...');
+      return;
+    }
+
     // Kontrollera om användar-ID faktiskt har ändrats
     if (userIdRef.current !== user?.id) {
+      console.log('CartProvider - Refreshing cart due to user change');
       userIdRef.current = user?.id;
       refreshCart();
     }
-  }, [user?.id, refreshCart]);
+  }, [user?.id, authLoading, refreshCart]);
 
   const updateCartItems = useCallback(async (updatedCartItems: CartItem[]) => {
     setCartItems(updatedCartItems);

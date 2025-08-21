@@ -3,31 +3,34 @@
 import Link from 'next/link';
 
 import {User, Loader2, ArrowRight} from 'lucide-react';
-import {useAuth} from '@/context/AuthProvider';
-import {useEffect, useState, useRef, useTransition} from 'react';
-import {signOutAction} from '@/actions/auth';
+import {useAuth} from '@/hooks/useAuth';
+import {useEffect, useState, useRef} from 'react';
+
 // import SpinningLogo from '../shared/SpinningLogo';
 import {motion} from 'framer-motion';
 import {AnimatePresence} from 'framer-motion';
 import {MotionCloseX} from '../shared/AnimatedDropdown';
 import {useSaveCurrentUrl} from '@/hooks/useLoginRedirect';
 import {useRouter} from 'next/navigation';
+import {signOut} from 'next-auth/react';
 
 function LogoutButton() {
-  const [isPending, startTransition] = useTransition();
+  const [isPending, setIsPending] = useState(false);
 
-  const handleSignOut = () => {
-    startTransition(async () => {
-      await signOutAction();
-    });
+  const handleLogout = async () => {
+    setIsPending(true);
+    setTimeout(async () => {
+      await signOut();
+      setIsPending(false);
+    }, 1000);
   };
 
   return (
     <button
-      onClick={handleSignOut}
+      onClick={handleLogout}
       type='button'
       disabled={isPending}
-      className='flex items-center w-full  px-4 py-2 text-sm  disabled:opacity-70 cursor-pointer'
+      className='flex items-center w-full  px-4 py-2 md:py-3 text-sm  disabled:opacity-70 cursor-pointer'
     >
       {isPending ? (
         <>
@@ -38,7 +41,7 @@ function LogoutButton() {
         </>
       ) : (
         <>
-          <span className='flex w-full hover:text-red-700 font-medium justify-between group relative items-center gap-2 text-gray-700'>
+          <span className='flex w-full hover:text-red-800 font-medium justify-between group relative items-center gap-2 text-gray-700'>
             Logga ut
             <ArrowRight
               size={12}
@@ -60,7 +63,7 @@ const UserButton = ({
   isSearchExpanded: boolean;
 }) => {
   const [mounted, setMounted] = useState(false);
-  const {user, loading, refreshUser} = useAuth();
+  const {user, loading, role} = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -74,11 +77,6 @@ const UserButton = ({
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  // Uppdatera användarinformation när komponenten monteras
-  useEffect(() => {
-    refreshUser();
-  }, [refreshUser]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -127,11 +125,15 @@ const UserButton = ({
   }
 
   let firstAndLastInitial = '';
-
-  if (user.user_metadata.first_name && user.user_metadata.last_name) {
-    firstAndLastInitial =
-      user.user_metadata.first_name?.charAt(0).toUpperCase() +
-      user.user_metadata.last_name?.charAt(0).toUpperCase();
+  if (user.name) {
+    const nameParts = user.name.split(' ');
+    if (nameParts.length >= 2) {
+      firstAndLastInitial =
+        nameParts[0].charAt(0).toUpperCase() +
+        nameParts[nameParts.length - 1].charAt(0).toUpperCase();
+    } else {
+      firstAndLastInitial = nameParts[0].charAt(0).toUpperCase();
+    }
   } else {
     firstAndLastInitial = user.email?.charAt(0).toUpperCase() ?? 'U';
   }
@@ -146,13 +148,28 @@ const UserButton = ({
         }}
         className='flex items-center  cursor-pointer  relative'
       >
-        <div className='h-6 w-6 rounded-full uppercase  border border-black/80 bg-white flex items-center justify-center text-[11px]  font-medium md:hidden'>
+        {/* Mobile user button */}
+        <div
+          className={`h-6 w-6 rounded-full uppercase  border  bg-white flex items-center justify-center text-[11px]  font-medium md:hidden ${
+            role === 1
+              ? 'text-red-800 border-red-800'
+              : 'text-gray-700 border-black/80'
+          }`}
+        >
           {firstAndLastInitial}
         </div>
-        <span className='hidden md:block text-sm font-medium uppercase border-b border-transparent hover:border-black transition text-nowrap '>
+        {/* Desktop user button */}
+        <span
+          className={`hidden md:block text-sm font-medium uppercase border-b border-transparent transition text-nowrap ${
+            role === 1
+              ? 'text-red-800 hover:border-red-800'
+              : ' hover:border-black '
+          }`}
+        >
           MITT KONTO
         </span>
       </button>
+      {/* User dropdown when logged in*/}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -167,9 +184,14 @@ const UserButton = ({
             exit={{opacity: 0, y: -10}}
             transition={{duration: 0.1}}
           >
-            <div className='px-4 py-2.5 relative border-b border-gray-300'>
-              <h5 className='text-base md:text-lg flex  justify-between font-medium text-gray-900 truncate leading-tight '>
-                {user.user_metadata.full_name}{' '}
+            <div className='px-4 py-2.5 md:py-3.5 relative border-b border-gray-300'>
+              <h5 className='text-base md:text-lg flex items-center  font-medium text-gray-900 truncate leading-tight '>
+                {user.name || 'Användare'}{' '}
+                {role === 1 && (
+                  <span className='text-xs underline underline-offset-2 text-red-800 font-semibold  rounded ml-2'>
+                    ADMIN
+                  </span>
+                )}
                 <span className='absolute right-1 '>
                   <MotionCloseX
                     className='px-3.5 py-1'
@@ -179,14 +201,30 @@ const UserButton = ({
                   />
                 </span>
               </h5>
+
               <span className='text-sm font-medium  text-gray-600'>
                 {user.email}
               </span>
             </div>
-
+            {role === 1 && (
+              <Link
+                href='/admin'
+                className='flex items-center px-4 py-2 md:py-3 text-sm   border-b  border-gray-200'
+                onClick={() => setIsOpen(false)}
+              >
+                <span className='flex w-full font-medium hover:text-red-800 justify-between group relative items-center gap-2 '>
+                  <span className='text-red-800 '>Admin Dashboard</span>
+                  <ArrowRight
+                    size={12}
+                    strokeWidth={1.5}
+                    className='group-hover:translate-x-1  transition-transform duration-300'
+                  />
+                </span>
+              </Link>
+            )}
             <Link
               href='/profile'
-              className='flex items-center px-4 py-2 text-sm  text-gray-700  border-b  border-gray-200'
+              className='flex items-center px-4 py-2 md:py-3 text-sm  text-gray-700  border-b  border-gray-200'
               onClick={() => setIsOpen(false)}
             >
               <span className='flex w-full font-medium hover:text-black justify-between group relative items-center gap-2 '>

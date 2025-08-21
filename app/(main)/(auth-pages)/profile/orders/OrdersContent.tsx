@@ -10,8 +10,8 @@ import {ArrowRight} from 'lucide-react';
 type OrderItem = any;
 type Order = {
   id: string;
-  created_at: string;
-  total_amount?: number;
+  created_at: Date | null;
+  total_amount?: string;
   order_items: OrderItem[];
   // Add other fields as needed
 };
@@ -21,14 +21,15 @@ interface OrdersClientContentProps {
 }
 
 // Helper function to format currency (copied from previous page logic)
-function formatPrice(price: number | undefined | null): string {
+function formatPrice(price: string | number | undefined | null): string {
   if (price === undefined || price === null) {
     return '-';
   }
+  const numPrice = typeof price === 'string' ? parseFloat(price) : price;
   return new Intl.NumberFormat('sv-SE', {
     style: 'currency',
     currency: 'SEK',
-  }).format(price);
+  }).format(numPrice);
 }
 
 export default function OrdersClientContent({
@@ -77,7 +78,9 @@ export default function OrdersClientContent({
                     </p>
                   </div>
                   <p className='text-base   underline underline-offset-4  font-normal text-gray-600'>
-                    {new Date(order.created_at).toLocaleDateString('sv-SE')}
+                    {order.created_at
+                      ? new Date(order.created_at).toLocaleDateString('sv-SE')
+                      : '-'}
                   </p>
                 </div>
 

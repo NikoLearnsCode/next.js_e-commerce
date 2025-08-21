@@ -1,8 +1,9 @@
 import {Metadata} from 'next';
 import CheckoutPage from '@/components/checkout/CheckoutPage';
 import {redirect} from 'next/navigation';
-import {createClient} from '@/utils/supabase/server';
-
+import {getServerSession} from 'next-auth';
+import {authOptions} from '@/lib/auth';
+import {getSessionId} from '@/utils/cookies';
 
 export const metadata: Metadata = {
   title: 'Checkout',
@@ -13,8 +14,6 @@ export default async function Checkout({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const supabase = await createClient();
-
   const params = await searchParams;
 
   const stepValue = Array.isArray(params.step)
@@ -22,13 +21,14 @@ export default async function Checkout({
     : params.step || 'delivery';
 
   const isGuestCheckout = params.guest === 'true';
+  const session_id = await getSessionId();
 
-  const {
-    data: {user},
-    error,
-  } = await supabase.auth.getUser();
+  // Check if user is logged in with NextAuth
+  const session = await getServerSession(authOptions);
+  const user = session?.user;
+  
 
-  if ((error || !user) && !isGuestCheckout) {
+  if (!user && !isGuestCheckout && session_id) {
     return redirect(
       `/sign-in?callbackUrl=/checkout?step=${stepValue}&source=checkout`
     );
@@ -38,7 +38,9 @@ export default async function Checkout({
     redirect('/checkout?step=delivery');
   }
 
-  return (
-    <CheckoutPage />
-  );
+  if (!user && !session_id) {
+    redirect('/');
+  }
+
+  return <CheckoutPage />;
 }

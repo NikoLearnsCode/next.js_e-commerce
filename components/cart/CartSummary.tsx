@@ -26,10 +26,10 @@ export default function CartSummary({
         <div className='flex'>
           <Link
             href='/cart'
-            variant='secondary'
+            variant='outline'
             size='md'
             width='full'
-            className='mt-3 font-semibold text-xs md:text-sm h-8 md:h-9  '
+            className='mt-3 font-semibold text-xs md:text-sm h-8 md:h-10  '
             onClick={onCartClick}
           >
             Visa varukorg
