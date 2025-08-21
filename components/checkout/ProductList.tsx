@@ -75,7 +75,7 @@ export function ProductListDesktop() {
         ))}
       </div>
 
-      {isOpen && <ProductListDropdown closeMenu={closeMenu} isOpen={isOpen} />}
+      <ProductListDropdown closeMenu={closeMenu} isOpen={isOpen} />
     </div>
   );
 }
@@ -131,7 +131,7 @@ export function ProductListMobile() {
         </div>
       </div>
 
-      {isOpen && <ProductListDropdown closeMenu={closeMenu} isOpen={isOpen} />}
+      <ProductListDropdown closeMenu={closeMenu} isOpen={isOpen} />
     </>
   );
 }

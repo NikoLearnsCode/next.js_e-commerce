@@ -24,7 +24,7 @@
     "drizzle-orm": "^0.44.4",
     "drizzle-zod": "^0.8.3",
     "eslint": "^9.33.0",
-    "framer-motion": "^12.5.0",
+    "framer-motion": "^12.23.12",
     "lucide-react": "^0.468.0",
     "next": "latest",
     "next-auth": "^4.24.11",

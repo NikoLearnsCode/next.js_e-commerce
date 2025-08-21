@@ -10,6 +10,7 @@ import {
 } from '../shared/AnimatedDropdown';
 import Image from 'next/image';
 import {formatPrice} from '@/lib/helpers';
+import {AnimatePresence} from 'framer-motion';
 
 // Dropdown
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -54,8 +55,7 @@ export function ProductListDropdown({
   };
 
   return (
-    <>
-      {/* Cart module dropdown nedåt */}
+    <AnimatePresence>
       {isOpen && (
         <>
           <MotionOverlay key='mobile-cart-overlay' onClick={closeMenu} />
@@ -129,6 +129,6 @@ export function ProductListDropdown({
           </MotionDropdown>
         </>
       )}
-    </>
+    </AnimatePresence>
   );
 }

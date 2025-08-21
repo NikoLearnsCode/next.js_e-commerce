@@ -19,7 +19,7 @@ export default async function Login() {
   }
   return (
     <Suspense fallback={null}>
-      <AnimatedContainer direction='right'>
+      <AnimatedContainer direction='down'>
         <SignInForm />
       </AnimatedContainer>
     </Suspense>

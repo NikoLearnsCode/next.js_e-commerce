@@ -30,11 +30,11 @@ function LogoutButton() {
       onClick={handleLogout}
       type='button'
       disabled={isPending}
-      className='flex items-center w-full  px-4 py-2 md:py-3 text-sm  disabled:opacity-70 cursor-pointer'
+      className='flex items-center w-full  px-4 py-2 md:py-2.5 text-sm  disabled:opacity-70 cursor-pointer'
     >
       {isPending ? (
         <>
-          <span className='flex w-full justify-between group relative items-center gap-2 text-red-700'>
+          <span className='flex w-full justify-between group relative items-center gap-2 text-red-800'>
             Loggar ut...
             <Loader2 size={14} className='animate-spin' />
           </span>
@@ -184,11 +184,11 @@ const UserButton = ({
             exit={{opacity: 0, y: -10}}
             transition={{duration: 0.1}}
           >
-            <div className='px-4 py-2.5 md:py-3.5 relative border-b border-gray-300'>
+            <div className='px-4 py-2.5 md:py-2.5.5 relative border-b border-gray-300'>
               <h5 className='text-base md:text-lg flex items-center  font-medium text-gray-900 truncate leading-tight '>
                 {user.name || 'Användare'}{' '}
                 {role === 1 && (
-                  <span className='text-xs underline underline-offset-2 text-red-800 font-semibold  rounded ml-2'>
+                  <span className='text-xs underline underline-offset-2 text-red-800 font-semibold  ml-2'>
                     ADMIN
                   </span>
                 )}
@@ -209,11 +209,11 @@ const UserButton = ({
             {role === 1 && (
               <Link
                 href='/admin'
-                className='flex items-center px-4 py-2 md:py-3 text-sm   border-b  border-gray-200'
+                className='flex items-center px-4  hover:text-gray-700 py-2 md:py-2.5 text-sm   border-b  border-gray-200'
                 onClick={() => setIsOpen(false)}
               >
-                <span className='flex w-full font-medium hover:text-red-800 justify-between group relative items-center gap-2 '>
-                  <span className='text-red-800 '>Admin Dashboard</span>
+                <span className='flex w-full font-medium  justify-between group relative items-center gap-2 '>
+                  <span className='font-bold '>Admin Dashboard</span>
                   <ArrowRight
                     size={12}
                     strokeWidth={1.5}
@@ -224,7 +224,7 @@ const UserButton = ({
             )}
             <Link
               href='/profile'
-              className='flex items-center px-4 py-2 md:py-3 text-sm  text-gray-700  border-b  border-gray-200'
+              className='flex items-center px-4 py-2 md:py-2.5 text-sm  text-gray-700  border-b  border-gray-200'
               onClick={() => setIsOpen(false)}
             >
               <span className='flex w-full font-medium hover:text-black justify-between group relative items-center gap-2 '>
