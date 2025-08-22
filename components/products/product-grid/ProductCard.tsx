@@ -11,6 +11,7 @@ import {twMerge} from 'tailwind-merge';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import {useNavigatedHistory} from '@/context/NavigatedHistoryProvider';
+import NewBadge from '@/components/shared/NewBadge';
 
 type ProductCardProps = {
   product: Product;
@@ -33,6 +34,9 @@ export default function ProductCard({
   // Image logic
   const hasMultipleImages = product.images && product.images.length > 1;
   const hasImages = product.images && product.images.length > 0;
+
+  // Check if product is new (backend calculated)
+  const showNewBadge = product.isNew;
 
   // Navigation configuration
   const prevButtonClass = `product-card-prev-${product.id}`;
@@ -91,6 +95,7 @@ export default function ProductCard({
               sizes='(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 768px) 50vw, 50vw'
             />
           </Link>
+          {showNewBadge && <NewBadge variant='small' />}
         </div>
         <div className='p-1.5 flex flex-col  '>
           <Link
@@ -160,6 +165,7 @@ export default function ProductCard({
                 </SwiperSlide>
               ))}
             </Swiper>
+            {showNewBadge && <NewBadge />}
             {/* Desktop only: Show prev/next buttons on hover */}
             {showNavigationButtons && (
               <>
@@ -194,23 +200,26 @@ export default function ProductCard({
           </>
         ) : (
           // When product has only one image: No swiper needed, just show the image
-          <Link
-            href={`/${product.slug}`}
-            className='block relative aspect-[7/9] h-full w-full'
-            onClick={() =>
-              handleSaveNavigated({...product, image: product.images[0]})
-            }
-          >
-            <Image
-              src={product.images[0]}
-              alt={product.name}
-              fill
-              priority={priorityLoading}
-              loading={priorityLoading ? 'eager' : 'lazy'}
-              className='object-cover h-full w-full'
-              sizes='(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 768px) 50vw, 50vw'
-            />
-          </Link>
+          <>
+            <Link
+              href={`/${product.slug}`}
+              className='block relative aspect-[7/9] h-full w-full'
+              onClick={() =>
+                handleSaveNavigated({...product, image: product.images[0]})
+              }
+            >
+              <Image
+                src={product.images[0]}
+                alt={product.name}
+                fill
+                priority={priorityLoading}
+                loading={priorityLoading ? 'eager' : 'lazy'}
+                className='object-cover h-full w-full'
+                sizes='(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 768px) 50vw, 50vw'
+              />
+            </Link>
+            {showNewBadge && <NewBadge />}
+          </>
         )}
       </div>
 

@@ -63,7 +63,9 @@ export const paymentSchema = z.object({
 
 export type PaymentFormData = z.infer<typeof paymentSchema>;
 
-export type Product = typeof productsTable.$inferSelect;
+export type Product = typeof productsTable.$inferSelect & {
+  isNew: boolean;
+};
 
 export type NewProduct = typeof productsTable.$inferInsert;
 

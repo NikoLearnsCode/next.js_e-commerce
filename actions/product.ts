@@ -12,6 +12,7 @@ import {
   count,
   sql,
   ne,
+  getTableColumns,
 } from 'drizzle-orm';
 import {productsTable} from '@/drizzle/db/schema';
 import type {Params, Result} from '@/lib/types/query-types';
@@ -26,7 +27,13 @@ export async function getProductSlugAndRelatedProducts(slug: string): Promise<{
   genderProducts: Product[];
 }> {
   const mainProduct = await db
-    .select()
+    .select({
+      ...getTableColumns(productsTable),
+      isNew:
+        sql<boolean>`${productsTable.created_at} > NOW() - INTERVAL '2 days'`.as(
+          'isNew'
+        ),
+    })
     .from(productsTable)
     .where(eq(productsTable.slug, slug))
     .limit(1);
@@ -45,7 +52,13 @@ export async function getProductSlugAndRelatedProducts(slug: string): Promise<{
   const [sameCategoryProducts, sameGenderProducts] = await Promise.all([
     // Same category + gender
     db
-      .select()
+      .select({
+        ...getTableColumns(productsTable),
+        isNew:
+          sql<boolean>`${productsTable.created_at} > NOW() - INTERVAL '2 days'`.as(
+            'isNew'
+          ),
+      })
       .from(productsTable)
       .where(
         and(
@@ -57,7 +70,13 @@ export async function getProductSlugAndRelatedProducts(slug: string): Promise<{
       .limit(8),
     // Same gender, different category
     db
-      .select()
+      .select({
+        ...getTableColumns(productsTable),
+        isNew:
+          sql<boolean>`${productsTable.created_at} > NOW() - INTERVAL '2 days'`.as(
+            'isNew'
+          ),
+      })
       .from(productsTable)
       .where(
         and(
@@ -336,7 +355,13 @@ export async function getInitialProducts({
     const [countResult, productsData] = await Promise.all([
       db.select({count: count()}).from(productsTable).where(whereClause),
       db
-        .select()
+        .select({
+          ...getTableColumns(productsTable),
+          isNew:
+            sql<boolean>`${productsTable.created_at} > NOW() - INTERVAL '2 days'`.as(
+              'isNew'
+            ),
+        })
         .from(productsTable)
         .where(whereClause)
         .orderBy(...orderByFields)
