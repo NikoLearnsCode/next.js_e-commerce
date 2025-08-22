@@ -3,7 +3,7 @@ import Newsletter from '@/components/shared/Newsletter';
 import ProductFilterWrapper from '@/components/products/product-grid/ProductFilterWrapper';
 import {notFound} from 'next/navigation';
 import {Metadata} from 'next';
-import {parseSortParam} from '@/lib/helpers';
+import {parseSortParam} from '@/utils/filterSort';
 
 interface CategoryPageProps {
   params: Promise<{

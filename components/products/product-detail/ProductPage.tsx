@@ -26,7 +26,7 @@ type ProductPageProps = {
   initial?: boolean;
 };
 
-export default function product({
+export default function ProductPage({
   product,
   categoryProducts = [],
   genderProducts = [],
@@ -60,7 +60,7 @@ export default function product({
 
                 {/* Desktop view - Display all images in a grid */}
                 <div className='hidden flex-1 lg:grid md lg:grid-cols-2 lg:gap-1 '>
-                  {product.images.map((img, idx) => (
+                  {product.images.map((img: string, idx: number) => (
                     <div key={idx} className='relative     aspect-[7/9]'>
                       <Image
                         src={img}
@@ -118,7 +118,7 @@ export default function product({
                 {selectedSize ? `Vald storlek: ${selectedSize}` : 'Storlek:'}
               </span>
               <div className='flex items-center flex-wrap'>
-                {product.sizes.map((size) => (
+                {product.sizes.map((size: string) => (
                   <button
                     key={size}
                     className={twMerge(

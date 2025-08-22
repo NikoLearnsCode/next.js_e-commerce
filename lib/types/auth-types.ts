@@ -1,4 +1,5 @@
 import {DefaultSession} from 'next-auth';
+import {DefaultJWT} from 'next-auth/jwt';
 
 declare module 'next-auth' {
   interface Session {
@@ -10,8 +11,12 @@ declare module 'next-auth' {
 }
 
 declare module 'next-auth/jwt' {
-  interface JWT {
-    uid: string;
+  interface JWT extends DefaultJWT {
+    id: string;
     role: number;
   }
 }
+
+export type AdapterAccount = {
+  type: 'oauth' | 'oidc' | 'email';
+};

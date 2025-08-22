@@ -68,7 +68,6 @@ export default function SignInForm() {
       )}
 
       <div className='space-y-4'>
-
         <Button
           variant='outline'
           onClick={() => handleSignIn('google')}

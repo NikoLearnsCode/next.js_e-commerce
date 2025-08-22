@@ -6,7 +6,7 @@ import {
   ordersTable,
   orderItemsTable,
   categoriesTable,
-} from '@/drizzle/src/db/schema';
+} from '@/drizzle/db/schema';
 
 export const cartItemSchema = z.object({
   id: z.string().uuid(),

@@ -1,7 +1,7 @@
 'use client';
 
 import {Link} from '@/components/shared/link';
-import {formatPrice} from '@/lib/helpers';
+import {formatPrice} from '@/utils/helpers';
 
 type CartSummaryProps = {
   totalPrice: number;

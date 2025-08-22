@@ -1,14 +1,5 @@
-import {clsx, type ClassValue} from 'clsx';
-import {twMerge} from 'tailwind-merge';
-import type {SortParams} from '@/lib/types';
+import type {SortParams} from '@/lib/types/query-types';
 
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
-
-
-
-// Gemensam funktion för att parsa sort-parametrar
 export function parseSortParam(sortParam?: string | null): SortParams {
   if (!sortParam) return {sort: 'id', order: 'asc'};
 
@@ -23,6 +14,8 @@ export function parseSortParam(sortParam?: string | null): SortParams {
       return {sort: 'id', order: 'asc'};
   }
 }
+
+/* ------------------------------------------------- */
 
 const SIZE_ORDER: Record<string, number> = {
   XXS: 0,
@@ -48,12 +41,10 @@ export function sortSizes(sizes: string[]): string[] {
     }
   }
 
-  // Textstorlekar i definierad ordning
   text.sort(
     (a, b) => SIZE_ORDER[a.toUpperCase()] - SIZE_ORDER[b.toUpperCase()]
   );
 
-  // Numeriska (hanterar t.ex. '42.5', annars fallback till localeCompare)
   numeric.sort((a, b) => {
     const na = parseFloat(a);
     const nb = parseFloat(b);
@@ -62,12 +53,4 @@ export function sortSizes(sizes: string[]): string[] {
   });
 
   return [...text, ...numeric];
-}
-
-export function formatPrice(price: number) {
-  return price.toLocaleString('sv-SE', {
-    style: 'currency',
-    currency: 'SEK',
-    minimumFractionDigits: 0,
-  });
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import {motion} from 'framer-motion';
-import {formatPrice} from '@/lib/helpers';
+import {formatPrice} from '@/utils/helpers';
 import {Link} from '@/components/shared/link';
 
 type StickyMobileSummaryProps = {
@@ -30,9 +30,7 @@ export default function StickyMobileSummary({
         <div>
           <div className='flex  flex-col text-base'>
             <span className=' text-sm'>Totalsumma:</span>
-            <span className=' text-base'>
-              {formatPrice(totalPrice)}
-            </span>
+            <span className=' text-base'>{formatPrice(totalPrice)}</span>
           </div>
         </div>
         <Link

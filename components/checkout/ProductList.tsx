@@ -2,7 +2,7 @@
 import Image from 'next/image';
 import {useCart} from '@/context/CartProvider';
 import {useState} from 'react';
-import {formatPrice} from '@/lib/helpers';
+import {formatPrice} from '@/utils/helpers';
 import {ProductListDropdown} from './DropdownCart';
 
 export function ProductListDesktop() {

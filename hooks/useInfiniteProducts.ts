@@ -3,7 +3,7 @@
 import {Product} from '@/lib/validators';
 import {getInitialProducts} from '@/actions/product';
 import {useInfiniteQuery} from '@tanstack/react-query';
-import {parseSortParam} from '@/lib/helpers';
+import {parseSortParam} from '@/utils/filterSort';
 
 export function useInfiniteProducts({
   query,

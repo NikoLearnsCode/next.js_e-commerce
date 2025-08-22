@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 import {Minus, Plus, X} from 'lucide-react';
-import {formatPrice} from '@/lib/helpers';
+import {formatPrice} from '@/utils/helpers';
 import {motion, AnimatePresence} from 'framer-motion';
 import {useCart} from '@/context/CartProvider';
 import SpinningLogo from '@/components/shared/SpinningLogo';

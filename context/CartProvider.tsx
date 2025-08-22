@@ -13,7 +13,6 @@ import {getCart, removeFromCart, updateCartItemQuantity} from '@/actions/cart';
 import {CartItem} from '@/lib/validators';
 import {useAuth} from '@/hooks/useAuth';
 
-//TS
 interface CartContextType {
   cartItems: CartItem[];
   itemCount: number;
@@ -31,7 +30,6 @@ interface CartContextType {
   removingItems: Record<string, boolean>;
 }
 
-// Standardvärden
 const CartContext = createContext<CartContextType>({
   cartItems: [],
   itemCount: 0,
@@ -60,23 +58,12 @@ export function CartProvider({children}: {children: React.ReactNode}) {
     {}
   );
 
-  // Hämta användarinformation från NextAuth
-  const {user, loading: authLoading} = useAuth();
+  const {user} = useAuth();
 
-  // Debug logging
-  console.log('CartProvider - Auth status:', {
-    user: user,
-    userId: user?.id,
-    authLoading,
-  });
-
-  // Spara userId i en ref för att undvika onödiga renderingar
   const userIdRef = useRef<string | undefined>(user?.id);
 
-  //Förhindrar samtidiga anrop
   const isRefreshing = useRef(false);
 
-  // Använd useMemo för att förhindra onödiga beräkningar vid varje rendering
   const itemCount = useMemo(
     () =>
       cartItems.reduce(
@@ -96,15 +83,12 @@ export function CartProvider({children}: {children: React.ReactNode}) {
     [cartItems]
   );
 
-  // memoriserar funktionen så att samma instans används mellan renderingar.
   const refreshCart = useCallback(async () => {
-    // Förhindra parallella uppdateringar av varukorgen
     if (isRefreshing.current) return;
 
     try {
       isRefreshing.current = true;
       const {cartItems: freshCartItems} = await getCart();
-      // Uppdatera lokal state med den hämtade datan
       setCartItems(freshCartItems);
     } catch (error) {
       console.error('Error fetching cart:', error);
@@ -114,7 +98,6 @@ export function CartProvider({children}: {children: React.ReactNode}) {
     }
   }, []);
 
-  // Funktion för att ta bort en artikel från varukorgen
   const removeItem = useCallback(async (itemId: string) => {
     try {
       setRemovingItems((prev) => ({...prev, [itemId]: true}));
@@ -123,19 +106,16 @@ export function CartProvider({children}: {children: React.ReactNode}) {
         setCartItems(result.cartItems || []);
       } else {
         console.error('Error removing item via backend:', result.error);
-        // fallback
         await refreshCart();
       }
     } catch (error) {
       console.error('Error removing item from cart:', error);
-      // fallback
       await refreshCart();
     } finally {
       setRemovingItems((prev) => ({...prev, [itemId]: false}));
     }
   }, []);
 
-  // Funktion för att uppdatera kvantitet av en artikel i varukorgen
   const updateItemQuantity = useCallback(
     async (itemId: string, quantity: number) => {
       if (quantity < 1) return;
@@ -167,25 +147,11 @@ export function CartProvider({children}: {children: React.ReactNode}) {
 
   // När användaren loggar in eller ut
   useEffect(() => {
-    console.log('CartProvider - User ID change detected:', {
-      oldUserId: userIdRef.current,
-      newUserId: user?.id,
-      authLoading,
-    });
-
-    // Vänta tills auth inte längre laddar
-    if (authLoading) {
-      console.log('CartProvider - Waiting for auth to finish loading...');
-      return;
-    }
-
-    // Kontrollera om användar-ID faktiskt har ändrats
     if (userIdRef.current !== user?.id) {
-      console.log('CartProvider - Refreshing cart due to user change');
       userIdRef.current = user?.id;
       refreshCart();
     }
-  }, [user?.id, authLoading, refreshCart]);
+  }, [user?.id, refreshCart]);
 
   const updateCartItems = useCallback(async (updatedCartItems: CartItem[]) => {
     setCartItems(updatedCartItems);
@@ -202,7 +168,6 @@ export function CartProvider({children}: {children: React.ReactNode}) {
   const clearCartAction = async () => {
     try {
       setLoading(true);
-      // await clearCart();
       await refreshCart();
       setLoading(false);
     } catch (error) {

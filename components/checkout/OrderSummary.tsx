@@ -7,7 +7,7 @@ import {useState} from 'react';
 import {Accordion} from '@/components/shared/Accordion';
 import {FloatingLabelInput} from '@/components/shared/floatingLabelInput';
 import {ProductListDesktop} from './ProductList';
-import {formatPrice} from '@/lib/helpers';
+import {formatPrice} from '@/utils/helpers';
 
 export function CampaignCodeButton() {
   const [campaignCode, setCampaignCode] = useState('');

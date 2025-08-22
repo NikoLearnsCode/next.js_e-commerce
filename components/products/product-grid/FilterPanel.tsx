@@ -85,13 +85,12 @@ export default function FilterPanel({
                 <Accordion.Root type='single' collapsible={true}>
                   {/* Storlekar */}
                   {sizes.length > 0 && (
-                    <Accordion.Item
-                      value='sizes'
-                      className='border-b '
-                    >
+                    <Accordion.Item value='sizes' className='border-b '>
                       <Accordion.Trigger>
                         <div className='flex flex-col'>
-                          <span className='text-sm sm:text-base font-medium md:font-normal'>Storlek</span>
+                          <span className='text-sm sm:text-base font-medium md:font-normal'>
+                            Storlek
+                          </span>
                           {selectedSizes.length > 0 && (
                             <span className='font-normal text-xs uppercase  text-gray-600 '>
                               {selectedSizes.join(', ')}
@@ -117,13 +116,12 @@ export default function FilterPanel({
 
                   {/* Färger */}
                   {colors.length > 0 && (
-                    <Accordion.Item
-                      value='colors'
-                      className='border-b'
-                    >
+                    <Accordion.Item value='colors' className='border-b'>
                       <Accordion.Trigger>
                         <div className='flex flex-col '>
-                          <span className='text-sm sm:text-base font-medium md:font-normal'>Färg</span>
+                          <span className='text-sm sm:text-base font-medium md:font-normal'>
+                            Färg
+                          </span>
                           {selectedColors.length > 0 && (
                             <span className='font-normal text-xs uppercase font-syne text-gray-600 '>
                               {selectedColors.join(', ')}
@@ -148,10 +146,7 @@ export default function FilterPanel({
                   )}
 
                   {/* Sortering */}
-                  <Accordion.Item
-                    value='sort'
-                    className='border-b  '
-                  >
+                  <Accordion.Item value='sort' className='border-b  '>
                     <Accordion.Trigger>
                       <div className='flex flex-col'>
                         <span className='text-sm relative sm:text-base font-medium md:font-normal'>

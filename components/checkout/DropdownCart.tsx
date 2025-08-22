@@ -9,7 +9,7 @@ import {
   MotionCloseX,
 } from '../shared/AnimatedDropdown';
 import Image from 'next/image';
-import {formatPrice} from '@/lib/helpers';
+import {formatPrice} from '@/utils/helpers';
 import {AnimatePresence} from 'framer-motion';
 
 // Dropdown

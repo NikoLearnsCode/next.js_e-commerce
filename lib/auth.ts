@@ -1,12 +1,12 @@
 import {DrizzleAdapter} from '@auth/drizzle-adapter';
 import {NextAuthOptions} from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
-import {db} from '@/drizzle/src';
+import {db} from '@/drizzle';
 import {
   usersTable,
   accountsTable,
   sessionsTable,
-} from '@/drizzle/src/db/schema';
+} from '@/drizzle/db/schema';
 import {transferCartOnLogin} from '@/actions/cart';
 import {CART_SESSION_COOKIE} from '@/utils/cookies';
 import {cookies} from 'next/headers';
@@ -31,22 +31,18 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.GITHUB_SECRET!,
     }),
   ],
-  // Remove strategy - let NextAuth choose based on adapter
-  // When using DrizzleAdapter, NextAuth will automatically use database sessions
+
   callbacks: {
     signIn: async ({user}) => {
       // Transfer cart when user signs in
-      console.log('signIn callback - user:', user);
-      console.log('signIn callback - user.id:', user?.id);
+
       if (user?.id) {
         try {
           await transferCartOnLogin(user.id);
           const cookieStore = await cookies();
           cookieStore.delete(CART_SESSION_COOKIE);
-          console.log('Cart transferred successfully for user:', user.id);
         } catch (error) {
           console.error('Error transferring cart on login:', error);
-          // Don't block login if cart transfer fails
         }
       }
       return true;

@@ -31,7 +31,7 @@ export default function PaymentStep({onNext, deliveryData}: PaymentStepProps) {
   const form = useForm<PaymentFormData>({
     resolver: zodResolver(paymentSchema),
     defaultValues: {
-      paymentMethod: 'card', 
+      paymentMethod: 'card',
       cardNumber: '1234 5678 9012 3456',
       expiryDate: '01/25',
       cvv: '123',

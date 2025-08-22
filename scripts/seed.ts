@@ -1,7 +1,7 @@
 // Seed products
 
-import {db} from '@/drizzle/src/index';
-import {productsTable} from '@/drizzle/src/db/schema';
+import {db} from '@/drizzle/index';
+import {productsTable} from '@/drizzle/db/schema';
 
 const baseProducts = [
   // HERRKLÄDER

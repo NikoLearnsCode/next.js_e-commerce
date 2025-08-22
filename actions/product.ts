@@ -13,11 +13,11 @@ import {
   sql,
   ne,
 } from 'drizzle-orm';
-import {productsTable} from '@/drizzle/src/db/schema';
-import type {Params, Result} from '@/lib/types';
+import {productsTable} from '@/drizzle/db/schema';
+import type {Params, Result} from '@/lib/types/query-types';
 import type {Product} from '@/lib/validators';
-import {sortSizes} from '@/lib/helpers';
-import {db} from '@/drizzle/src/index';
+import {sortSizes} from '@/utils/filterSort';
+import {db} from '@/drizzle/index';
 
 /* ---------------------------------------------------- */
 export async function getProductSlugAndRelatedProducts(slug: string): Promise<{

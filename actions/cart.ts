@@ -8,8 +8,8 @@ import {
   getSessionId,
 } from '@/utils/cookies';
 import type {CartItem, NewCart} from '@/lib/validators';
-import {db} from '@/drizzle/src/index';
-import {cartsTable} from '@/drizzle/src/db/schema';
+import {db} from '@/drizzle/index';
+import {cartsTable} from '@/drizzle/db/schema';
 import {eq, and, isNull} from 'drizzle-orm';
 import {cookies} from 'next/headers';
 
@@ -266,7 +266,7 @@ export async function transferCartOnLogin(userId: string) {
       return {success: true, message: 'No session cart found'};
     }
 
-    console.log('Found session cart:', sessionCart);
+    // console.log('Found session cart:', sessionCart);
 
     // Check if user already has a cart
     const userCartData = await db
@@ -311,7 +311,7 @@ export async function transferCartOnLogin(userId: string) {
       // Delete the anonymous cart
       await db.delete(cartsTable).where(eq(cartsTable.id, sessionCart.id));
 
-      console.log('Cart merged and session cart deleted');
+      console.log('Cart merged successfully and session cart deleted');
     } else {
       console.log('No user cart found, transferring session cart');
       // User has no cart - transfer the anonymous cart

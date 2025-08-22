@@ -4,11 +4,11 @@ import {getServerSession} from 'next-auth';
 import {authOptions} from '@/lib/auth';
 import {getSessionId} from '@/utils/cookies';
 import {CartItem, DeliveryFormData} from '@/lib/validators';
-import {db} from '@/drizzle/src/index';
-import {ordersTable, orderItemsTable} from '@/drizzle/src/db/schema';
+import {db} from '@/drizzle/index';
+import {ordersTable, orderItemsTable} from '@/drizzle/db/schema';
 import {eq, desc, inArray} from 'drizzle-orm';
 import {clearCart} from './cart';
-import {PaymentInfo} from '@/lib/types';
+import {PaymentInfo} from '@/lib/types/query-types';
 
 /* ------------------------------------------------- */
 export async function createOrder(

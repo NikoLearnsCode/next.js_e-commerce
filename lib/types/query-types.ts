@@ -4,18 +4,14 @@ export type SortField = 'id' | 'price' | 'name';
 
 export type SortOrder = 'asc' | 'desc';
 
-export interface SortParams {
+export type SortParams = {
   sort: SortField;
   order: SortOrder;
-}
-
-export type AdapterAccount = {
-  type: 'oauth' | 'oidc' | 'email';
 };
 
-export interface PaymentInfo {
+export type PaymentInfo = {
   method: 'card' | 'swish' | 'klarna';
-}
+};
 
 export type Params = {
   limit?: number;
@@ -23,7 +19,7 @@ export type Params = {
   order?: 'asc' | 'desc';
   sort?: SortField;
   lastId?: string | null;
-  lastValue?: number | string | null; 
+  lastValue?: number | string | null;
   category?: string | null;
   gender?: string | null;
   color?: string[];

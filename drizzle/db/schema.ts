@@ -12,7 +12,7 @@ import {
 } from 'drizzle-orm/pg-core';
 
 import type {CartItem} from '@/lib/validators';
-import type {AdapterAccount} from '@/lib/types';
+import type {AdapterAccount} from '@/lib/types/auth-types';
 
 // LAGRAR INFO OM ANVÄNDARE
 export const usersTable = pgTable('users', {
