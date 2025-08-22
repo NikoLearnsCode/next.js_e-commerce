@@ -18,9 +18,7 @@ export default async function ProfilePage() {
 
   const user = session?.user?.name?.split(' ')[0];
 
-
   return (
-    
     <div className=' py-8  '>
       <h1 className='text-4xl  mb-16 mx-auto border-black w-fit '>
         Hej {user}

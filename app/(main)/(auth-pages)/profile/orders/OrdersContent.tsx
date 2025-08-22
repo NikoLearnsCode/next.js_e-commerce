@@ -1,51 +1,63 @@
-'use client'; // Mark as Client Component
+'use client';
 
 import Image from 'next/image';
 import AnimatedAuthContainer from '@/components/shared/AnimatedContainer';
 import {Link} from '@/components/shared/link';
-import {ArrowRight} from 'lucide-react';
-// Assuming your Order type is defined and exported from here
-// You might need to adjust the path and ensure OrderItem is also available if needed
-// For now, using placeholder types, replace with your actual types
-type OrderItem = any;
+import {ArrowRight, ArrowLeft} from 'lucide-react';
+import {Swiper, SwiperSlide} from 'swiper/react';
+import {Navigation} from 'swiper/modules';
+import type SwiperType from 'swiper';
+import {useState} from 'react';
+import 'swiper/css';
+import 'swiper/css/navigation';
+
+type OrderItem = {
+  id: string;
+  product_id: string;
+  quantity: number;
+  price: string;
+  name: string;
+  size?: string;
+  color?: string;
+  image?: string;
+};
+
 type Order = {
   id: string;
   created_at: Date | null;
   total_amount?: string;
   order_items: OrderItem[];
-  // Add other fields as needed
 };
 
 interface OrdersClientContentProps {
   orders: Order[];
 }
 
-// Helper function to format currency (copied from previous page logic)
-function formatPrice(price: string | number | undefined | null): string {
-  if (price === undefined || price === null) {
-    return '-';
-  }
-  const numPrice = typeof price === 'string' ? parseFloat(price) : price;
-  return new Intl.NumberFormat('sv-SE', {
-    style: 'currency',
-    currency: 'SEK',
-  }).format(numPrice);
-}
-
 export default function OrdersClientContent({
   orders,
 }: OrdersClientContentProps) {
+  const [carouselStates, setCarouselStates] = useState<{
+    [key: string]: {isBeginning: boolean; isEnd: boolean};
+  }>({});
+
+  const handleSlideChange = (swiper: SwiperType, orderId: string) => {
+    setCarouselStates((prev) => ({
+      ...prev,
+      [orderId]: {
+        isBeginning: swiper.isBeginning,
+        isEnd: swiper.isEnd,
+      },
+    }));
+  };
   return (
-    <AnimatedAuthContainer direction='up' className='max-w-4xl w-full '>
-      <span className='px-4 flex justify-between items-center mb-8 max-w-md mx-auto'>
-        <h1 className='text-xl uppercase font-syne font-medium '>
-          Mina Ordrar
-        </h1>
+    <AnimatedAuthContainer direction='up' className='max-w-6xl w-full'>
+      {/* Header */}
+      <div className='px-4 flex justify-between items-center mb-8'>
+        <h1 className='text-xl uppercase font-syne font-medium'>Mina Ordrar</h1>
         <Link
-          className='text-xs px-0 text-primary font-medium hover:underline flex  gap-2  group tracking-wider '
+          className='text-xs text-primary font-medium hover:underline flex gap-2 group tracking-wider'
           href='/profile'
         >
-          {' '}
           Tillbaka
           <ArrowRight
             size={16}
@@ -53,83 +65,135 @@ export default function OrdersClientContent({
             className='group-hover:translate-x-1 transition-transform duration-300'
           />
         </Link>
-      </span>
+      </div>
 
       {orders.length === 0 ? (
-        <p className='mx-auto max-w-md px-4 text-base text-gray-600'>
+        <p className='text-center text-gray-600 py-12'>
           Du har inte lagt några ordrar än.
         </p>
       ) : (
-        <div className='   grid grid-cols-1 md:grid-cols-2  gap-2 h-auto items-start'>
-          {orders.map((order) => (
-            <div key={order.id} className='border border-gray-100 p-4'>
-              <div className=' p-4'>
-                <div className='flex justify-between'>
-                  <div className='flex flex-col mb-4 pb-4 text-gray-700'>
-                    <p className='text-lg font-medium mt-2 md:mt-0'>
-                      {''}
-                      {formatPrice(order.total_amount)}{' '}
-                      <span className='text-gray-600 '>
-                        ({order.order_items.length})
-                      </span>
-                    </p>
-                    <p className='text-sm text-gray-600'>
-                      Ordernr: #{order.id?.substring(0, 8)}
-                    </p>
-                  </div>
-                  <p className='text-base   underline underline-offset-4  font-normal text-gray-600'>
+        <div className='space-y-12 px-4 h-full'>
+          {/* Section Header */}
+
+          {orders.map((order) => {
+            const orderState = carouselStates[order.id] || {
+              isBeginning: true,
+              isEnd: false,
+            };
+            const prevButtonClass = `order-${order.id}-prev`;
+            const nextButtonClass = `order-${order.id}-next`;
+
+            return (
+              <div key={order.id} className='w-full h-full flex flex-col'>
+                {/* Date and Navigation */}
+                <div className='flex justify-between mb-4'>
+                  <p className='text-sm text-gray-600'>
                     {order.created_at
-                      ? new Date(order.created_at).toLocaleDateString('sv-SE')
-                      : '-'}
+                      ? new Date(order.created_at).toLocaleDateString('sv-SE', {
+                          day: 'numeric',
+                          month: 'long',
+                          year: 'numeric',
+                        })
+                      : 'Okänt datum'}
                   </p>
+
+                  <div className='flex z-10'>
+                    <button
+                      className={`${prevButtonClass} py-1.5 px-3 transition cursor-pointer ${
+                        orderState.isBeginning
+                          ? 'opacity-50 pointer-events-none'
+                          : 'opacity-100'
+                      }`}
+                      aria-label='Föregående'
+                      disabled={orderState.isBeginning}
+                    >
+                      <ArrowLeft
+                        strokeWidth={1.25}
+                        className='h-4 w-4 sm:h-4.5 sm:w-4.5'
+                      />
+                    </button>
+
+                    <button
+                      className={`${nextButtonClass} py-1.5 px-3 transition cursor-pointer ${
+                        orderState.isEnd
+                          ? 'opacity-50 pointer-events-none'
+                          : 'opacity-100'
+                      }`}
+                      aria-label='Nästa'
+                      disabled={orderState.isEnd}
+                    >
+                      <ArrowRight
+                        strokeWidth={1.25}
+                        className='h-4 w-4 sm:h-4.5 sm:w-4.5'
+                      />
+                    </button>
+                  </div>
                 </div>
 
-                <div className='space-y-3'>
-                  {(order.order_items || []).map(
-                    (item: OrderItem, index: number) => (
-                      <div
-                        key={`${item.product_id}-${item.size || index}`}
-                        className='flex items-center space-x-3 text-sm'
+                {/* Product Images Swiper */}
+                <Swiper
+                  modules={[Navigation]}
+                  spaceBetween={4}
+                  slidesPerView={2}
+                  slidesOffsetBefore={20}
+                  breakpoints={{
+                    640: {
+                      slidesPerView: 2,
+                      spaceBetween: 4,
+                    },
+                    768: {
+                      slidesPerView: 3,
+                      spaceBetween: 4,
+                    },
+                    1024: {
+                      slidesPerView: 4,
+                      spaceBetween: 4,
+                    },
+                    1280: {
+                      slidesPerView: 5,
+                      spaceBetween: 4,
+                    },
+                  }}
+                  navigation={{
+                    prevEl: `.${prevButtonClass}`,
+                    nextEl: `.${nextButtonClass}`,
+                  }}
+                  onSlideChange={(swiper) =>
+                    handleSlideChange(swiper, order.id)
+                  }
+                  onInit={(swiper) => handleSlideChange(swiper, order.id)}
+                  className='w-full'
+                >
+                  {order.order_items.map((item, index) => (
+                    <SwiperSlide
+                      className='aspect-[7/9]'
+                      key={`${item.product_id}-${index}`}
+                    >
+                      <Link
+                        href={`/profile/orders/${order.id}`}
+                        className='relative block h-full w-full'
                       >
-                        {item.image && (
-                          <div className='w-15 h-20  rounded overflow-hidden flex-shrink-0'>
+                        <div className='bg-gray-50 rounded-lg overflow-hidden hover:shadow-md transition-shadow duration-200 h-full w-full'>
+                          {item.image ? (
                             <Image
                               src={item.image}
                               alt={item.name || 'Produktbild'}
-                              width={80}
-                              height={80}
-                              className='object-contain w-full h-full'
+                              fill
+                              className='object-cover'
                             />
-                          </div>
-                        )}
-                        <div className='flex-grow'>
-                          <p className='font-medium'>
-                            {item.name || 'Produktnamn saknas'}
-                          </p>
-                          <p className='text-gray-600'>
-                            Antal: {item.quantity}
-                          </p>
-                          {item.size && (
-                            <p className='text-gray-600'>
-                              Storlek: {item.size}
-                            </p>
+                          ) : (
+                            <div className='w-full h-full flex items-center justify-center text-gray-400'>
+                              <span className='text-xs'>Ingen bild</span>
+                            </div>
                           )}
                         </div>
-                        <p className='text-gray-700'>
-                          {formatPrice(item.price)}
-                        </p>
-                      </div>
-                    )
-                  )}
-                  {(order.order_items || []).length === 0 && (
-                    <p className='text-sm text-gray-600'>
-                      Inga produkter hittades för denna order.
-                    </p>
-                  )}
-                </div>
+                      </Link>
+                    </SwiperSlide>
+                  ))}
+                </Swiper>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </AnimatedAuthContainer>
