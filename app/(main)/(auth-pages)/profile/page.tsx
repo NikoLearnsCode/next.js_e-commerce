@@ -26,9 +26,9 @@ export default async function ProfilePage() {
       <div className='flex flex-col justify-center items-center space-y-6'>
         <Link
           href='/profile/orders'
-          className='text-lg font-normal uppercase hover:underline w-fit underline-offset-4'
+          className='text-lg  font-syne font-medium uppercase hover:underline w-fit underline-offset-4'
         >
-          Beställningar
+          Mina ordrar
         </Link>
 
         <LogoutButton className='mt-10' />

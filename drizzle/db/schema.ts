@@ -108,6 +108,7 @@ export const orderItemsTable = pgTable('order_items', {
   name: varchar('name', {length: 255}).notNull(),
   size: varchar('size', {length: 255}).notNull(),
   color: varchar('color', {length: 255}).notNull(),
+  slug: varchar('slug', {length: 255}).notNull(),
   created_at: timestamp('created_at').defaultNow(),
   image: varchar('image', {length: 255}).notNull(),
 });

@@ -10,12 +10,10 @@ import Newsletter from '@/components/shared/Newsletter';
 import MobileImageSwiper from './MobileImageSwiper';
 import dynamic from 'next/dynamic';
 
-// Dynamically import the carousels
-const ProductCarousel = dynamic(
-  () => import('@/components/products/product-detail/CarouselOne')
-);
-const ProductTwo = dynamic(
-  () => import('@/components/products/product-detail/CarouselTwo')
+// Dynamically import the carousel
+const Carousel = dynamic(() => import('@/components/shared/Carousel'));
+const ProductCard = dynamic(
+  () => import('@/components/products/product-grid/ProductCard')
 );
 
 type ProductPageProps = {
@@ -157,14 +155,36 @@ export default function ProductPage({
       {/* Products in the same category */}
       {categoryProducts.length > 0 && (
         <div className='mx-auto pt-24 lg:pt-40 pb-8'>
-          <ProductCarousel products={categoryProducts} />
+          <Carousel
+            items={categoryProducts}
+            title='Liknande produkter'
+            renderItem={(product) => (
+              <ProductCard
+                product={product as Product}
+                priorityLoading={false}
+                interactionMode='carouselItem'
+              />
+            )}
+            id='carousel-one'
+          />
         </div>
       )}
 
       {/* Products for the same gender */}
       {genderProducts.length > 0 && (
         <div className='mx-auto py-8'>
-          <ProductTwo products={genderProducts} />
+          <Carousel
+            items={genderProducts}
+            title='Du kanske också gillar'
+            renderItem={(product) => (
+              <ProductCard
+                product={product as Product}
+                priorityLoading={false}
+                interactionMode='carouselItem'
+              />
+            )}
+            id='carousel-two'
+          />
         </div>
       )}
       <Newsletter />

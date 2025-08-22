@@ -9,7 +9,12 @@ import {
   useCallback,
   useMemo,
 } from 'react';
-import {getCart, removeFromCart, updateCartItemQuantity} from '@/actions/cart';
+import {
+  getCart,
+  removeFromCart,
+  updateCartItemQuantity,
+  clearCart,
+} from '@/actions/cart';
 import {CartItem} from '@/lib/validators';
 import {useAuth} from '@/hooks/useAuth';
 
@@ -167,9 +172,12 @@ export function CartProvider({children}: {children: React.ReactNode}) {
 
   const clearCartAction = async () => {
     try {
-      setLoading(true);
-      await refreshCart();
-      setLoading(false);
+      const result = await clearCart();
+      if (result.success) {
+        setCartItems([]);
+      } else {
+        console.error('Error clearing cart:', result.error);
+      }
     } catch (error) {
       console.error('Error clearing cart:', error);
     }

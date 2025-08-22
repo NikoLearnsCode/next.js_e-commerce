@@ -76,5 +76,10 @@ export type NewOrder = typeof ordersTable.$inferInsert;
 export type OrderItem = typeof orderItemsTable.$inferSelect;
 export type NewOrderItem = typeof orderItemsTable.$inferInsert;
 
+// Order with items relation for displaying orders with their items
+export type OrderWithItems = Order & {
+  order_items: OrderItem[];
+};
+
 export type Category = typeof categoriesTable.$inferSelect;
 export type NewCategory = typeof categoriesTable.$inferInsert;

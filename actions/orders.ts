@@ -7,7 +7,7 @@ import {CartItem, DeliveryFormData} from '@/lib/validators';
 import {db} from '@/drizzle/index';
 import {ordersTable, orderItemsTable} from '@/drizzle/db/schema';
 import {eq, desc, inArray} from 'drizzle-orm';
-import {clearCart} from './cart';
+
 import {PaymentInfo} from '@/lib/types/query-types';
 
 /* ------------------------------------------------- */
@@ -50,13 +50,14 @@ export async function createOrder(
       name: item.name,
       size: item.size,
       color: item.color,
+      slug: item.slug,
       image: item.images[0],
     }));
 
     await db.insert(orderItemsTable).values(orderItems);
 
     // Clear cart using the cart function
-    await clearCart();
+
 
     return {success: true, orderId: order[0].id};
   } catch (error) {
