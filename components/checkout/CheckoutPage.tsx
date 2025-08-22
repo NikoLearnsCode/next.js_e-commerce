@@ -1,79 +1,78 @@
 'use client';
 
+import {useState} from 'react';
+import {useRouter, useSearchParams} from 'next/navigation';
 import {useCart} from '@/context/CartProvider';
 import DeliveryStep from '@/components/checkout/steps/DeliveryStep';
 import PaymentStep from '@/components/checkout/steps/PaymentStep';
-import {useRouter, useSearchParams} from 'next/navigation';
-import Link from 'next/link';
-import {GoArrowLeft} from 'react-icons/go';
+
 import OrderConfirmation from './steps/OrderConfirmation';
 import Steps from './StepBar';
-import {useState} from 'react';
-import {DeliveryFormData} from '@/lib/validators';
 import CheckoutLayoutDesktop from './desktop/CheckoutLayoutDesktop';
 import CheckoutLayoutMobile from './mobile/CheckoutLayoutMobile';
 import {useMediaQuery} from '@/hooks/useMediaQuery';
-
-export type CheckoutStep = 'delivery' | 'payment' | 'confirmation';
+import {DeliveryFormData} from '@/lib/validators';
+import {CheckoutStep, validateStep, getCheckoutUrl} from '@/lib/checkoutSteps';
+import SpinningLoader from '@/components/shared/SpinningLogo';
 
 export default function CheckoutPage() {
-  const {cartItems, loading} = useCart();
+  const {loading} = useCart();
+  const isDesktop = useMediaQuery('(min-width: 768px)');
   const router = useRouter();
   const searchParams = useSearchParams();
-  const currentStep = (searchParams.get('step') as CheckoutStep) || 'delivery';
-  const isGuest = searchParams.get('guest') === 'true';
+
+  const [completedSteps, setCompletedSteps] = useState<CheckoutStep[]>([]);
   const [deliveryData, setDeliveryData] = useState<DeliveryFormData | null>(
     null
   );
-  const isDesktop = useMediaQuery('(min-width: 768px)');
 
-  if (cartItems.length === 0 && !loading) {
+  // URL state
+  const stepParam = searchParams.get('step');
+  const isGuest = searchParams.get('guest') === 'true';
+
+  // Validerat aktuellt steg
+  const currentStep = validateStep(stepParam, completedSteps);
+
+  // Navigation functions
+  const saveDeliveryAndProceed = (data: DeliveryFormData) => {
+    setDeliveryData(data);
+    setCompletedSteps((prev) => [...prev, 'delivery']);
+    router.push(getCheckoutUrl('payment', isGuest));
+  };
+
+  const completePaymentAndProceed = () => {
+    setCompletedSteps((prev) => [...prev, 'payment']);
+    router.push(getCheckoutUrl('confirmation', isGuest));
+  };
+
+  //  förhindra layout shift
+  if (loading) {
     return (
-      <div className='flex flex-col justify-center items-center min-h-[calc(100vh-310px)]'>
-        <h2 className='text-xl  text-gray-700'>Din varukorg är tom</h2>
-        <Link
-          className='text-sm text-primary font-medium active:underline hover:underline flex justify-center gap-1 items-center mt-4 group tracking-wider mx-auto text-center'
-          href='/'
-        >
-          <GoArrowLeft
-            size={16}
-            className='group-active:-translate-x-2 group-hover:-translate-x-2 transition-transform duration-300 mr-1'
-          />
-          Fortsätt handla
-        </Link>
+      <div className='absolute inset-0 flex flex-col  mb-20 justify-center items-center'>
+        <SpinningLoader height='40' className='opacity-50 pb-4' />
+        <span className='text-xs pl-1 font-semibold uppercase font-syne text-gray-400 '>
+          Laddar...
+        </span>
       </div>
     );
   }
-
-  const handleNext = () => {
-    let nextPath = '';
-    if (currentStep === 'delivery') nextPath = '/checkout?step=payment';
-    else if (currentStep === 'payment')
-      nextPath = '/checkout?step=confirmation';
-
-    if (isGuest) {
-      nextPath += '&guest=true';
-    }
-
-    router.push(nextPath);
-  };
-
-  const handleSaveDeliveryData = (data: DeliveryFormData) => {
-    setDeliveryData(data);
-    handleNext();
-  };
 
   const renderStepContent = () => {
     switch (currentStep) {
       case 'delivery':
         return (
           <DeliveryStep
-            onNext={handleSaveDeliveryData}
+            onNext={saveDeliveryAndProceed}
             initialData={deliveryData}
           />
         );
       case 'payment':
-        return <PaymentStep onNext={handleNext} deliveryData={deliveryData} />;
+        return (
+          <PaymentStep
+            onNext={completePaymentAndProceed}
+            deliveryData={deliveryData}
+          />
+        );
       case 'confirmation':
         return <OrderConfirmation />;
       default:

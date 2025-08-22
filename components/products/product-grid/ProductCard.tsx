@@ -24,13 +24,25 @@ export default function ProductCard({
   priorityLoading = false,
   interactionMode = 'grid',
 }: ProductCardProps) {
+  // Mobile/Desktop detection
   const [isMobile, setIsMobile] = useState(false);
 
+  // Hooks and navigation
   const {handleSaveNavigated} = useNavigatedHistory();
+
+  // Image logic
   const hasMultipleImages = product.images && product.images.length > 1;
+  const hasImages = product.images && product.images.length > 0;
+
+  // Navigation configuration
   const prevButtonClass = `product-card-prev-${product.id}`;
   const nextButtonClass = `product-card-next-${product.id}`;
+  const showNavigationButtons =
+    !isMobile && hasMultipleImages && interactionMode === 'grid';
+  const enableTouchNavigation =
+    isMobile && hasMultipleImages && interactionMode === 'grid';
 
+  // Screen size detection
   useEffect(() => {
     const checkScreenSize = () => {
       setIsMobile(window.innerWidth < 768);
@@ -40,7 +52,8 @@ export default function ProductCard({
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
 
-  if (!product.images || product.images.length === 0) {
+  // Edge case: No images available - Show placeholder
+  if (!hasImages) {
     return (
       <div className='border border-gray-50 h-full group'>
         <div className='w-full aspect-[7/9] bg-gray-200 flex items-center justify-center'>
@@ -54,6 +67,7 @@ export default function ProductCard({
     );
   }
 
+  // Special case: Carousel mode (when passed as prop) - Only show first image, no navigation
   if (interactionMode === 'carouselItem') {
     return (
       <div className='flex flex-col relative w-full h-full pb-6 group'>
@@ -91,30 +105,33 @@ export default function ProductCard({
     );
   }
 
+  // Swiper configuration for multiple images
+  const swiperKey = isMobile ? 'mobile' : 'desktop';
+  const swiperConfig = {
+    modules: [Navigation],
+    slidesPerView: 1,
+    spaceBetween: 1,
+    loop: true,
+    allowTouchMove: enableTouchNavigation,
+    preventClicks: false,
+    preventClicksPropagation: false,
+    navigation: showNavigationButtons
+      ? {
+          prevEl: `.${prevButtonClass}`,
+          nextEl: `.${nextButtonClass}`,
+        }
+      : false,
+    className: 'relative aspect-[7/9] h-full w-full',
+  };
+
+  // Default: Grid mode - Full product card with navigation options
   return (
     <div className='flex relative flex-col w-full h-full pb-6 group'>
       <div className='w-full relative h-full bg-white'>
         {hasMultipleImages ? (
+          // Multiple images: Swiper with touch (mobile) or button navigation (desktop)
           <>
-            <Swiper
-              key={isMobile ? 'mobile' : 'desktop'}
-              modules={[Navigation]}
-              slidesPerView={1}
-              spaceBetween={1}
-              loop={true}
-              allowTouchMove={isMobile}
-              preventClicks={false}
-              preventClicksPropagation={false}
-              navigation={
-                !isMobile
-                  ? {
-                      prevEl: `.${prevButtonClass}`,
-                      nextEl: `.${nextButtonClass}`,
-                    }
-                  : false
-              }
-              className='relative aspect-[7/9] h-full w-full'
-            >
+            <Swiper key={swiperKey} {...swiperConfig}>
               {product.images.map((imgSrc, idx) => (
                 <SwiperSlide key={idx}>
                   <Link
@@ -143,7 +160,8 @@ export default function ProductCard({
                 </SwiperSlide>
               ))}
             </Swiper>
-            {!isMobile && (
+            {/* Desktop only: Show prev/next buttons on hover */}
+            {showNavigationButtons && (
               <>
                 <button
                   className={twMerge(
@@ -175,6 +193,7 @@ export default function ProductCard({
             )}
           </>
         ) : (
+          // When product has only one image: No swiper needed, just show the image
           <Link
             href={`/${product.slug}`}
             className='block relative aspect-[7/9] h-full w-full'
@@ -195,6 +214,7 @@ export default function ProductCard({
         )}
       </div>
 
+      {/* Product name and price */}
       <div className='py-1.5 px-2 flex flex-col  '>
         <Link
           href={`/${product.slug}`}

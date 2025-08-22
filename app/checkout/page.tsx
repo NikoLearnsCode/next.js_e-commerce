@@ -4,6 +4,8 @@ import {redirect} from 'next/navigation';
 import {getServerSession} from 'next-auth';
 import {authOptions} from '@/lib/auth';
 import {getSessionId} from '@/utils/cookies';
+import {getCart} from '@/actions/cart';
+import {validateStep, getCheckoutUrl} from '@/lib/checkoutSteps';
 
 export const metadata: Metadata = {
   title: 'Checkout',
@@ -16,28 +18,37 @@ export default async function Checkout({
 }) {
   const params = await searchParams;
 
-  const stepValue = Array.isArray(params.step)
-    ? params.step[0]
-    : params.step || 'delivery';
-
+  const stepParam = Array.isArray(params.step) ? params.step[0] : params.step;
   const isGuestCheckout = params.guest === 'true';
   const session_id = await getSessionId();
 
   // Check if user is logged in with NextAuth
   const session = await getServerSession(authOptions);
   const user = session?.user;
-  
 
+  // Check if cart has items - redirect if empty
+  const {cartItems} = await getCart();
+  if (cartItems.length === 0) {
+    redirect('/cart');
+  }
+
+  // Validate step (utan completed steps på server-side)
+  const validatedStep = validateStep(stepParam || null, []);
+
+  // Authentication flow
   if (!user && !isGuestCheckout && session_id) {
-    return redirect(
-      `/sign-in?callbackUrl=/checkout?step=${stepValue}&source=checkout`
-    );
+    const signInUrl = `/sign-in?callbackUrl=${encodeURIComponent(
+      getCheckoutUrl(validatedStep, isGuestCheckout)
+    )}&source=checkout`;
+    return redirect(signInUrl);
   }
 
-  if (!params.step) {
-    redirect('/checkout?step=delivery');
+  // Redirect to default step if no step provided
+  if (!stepParam) {
+    return redirect(getCheckoutUrl('delivery', isGuestCheckout));
   }
 
+  // If no user and no session, redirect to home
   if (!user && !session_id) {
     redirect('/');
   }

@@ -50,9 +50,9 @@ export default function CartPage() {
       {/* Loading state */}
       {isLoading && (
         <div className='flex flex-col  justify-center items-center min-h-[calc(100vh-310px)]'>
-          <SpinningLogo height='35' className='pb-4' />
-          <p className='text-sm font-medium italic mt-4 text-gray-500'>
-            Laddar varukorg...
+          <SpinningLogo height='40' className='pb-4 opacity-50' />
+          <p className='text-xs pl-1 font-semibold uppercase font-syne text-gray-400 '>
+            Laddar...
           </p>
         </div>
       )}

@@ -1,17 +1,10 @@
 'use client';
 import Logo from '@/components/shared/Logo';
-type Step = {
-  key: string;
-  label: string;
-};
-const steps: Step[] = [
-  {key: 'delivery', label: 'Frakt'},
-  {key: 'payment', label: 'Betalning'},
-  {key: 'confirmation', label: 'Bekräftelse'},
-];
+import {getStepsArray, CheckoutStep} from '@/lib/checkoutSteps';
 
-export default function Steps({currentStep}: {currentStep: string}) {
-  const currentStepIndex = steps.findIndex((s: Step) => s.key === currentStep);
+export default function Steps({currentStep}: {currentStep: CheckoutStep}) {
+  const steps = getStepsArray();
+  const currentStepIndex = steps.findIndex((step) => step.key === currentStep);
   const allStepsDone = currentStepIndex >= steps.length - 1;
 
   return (
