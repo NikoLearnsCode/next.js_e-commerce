@@ -80,6 +80,12 @@ export default function OrdersClientContent({
                       </Link>
                     </div>
                   )}
+                  breakpoints={{
+                    640: {slidesPerView: 2, spaceBetween: 4},
+                    768: {slidesPerView: 3, spaceBetween: 4},
+                    1024: {slidesPerView: 4, spaceBetween: 4},
+                    1280: {slidesPerView: 4, spaceBetween: 4},
+                  }}
                   showNavigation={true}
                   id={`order-${order.id}`}
                 />
