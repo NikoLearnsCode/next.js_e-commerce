@@ -61,7 +61,7 @@ export default function DeliveryStep({onNext, initialData}: DeliveryStepProps) {
         />
 
         <div className='space-y-4'>
-          <h2 className='text-lg font-medium'>Leveransmetod</h2>
+          <h2 className='text-base md:text-lg font-medium'>Leveransmetod</h2>
           <div className='grid grid-cols-2 gap-3'>
             <div
               className={`flex h-16 justify-center items-center p-2 w-full border  hover:border-black cursor-pointer transition-colors duration-200 ${selectedMethod === 'home' ? 'border-black bg-gray-50' : 'border-gray-300'}`}
@@ -84,7 +84,7 @@ export default function DeliveryStep({onNext, initialData}: DeliveryStepProps) {
                 readOnly
                 className='hidden'
               />
-              <div className='text-sm text-center'>
+              <div className='text-[13px] md:text-sm text-center'>
                 <p
                   className={`font-medium ${selectedMethod === 'home' ? 'font-semibold' : ''}`}
                 >
@@ -115,7 +115,7 @@ export default function DeliveryStep({onNext, initialData}: DeliveryStepProps) {
                 readOnly
                 className='hidden'
               />
-              <div className='text-sm text-center'>
+              <div className='text-[13px] md:text-sm text-center'>
                 <p
                   className={`font-medium ${selectedMethod === 'pickup' ? 'font-semibold' : ''}`}
                 >
@@ -133,108 +133,79 @@ export default function DeliveryStep({onNext, initialData}: DeliveryStepProps) {
         </div>
 
         <div className='space-y-6'>
-          <h2 className='text-lg font-medium'>Leveransinformation</h2>
+          <h2 className='text-base md:text-lg font-medium'>
+            Leveransinformation
+          </h2>
+
+          {/* Form fields */}
           <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-            <div>
-              <FloatingLabelInput
-                {...form.register('firstName')}
-                id='firstName'
-                label='Förnamn'
-                autoComplete='given-name'
-              />
-              {form.formState.errors.firstName && (
-                <p className='text-red-500 text-sm mt-1'>
-                  {form.formState.errors.firstName.message}
-                </p>
-              )}
-            </div>
-            <div>
-              <FloatingLabelInput
-                {...form.register('lastName')}
-                id='lastName'
-                label='Efternamn'
-                autoComplete='family-name'
-              />
-              {form.formState.errors.lastName && (
-                <p className='text-red-500 text-sm mt-1'>
-                  {form.formState.errors.lastName.message}
-                </p>
-              )}
-            </div>
-          </div>
-
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-            <div>
-              <FloatingLabelInput
-                {...form.register('email')}
-                id='email'
-                type='email'
-                label='E-post'
-                autoComplete='email'
-              />
-              {form.formState.errors.email && (
-                <p className='text-red-500 text-sm mt-1'>
-                  {form.formState.errors.email.message}
-                </p>
-              )}
-            </div>
-            <div>
-              <FloatingLabelInput
-                {...form.register('phone')}
-                id='phone'
-                type='tel'
-                label='Telefon'
-                autoComplete='tel'
-              />
-              {form.formState.errors.phone && (
-                <p className='text-red-500 text-sm mt-1'>
-                  {form.formState.errors.phone.message}
-                </p>
-              )}
-            </div>
-          </div>
-
-          <div>
-            <FloatingLabelInput
-              {...form.register('address')}
-              id='address'
-              label='Adress'
-              autoComplete='street-address'
-            />
-            {form.formState.errors.address && (
-              <p className='text-red-500 text-sm mt-1'>
-                {form.formState.errors.address.message}
-              </p>
-            )}
-          </div>
-
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-            <div>
-              <FloatingLabelInput
-                {...form.register('postalCode')}
-                id='postalCode'
-                label='Postnummer'
-                autoComplete='postal-code'
-              />
-              {form.formState.errors.postalCode && (
-                <p className='text-red-500 text-sm mt-1'>
-                  {form.formState.errors.postalCode.message}
-                </p>
-              )}
-            </div>
-            <div>
-              <FloatingLabelInput
-                {...form.register('city')}
-                id='city'
-                label='Stad'
-                autoComplete='address-level2'
-              />
-              {form.formState.errors.city && (
-                <p className='text-red-500 text-sm mt-1'>
-                  {form.formState.errors.city.message}
-                </p>
-              )}
-            </div>
+            {[
+              {
+                name: 'firstName',
+                label: 'Förnamn',
+                autoComplete: 'given-name',
+                gridCol: 'sm:col-span-1',
+              },
+              {
+                name: 'lastName',
+                label: 'Efternamn',
+                autoComplete: 'family-name',
+                gridCol: 'sm:col-span-1',
+              },
+              {
+                name: 'email',
+                label: 'E-post',
+                type: 'email',
+                autoComplete: 'email',
+                gridCol: 'sm:col-span-1',
+              },
+              {
+                name: 'phone',
+                label: 'Telefon',
+                type: 'tel',
+                autoComplete: 'tel',
+                gridCol: 'sm:col-span-1',
+              },
+              {
+                name: 'address',
+                label: 'Adress',
+                autoComplete: 'street-address',
+                gridCol: 'sm:col-span-2',
+              },
+              {
+                name: 'postalCode',
+                label: 'Postnummer',
+                autoComplete: 'postal-code',
+                gridCol: 'sm:col-span-1',
+              },
+              {
+                name: 'city',
+                label: 'Stad',
+                autoComplete: 'address-level2',
+                gridCol: 'sm:col-span-1',
+              },
+            ].map((field) => (
+              <div key={field.name} className={field.gridCol}>
+                <FloatingLabelInput
+                  {...form.register(field.name as keyof DeliveryFormData)}
+                  id={field.name}
+                  type={field.type}
+                  label={field.label}
+                  autoComplete={field.autoComplete}
+                />
+                {form.formState.errors[
+                  field.name as keyof DeliveryFormData
+                ] && (
+                  <p className='text-red-500 text-sm mt-1'>
+                    {
+                      form.formState.errors[
+                        field.name as keyof DeliveryFormData
+                      ]?.message
+                    }
+                  </p>
+                )}
+              </div>
+            ))}
           </div>
         </div>
 

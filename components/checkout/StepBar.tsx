@@ -26,8 +26,8 @@ export default function Steps({currentStep}: {currentStep: string}) {
 
       <div className=''>
         <div className='max-w-2xl mx-auto'>
-          <div className='relative flex justify-between px-8 mb-8 md:px-0'>
-            <div className='transition absolute top-3 left-14 right-14 md:left-5 md:right-5 h-0.5 bg-gray-200' />
+          <div className='relative flex justify-between px-4 mb-8 md:px-0'>
+            <div className='transition absolute top-3 left-11 right-11 md:left-5 md:right-5 h-0.5 bg-gray-200' />
 
             {steps.map((step, index) => {
               let circleClasses =

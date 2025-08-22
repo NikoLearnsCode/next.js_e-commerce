@@ -4,7 +4,7 @@ import {useState} from 'react';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {FloatingLabelInput} from '@/components/shared/floatingLabelInput';
-import {OrderSummaryTotals} from '../OrderSummary';
+import OrderTotals from '../shared/OrderTotals';
 import {
   PaymentFormData,
   paymentSchema,
@@ -224,7 +224,7 @@ export default function PaymentStep({onNext, deliveryData}: PaymentStepProps) {
         </Accordion.Root>
 
         <div className='md:hidden mt-6'>
-          <OrderSummaryTotals />
+          <OrderTotals />
         </div>
 
         <Button

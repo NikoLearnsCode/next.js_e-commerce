@@ -1,27 +1,23 @@
 'use client';
-import {useCart} from '@/context/CartProvider';
-
-import {Button} from '@/components/shared/button';
 
 import {useState} from 'react';
+import {Button} from '@/components/shared/button';
 import {Accordion} from '@/components/shared/Accordion';
 import {FloatingLabelInput} from '@/components/shared/floatingLabelInput';
-import {ProductListDesktop} from './ProductList';
-import {formatPrice} from '@/utils/helpers';
 
-export function CampaignCodeButton() {
+export default function CampaignCodeSection() {
   const [campaignCode, setCampaignCode] = useState('');
 
   const handleApplyCode = () => {
     if (!campaignCode.trim()) return;
+    // TODO: Implement campaign code logic
   };
 
   return (
     <Accordion.Root
       type='single'
       collapsible={true}
-      className={`text-sm my-3  md:my-0  overflow-hidden`}
-      // defaultValue='campaignCode'
+      className='text-sm my-3 md:my-0 overflow-hidden'
     >
       <Accordion.Item
         value='campaignCode'
@@ -51,43 +47,5 @@ export function CampaignCodeButton() {
         </Accordion.Content>
       </Accordion.Item>
     </Accordion.Root>
-  );
-}
-
-// Separate component for the order summary totals
-export function OrderSummaryTotals() {
-  const {totalPrice} = useCart();
-
-  return (
-    <div className=' space-y-2  pt-4'>
-      <div className='flex justify-between text-sm'>
-        <span>Delsumma</span>
-        <span>{totalPrice} kr</span>
-      </div>
-      <div className='flex justify-between text-sm'>
-        <span>Frakt</span>
-        <span>Gratis</span>
-      </div>
-      <div className='flex justify-between pt-4 border-t'>
-        <span>Totalsumma</span>
-        <span className='font-medium'>{formatPrice(totalPrice)}</span>
-      </div>
-    </div>
-  );
-}
-
-// The main OrderSummary component for desktop view
-export default function OrderSummary() {
-  return (
-    <div className='hidden md:block bg-white  '>
-      <h2 className='text-lg font-medium mb-4'>Varukorg</h2>
-      <div className='space-y-4 '>
-        <CampaignCodeButton />
-        <OrderSummaryTotals />
-        <div className='border-t pt-6'>
-          <ProductListDesktop />
-        </div>
-      </div>
-    </div>
   );
 }

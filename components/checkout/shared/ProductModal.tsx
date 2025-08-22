@@ -1,26 +1,23 @@
 'use client';
+
 import {useCart} from '@/context/CartProvider';
 import {useEffect} from 'react';
 import Link from 'next/link';
-
 import {
   MotionOverlay,
   MotionDropdown,
   MotionCloseX,
-} from '../shared/AnimatedDropdown';
+} from '@/components/shared/AnimatedDropdown';
 import Image from 'next/image';
 import {formatPrice} from '@/utils/helpers';
 import {AnimatePresence} from 'framer-motion';
 
-// Dropdown
-// ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-export function ProductListDropdown({
-  closeMenu,
-  isOpen,
-}: {
+interface ProductModalProps {
   closeMenu: () => void;
   isOpen: boolean;
-}) {
+}
+
+export default function ProductModal({closeMenu, isOpen}: ProductModalProps) {
   const {cartItems, itemCount, removeItem, removingItems} = useCart();
 
   useEffect(() => {
@@ -58,12 +55,12 @@ export function ProductListDropdown({
     <AnimatePresence>
       {isOpen && (
         <>
-          <MotionOverlay key='mobile-cart-overlay' onClick={closeMenu} />
+          <MotionOverlay key='product-modal-overlay' onClick={closeMenu} />
           <MotionDropdown
             position='right'
-            key='mobile-cart'
+            key='product-modal'
             isMobile={true}
-            className='overflow-y-auto min-w-full md:min-w-[450px] '
+            className='overflow-y-auto min-w-full md:min-w-[450px]'
           >
             <div className='absolute top-1.5 right-3'>
               <MotionCloseX
@@ -77,16 +74,18 @@ export function ProductListDropdown({
               DIN VARUKORG ({itemCount})
             </h2>
 
-            <div className=' pt-3 pb-12  grid grid-cols-1 max-h-[88%] overflow-y-auto'>
+            <div className='pt-3 pb-12 grid grid-cols-1 max-h-[88%] overflow-y-auto'>
               {cartItems.map((item) => (
                 <div
                   key={item.id}
-                  className={`flex items-center px-5 not-last:border-b  border-gray-100 py-3 justify-between gap-4 ${removingItems[item.id] ? 'opacity-50' : ''}`}
+                  className={`flex items-center px-5 not-last:border-b border-gray-100 py-3 justify-between gap-4 ${
+                    removingItems[item.id] ? 'opacity-50' : ''
+                  }`}
                 >
                   <Link
                     href={`/${item.slug}`}
                     tabIndex={-1}
-                    className=' relative  bg-gray-50'
+                    className='relative bg-gray-50'
                   >
                     <Image
                       src={item.images[0]}
@@ -115,7 +114,11 @@ export function ProductListDropdown({
                     </p>
                     {cartItems.length > 1 && (
                       <button
-                        className={`font-medium mr-3 mt-3 transition border-gray-400 text-black hover:text-red-700 hover:border-red-700  text-xs border-b disabled:opacity-50 cursor-pointer ${removingItems[item.id] ? 'text-red-700 border-red-700 hover:border-red-700' : ''}`}
+                        className={`font-medium mr-3 mt-3 transition border-gray-400 text-black hover:text-red-700 hover:border-red-700 text-xs border-b disabled:opacity-50 cursor-pointer ${
+                          removingItems[item.id]
+                            ? 'text-red-700 border-red-700 hover:border-red-700'
+                            : ''
+                        }`}
                         onClick={() => handleRemoveItem(item.id)}
                         disabled={removingItems[item.id]}
                       >

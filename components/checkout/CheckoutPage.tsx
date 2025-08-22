@@ -6,12 +6,13 @@ import PaymentStep from '@/components/checkout/steps/PaymentStep';
 import {useRouter, useSearchParams} from 'next/navigation';
 import Link from 'next/link';
 import {GoArrowLeft} from 'react-icons/go';
-import OrderSummary, {CampaignCodeButton} from './OrderSummary';
 import OrderConfirmation from './steps/OrderConfirmation';
 import Steps from './StepBar';
 import {useState} from 'react';
 import {DeliveryFormData} from '@/lib/validators';
-import {ProductListMobile} from './ProductList';
+import CheckoutLayoutDesktop from './desktop/CheckoutLayoutDesktop';
+import CheckoutLayoutMobile from './mobile/CheckoutLayoutMobile';
+import {useMediaQuery} from '@/hooks/useMediaQuery';
 
 export type CheckoutStep = 'delivery' | 'payment' | 'confirmation';
 
@@ -24,6 +25,7 @@ export default function CheckoutPage() {
   const [deliveryData, setDeliveryData] = useState<DeliveryFormData | null>(
     null
   );
+  const isDesktop = useMediaQuery('(min-width: 768px)');
 
   if (cartItems.length === 0 && !loading) {
     return (
@@ -61,43 +63,38 @@ export default function CheckoutPage() {
     handleNext();
   };
 
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case 'delivery':
+        return (
+          <DeliveryStep
+            onNext={handleSaveDeliveryData}
+            initialData={deliveryData}
+          />
+        );
+      case 'payment':
+        return <PaymentStep onNext={handleNext} deliveryData={deliveryData} />;
+      case 'confirmation':
+        return <OrderConfirmation />;
+      default:
+        return null;
+    }
+  };
+
   return (
-    <div className='max-w-5xl mx-auto px-4 py-8   '>
+    <div className='max-w-5xl mx-auto px-4 py-8'>
       <Steps currentStep={currentStep} />
 
-      {/* main content */}
-      <div className='flex flex-col md:flex-row gap-6 pb-16 pt-4 px-2 md:gap-20'>
-        {/* mobile-only components  */}
-        {currentStep !== 'confirmation' && (
-          <div className='md:hidden space-y-6 py-3 md:pt-0'>
-            <ProductListMobile />
-
-            {currentStep === 'payment' && <CampaignCodeButton />}
-          </div>
-        )}
-
-        {/* main step*/}
-        <div className='flex-1'>
-          {currentStep === 'delivery' && (
-            <DeliveryStep
-              onNext={handleSaveDeliveryData}
-              initialData={deliveryData}
-            />
-          )}
-          {currentStep === 'payment' && (
-            <PaymentStep onNext={handleNext} deliveryData={deliveryData} />
-          )}
-
-          {currentStep === 'confirmation' && <OrderConfirmation />}
-        </div>
-
-        {/* desktop-only summary sidebar */}
-        {currentStep !== 'confirmation' && (
-          <div className='hidden md:block w-72'>
-            <OrderSummary />
-          </div>
-        )}
-      </div>
+      {/* Responsive layout */}
+      {isDesktop ? (
+        <CheckoutLayoutDesktop currentStep={currentStep}>
+          {renderStepContent()}
+        </CheckoutLayoutDesktop>
+      ) : (
+        <CheckoutLayoutMobile currentStep={currentStep}>
+          {renderStepContent()}
+        </CheckoutLayoutMobile>
+      )}
     </div>
   );
 }
