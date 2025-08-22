@@ -2,11 +2,7 @@ import {DrizzleAdapter} from '@auth/drizzle-adapter';
 import {NextAuthOptions} from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import {db} from '@/drizzle';
-import {
-  usersTable,
-  accountsTable,
-  sessionsTable,
-} from '@/drizzle/db/schema';
+import {usersTable, accountsTable, sessionsTable} from '@/drizzle/db/schema';
 import {transferCartOnLogin} from '@/actions/cart';
 import {CART_SESSION_COOKIE} from '@/utils/cookies';
 import {cookies} from 'next/headers';
@@ -20,6 +16,8 @@ export const authOptions: NextAuthOptions = {
   }),
   session: {
     strategy: 'database',
+    maxAge: 2 * 24 * 60 * 60, // 2 dagar
+    updateAge: 24 * 60 * 60, // Förläng varje dag vid aktivitet
   },
   providers: [
     GoogleProvider({
@@ -47,23 +45,13 @@ export const authOptions: NextAuthOptions = {
       }
       return true;
     },
-    // Denna callback körs varje gång en session hämtas (t.ex. av useSession).
     session: async ({session, user}) => {
-      // 1. `user`-objektet kommer direkt från din databas (via DrizzleAdapter).
-      //    Det innehåller alla fält från din `usersTable`, inklusive `id` och `role`.
-
-      // 2. Vi ser till att `session.user` inte är null.
       if (session.user) {
-        // 3. Vi kopierar `id` från databas-`user` till `session.user`.
-        //    Det är DETTA som gör att `session.user.id` kommer finnas i din `useAuth`-hook.
         session.user.id = user.id;
 
-        // 4. Vi kopierar också `role` från databas-`user` till `session.user`.
-        //    Nu kommer `session.user.role` att vara tillgänglig i din `useAuth`-hook.
         (session.user as any).role = (user as any).role;
       }
-
-      // 5. Returnera det modifierade session-objektet.
+      // Returnerar det modifierade session-objektet
       return session;
     },
   },

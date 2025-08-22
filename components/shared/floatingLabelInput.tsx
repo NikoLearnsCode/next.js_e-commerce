@@ -2,7 +2,6 @@
 
 import * as React from 'react';
 import {cn} from '@/utils/helpers';
-import {useRef} from 'react';
 
 interface FloatingLabelInputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -13,127 +12,106 @@ interface FloatingLabelInputProps
 const FloatingLabelInput = React.forwardRef<
   HTMLInputElement,
   FloatingLabelInputProps
->(({className, label, id, ...props}, ref) => {
-  const [isFocused, setIsFocused] = React.useState(false);
-  const [hasValue, setHasValue] = React.useState(false);
-  const inputRef = useRef<HTMLInputElement | null>(null);
-  const animationFrameRef = useRef<number | null>(null);
+>(
+  (
+    {
+      className,
+      label,
+      id,
+      onFocus,
+      onBlur,
+      onChange,
+      value,
+      defaultValue,
+      ...props
+    },
+    ref
+  ) => {
+    const [isFocused, setIsFocused] = React.useState(false);
+    const [hasValue, setHasValue] = React.useState(false);
+    const inputRef = React.useRef<HTMLInputElement | null>(null);
 
-  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-    setIsFocused(true);
-    props.onFocus?.(e);
-  };
-
-  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    setIsFocused(false);
-    setHasValue(e.target.value !== '');
-    props.onBlur?.(e);
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setHasValue(e.target.value !== '');
-    props.onChange?.(e);
-  };
-
-  // Hantera form reset
-  React.useEffect(() => {
-    const input = document.getElementById(id);
-    if (input) {
-      const form = input.closest('form');
-      if (form) {
-        const resetListener = () => {
-          setHasValue(false);
-        };
-        form.addEventListener('reset', resetListener);
-        return () => {
-          form.removeEventListener('reset', resetListener);
-        };
-      }
-    }
-  }, [id]);
-
-  // Kontrollera initialt värde och hantera autofyll
-  React.useEffect(() => {
-    // Spara referens till input-elementet
-    const input = document.getElementById(id) as HTMLInputElement;
-    if (input) {
-      inputRef.current = input;
-
-      // Kontrollera om det finns ett initialt värde
-      if (input.value !== '') {
-        setHasValue(true);
-      }
-
-      // Starta en animation frame loop för att detektera autofyll
-      const checkAutofill = () => {
-        if (inputRef.current) {
-          // Kontrollera om värdet har ändrats (kan hända vid autofyll)
-          if (inputRef.current.value !== '' && !hasValue) {
-            setHasValue(true);
-          }
+    // Kombinera refs
+    const combinedRef = React.useCallback(
+      (node: HTMLInputElement | null) => {
+        inputRef.current = node;
+        if (typeof ref === 'function') {
+          ref(node);
+        } else if (ref) {
+          ref.current = node;
         }
+      },
+      [ref]
+    );
 
-        // Fortsätt loopen
-        animationFrameRef.current = requestAnimationFrame(checkAutofill);
-      };
-
-      // Starta loopen
-      animationFrameRef.current = requestAnimationFrame(checkAutofill);
-    }
-
-    // Städa upp när komponenten avmonteras
-    return () => {
-      if (animationFrameRef.current !== null) {
-        cancelAnimationFrame(animationFrameRef.current);
+    // Kontrollera DOM-elementets faktiska värde
+    const checkInputValue = React.useCallback(() => {
+      if (inputRef.current) {
+        setHasValue(inputRef.current.value !== '');
       }
-    };
-  }, [id, hasValue]);
+    }, []);
 
-  return (
-    <div className='relative group'>
-      <input
-        id={id}
-        data-slot='input'
-        ref={(node) => {
-          // Hantera både forwarded ref och vår lokala ref
-          if (typeof ref === 'function') {
-            ref(node);
-          } else if (ref) {
-            ref.current = node;
-          }
-          inputRef.current = node;
-        }}
-        autoComplete='true'
-        className={cn(
-          'flex h-11 w-full rounded-xs min-w-0 border border-gray-400 bg-transparent px-3 pt-5 pb-1 text-base transition-all outline-none',
-          'file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium',
-          'disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
-          'aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive',
-          'transition group-hover:border-black focus:border-black focus:ring-0',
-          'autofill:bg-gray-50',
-          className
-        )}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-        onChange={handleChange}
-        {...props}
-      />
-      <label
-        htmlFor={id}
-        data-slot='label'
-        className={cn(
-          'absolute left-3 text-sm select-none pointer-events-none transition-all duration-200',
-          'group-data-[disabled=true]:opacity-50 peer-disabled:opacity-50',
-          'text-gray-500',
-          isFocused || hasValue ? 'top-1 text-xs' : 'top-1/2 -translate-y-1/2',
-          isFocused ? 'text-black' : ''
-        )}
-      >
-        {label}
-      </label>
-    </div>
-  );
-});
+    // Kontrollera initial värde och när props ändras
+    React.useEffect(() => {
+      checkInputValue();
+    }, [checkInputValue, value, defaultValue]);
+
+    const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+      setIsFocused(true);
+      onFocus?.(e);
+    };
+
+    const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+      setIsFocused(false);
+      checkInputValue();
+      onBlur?.(e);
+    };
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      checkInputValue();
+      onChange?.(e);
+    };
+
+    const isFloating = isFocused || hasValue;
+
+    return (
+      <div className='relative'>
+        <input
+          {...props}
+          id={id}
+          ref={combinedRef}
+          value={value}
+          defaultValue={defaultValue}
+          className={cn(
+            'peer w-full border border-gray-400 bg-transparent px-3 pt-5 pb-1 text-base',
+            'rounded-xs outline-none transition-all duration-200',
+            'hover:border-black focus:border-black',
+            'disabled:cursor-not-allowed disabled:opacity-50',
+            'aria-invalid:border-destructive',
+            className
+          )}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          onChange={handleChange}
+        />
+
+        <label
+          htmlFor={id}
+          className={cn(
+            'absolute left-3 pointer-events-none select-none transition-all duration-200',
+            isFloating
+              ? 'top-1 text-xs text-black'
+              : 'top-1/2 -translate-y-1/2 text-sm text-gray-500',
+            'peer-focus:text-black peer-disabled:opacity-50'
+          )}
+        >
+          {label}
+        </label>
+      </div>
+    );
+  }
+);
 
 FloatingLabelInput.displayName = 'FloatingLabelInput';
+
 export {FloatingLabelInput};
