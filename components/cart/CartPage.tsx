@@ -63,7 +63,7 @@ export default function CartPage() {
       {/* Cart with items */}
       {cartItems.length > 0 && (
         <div className='space-y-6  py-2'>
-          <h1 className='text-lg sm:text-xl  mb-4 px-1 sm:px-4'>
+          <h1 className='text-sm sm:text-base uppercase  mb-5 px-4 sm:px-8'>
             Din varukorg ({itemCount})
           </h1>
 
@@ -76,9 +76,9 @@ export default function CartPage() {
             {/* Desktop Order summary section, always visible */}
             <div
               ref={normalSummaryRef}
-              className='w-full  lg:min-w-[370px] lg:max-w-[370px] lg:border  lg:sticky lg:top-20 lg:self-start   lg:p-8 border-gray-200 bg-white mt-4 lg:mt-0 transition-all duration-300'
+              className='w-full lg:min-w-[350px] lg:max-w-[350px] xl:min-w-[420px] xl:max-w-[420px]  lg:sticky lg:top-30 lg:self-start px-5 sm:px-0 border-t border-gray-200 sm:border-none  bg-white mt-4  pt-5 sm:pt-0 lg:mt-0 transition-all duration-300'
             >
-              <h2 className='text-lg lg:text-xl  mb-5'>Ordersammanställning</h2>
+              <h2 className='text-lg   mb-5'>Ordersammanställning</h2>
               <CartSummary totalPrice={totalPrice} />
             </div>
           </div>

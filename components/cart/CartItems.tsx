@@ -2,12 +2,10 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-
-import {Minus, Plus, X} from 'lucide-react';
+import {AnimatePresence} from 'framer-motion';
 import {formatPrice} from '@/utils/helpers';
-import {motion, AnimatePresence} from 'framer-motion';
 import {useCart} from '@/context/CartProvider';
-import SpinningLogo from '@/components/shared/SpinningLogo';
+import ProductListItem from '@/components/shared/ProductListItem';
 type CartItemsProps = {
   compact?: boolean;
 };
@@ -46,7 +44,7 @@ export default function CartItems({compact = false}: CartItemsProps) {
       className={
         compact
           ? 'max-h-[25vh] sm:max-h-[40vh] overflow-y-auto'
-          : 'grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 '
+          : 'grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3 gap-0.5'
       }
     >
       <AnimatePresence>
@@ -106,115 +104,16 @@ export default function CartItems({compact = false}: CartItemsProps) {
           }
 
           // Full view for cart page
-
           return (
-            <motion.div
+            <ProductListItem
               key={item.id}
-              className='flex flex-row sm:flex-col pb-4 mb-4 sm:mb-0  border-b border-gray-50 sm:border-none overflow-hidden sm:p-0.5'
-              initial={{opacity: 0, y: 20}}
-              animate={{opacity: 1, y: 0}}
-              exit={{
-                opacity: 0,
-                height: 0,
-                marginBottom: 0,
-                transition: {
-                  opacity: {duration: 0.2},
-                  height: {duration: 0.3},
-                },
-              }}
-              transition={{
-                type: 'spring',
-                stiffness: 400,
-                damping: 30,
-              }}
-              layout
-            >
-              {/* Image section */}
-              <div className='relative min-w-2/3 w-full h-full aspect-7/9'>
-                <Link tabIndex={-1} href={`/${item.slug}`}>
-                  {item.images[0] ? (
-                    <Image
-                      src={item.images[0]}
-                      alt={item.name}
-                      fill
-                      quality={90}
-                     
-                      priority
-                      className='object-cover  w-full h-full '
-                    />
-                  ) : (
-                    <div className='w-full h-full flex items-center justify-center text-gray-400'>
-                      Ingen bild
-                    </div>
-                  )}
-                </Link>
-                <button
-                  className='absolute top-0 right-0 z-1 hover:text-red-800 p-3 cursor-pointer '
-                  onClick={() => handleRemoveItem(item.id)}
-                  disabled={isRemoving}
-                >
-                  {isRemoving ? (
-                    <SpinningLogo width='24' height='17' />
-                  ) : (
-                    <X size={16} strokeWidth={1.5} />
-                  )}
-                </button>
-              </div>
-
-              <div className='px-3 py-2 relative min-w-1/3 lg:pb-10 lg:px-2.5  flex flex-col  mb-2'>
-                <div className='flex flex-col flex-1 gap-1 sm:gap-0 justify-center items-center sm:items-start text-sm md:text-base'>
-                  <Link
-                    href={`/${item.slug}`}
-                    className=' outline-none focus:underline focus:underline-offset-2 text-wrap text-break text-center '
-                  >
-                    {item.name}
-                  </Link>
-                  <span className='text-black/80 '>
-                    {formatPrice(item.price)}
-                  </span>
-                </div>
-
-                <div className='text-sm mt-1 gap-2 md:text-base flex flex-col sm:flex-row items-center '>
-                  <div className='flex items-center gap-2 justify-center'>
-                    <button
-                      onClick={() =>
-                        handleUpdateQuantity(item.id, item.quantity - 1)
-                      }
-                      disabled={isUpdating || item.quantity <= 1}
-                      className={`h-8 w-8  flex items-center justify-center  ${
-                        item.quantity <= 1
-                          ? 'pointer-events-none opacity-30 '
-                          : 'cursor-pointer '
-                      }`}
-                    >
-                      <Minus
-                        strokeWidth={1.25}
-                        className={` w-4.5 h-4.5   ${isUpdating ? 'cursor-not-allowed' : ''}`}
-                      />
-                    </button>
-
-                    <span className='text-sm'>{item.quantity}</span>
-
-                    <button
-                      onClick={() =>
-                        handleUpdateQuantity(item.id, item.quantity + 1)
-                      }
-                      disabled={isUpdating}
-                      className='h-8 w-8 flex items-center justify-center  cursor-pointer'
-                    >
-                      <Plus
-                        strokeWidth={1.25}
-                        className={` w-4.5 h-4.5   ${isUpdating ? 'cursor-not-allowed' : ''}`}
-                      />
-                    </button>
-                  </div>
-                  <div className='pl-2 flex gap-4 text-sm'>
-                    <span>{item.size}</span>
-                    <span>{item.color}</span>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
+              item={item}
+              type='cart'
+              isUpdating={isUpdating}
+              isRemoving={isRemoving}
+              onRemove={handleRemoveItem}
+              onUpdateQuantity={handleUpdateQuantity}
+            />
           );
         })}
       </AnimatePresence>

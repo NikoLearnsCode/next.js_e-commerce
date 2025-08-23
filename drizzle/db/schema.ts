@@ -124,3 +124,31 @@ export const categoriesTable = pgTable('categories', {
   created_at: timestamp('created_at').defaultNow(),
   updated_at: timestamp('updated_at').defaultNow(),
 });
+
+// FAVORITES
+export const favoritesTable = pgTable('favorites', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  user_id: uuid('user_id').references(() => usersTable.id, {
+    onDelete: 'cascade',
+  }),
+  session_id: varchar('session_id', {length: 255}),
+  product_id: uuid('product_id')
+    .references(() => productsTable.id, {
+      onDelete: 'cascade',
+    })
+    .notNull(),
+  // Store product info to avoid joins and handle deleted products
+  product_info: jsonb('product_info')
+    .$type<{
+      name: string;
+      price: string;
+      slug: string;
+      images: string[];
+      brand: string;
+      gender: string;
+      category: string;
+      color: string;
+    }>()
+    .notNull(),
+  created_at: timestamp('created_at').defaultNow(),
+});

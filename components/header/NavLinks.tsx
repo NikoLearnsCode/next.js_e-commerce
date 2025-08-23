@@ -53,10 +53,10 @@ const navLinks: NavLink[] = [
 export default function Navigation() {
   return (
     <>
-      <div className='md:hidden'>
+      <div className='lg:hidden'>
         <MobileNav navLinks={navLinks} />
       </div>
-      <div className='hidden md:block'>
+      <div className='hidden lg:block'>
         <DesktopNav navLinks={navLinks} />
       </div>
     </>

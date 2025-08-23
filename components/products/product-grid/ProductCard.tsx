@@ -11,6 +11,8 @@ import {twMerge} from 'tailwind-merge';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import {useNavigatedHistory} from '@/context/NavigatedHistoryProvider';
+
+import FavoriteButton from '@/components/shared/FavoriteButton';
 import NewBadge from '@/components/shared/NewBadge';
 
 type ProductCardProps = {
@@ -64,8 +66,8 @@ export default function ProductCard({
           <span className='text-gray-500'>Ingen bild tillgänglig</span>
         </div>
         <div className='p-1.5 overflow-hidden'>
-          <h2 className='truncate font-medium'>{product.name}</h2>
-          <p className='mt-2 font-semibold'>{product.price} kr</p>
+          <h2 className='truncate '>{product.name}</h2>
+          <p className='mt-2 '>{product.price} kr</p>
         </div>
       </div>
     );
@@ -95,16 +97,27 @@ export default function ProductCard({
               sizes='(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 768px) 50vw, 50vw'
             />
           </Link>
-          {showNewBadge && <NewBadge variant='small' />}
         </div>
-        <div className='p-1.5 flex flex-col  '>
-          <Link
-            href={`/${product.slug}`}
-            className='outline-none focus:underline focus:underline-offset-2'
-          >
-            <h2 className=' text-xs sm:text-sm font-medium '>{product.name}</h2>
-          </Link>
-          <p className='text-xs sm:text-sm'>{product.price} kr</p>
+
+        {/* Badge row - only when NEW badge is active */}
+        {showNewBadge && (
+          <div className='px-2 pt-1 flex items-center justify-between'>
+            <NewBadge />
+            <FavoriteButton product={product}  />
+          </div>
+        )}
+
+        <div className='px-2 pb-1.5 flex flex-col'>
+          <div className='flex items-center justify-between'>
+            <Link
+              href={`/${product.slug}`}
+              className='outline-none focus:underline focus:underline-offset-2'
+            >
+              <h2 className='text-xs sm:text-sm font-medium'>{product.name}</h2>
+            </Link>
+            {!showNewBadge && <FavoriteButton product={product}  />}
+          </div>
+          <p className='text-xs text-gray-700 sm:text-sm'>{product.price} kr</p>
         </div>
       </div>
     );
@@ -165,7 +178,6 @@ export default function ProductCard({
                 </SwiperSlide>
               ))}
             </Swiper>
-            {showNewBadge && <NewBadge />}
             {/* Desktop only: Show prev/next buttons on hover */}
             {showNavigationButtons && (
               <>
@@ -218,23 +230,33 @@ export default function ProductCard({
                 sizes='(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 768px) 50vw, 50vw'
               />
             </Link>
-            {showNewBadge && <NewBadge />}
           </>
         )}
       </div>
 
+      {/* Badge row - only when NEW badge is active */}
+      {showNewBadge && (
+        <div className='px-2 pt-1 flex items-center justify-between'>
+          <NewBadge />
+          <FavoriteButton product={product} />
+        </div>
+      )}
+
       {/* Product name and price */}
-      <div className='py-1.5 px-2 flex flex-col  '>
-        <Link
-          href={`/${product.slug}`}
-          onClick={() =>
-            handleSaveNavigated({...product, image: product.images[0]})
-          }
-          className='outline-none focus:underline focus:underline-offset-2'
-        >
-          <h2 className=' text-xs sm:text-sm font-medium'>{product.name}</h2>
-        </Link>
-        <p className=' text-xs sm:text-sm '>{product.price} kr</p>
+      <div className='px-2 pb-1.5 flex flex-col'>
+        <div className='flex items-center justify-between'>
+          <Link
+            href={`/${product.slug}`}
+            onClick={() =>
+              handleSaveNavigated({...product, image: product.images[0]})
+            }
+            className='outline-none focus:underline focus:underline-offset-2'
+          >
+            <h2 className='text-xs sm:text-sm '>{product.name}</h2>
+          </Link>
+          {!showNewBadge && <FavoriteButton product={product} />}
+        </div>
+        <p className='text-xs text-gray-700 sm:text-sm'>{product.price} kr</p>
       </div>
     </div>
   );

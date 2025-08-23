@@ -42,15 +42,25 @@ export default function CartSummary({
 
   return (
     <div>
-      <div className='flex justify-between text-base lg:text-lg pr-2'>
-        <span className='text-base lg:text-lg'>Totalsumma:</span>
-        <span className='text-lg lg:text-xl'>{formatPrice(totalPrice)}</span>
+      <div className='flex justify-between flex-col gap-2 text-sm lg:text-lg pr-2'>
+        <span className='text-sm flex justify-between'>
+          Delsumma <span>{formatPrice(totalPrice)}</span>
+        </span>
+        <span className='text-sm flex justify-between'>
+          Frakt <span className=''>Gratis</span>
+        </span>
+        <span className='text-sm font-medium flex justify-between'>
+          Totalsumma{' '}
+          <span className='text-base font-semibold'>
+            {formatPrice(totalPrice)}
+          </span>
+        </span>
       </div>
       <Link
         href={getCheckoutUrl('delivery')}
         variant='primary'
         width='full'
-        className='mt-6 h-12 text-sm lg:text-base font-medium'
+        className='mt-6 h-12 text-sm lg:text-sm font-medium'
       >
         Till kassan
       </Link>

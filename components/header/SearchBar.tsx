@@ -106,8 +106,8 @@ export default function SearchBar({
           className=' cursor-pointer'
           aria-label='Search'
         >
-          <Search size={24} strokeWidth={1} className='md:hidden' />
-          <span className='hidden md:block text-sm font-medium uppercase border-b border-transparent hover:border-black transition'>
+          <Search size={24} strokeWidth={1} className='lg:hidden' />
+          <span className='hidden lg:block text-sm font-medium uppercase border-b border-transparent hover:border-black transition'>
             Sök
           </span>
         </motion.button>

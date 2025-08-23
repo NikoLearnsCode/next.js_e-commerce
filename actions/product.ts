@@ -19,6 +19,7 @@ import type {Params, Result} from '@/lib/types/query-types';
 import type {Product} from '@/lib/validators';
 import {sortSizes} from '@/utils/filterSort';
 import {db} from '@/drizzle/index';
+import {NEW_PRODUCT_DAYS} from '@/lib/constants';
 
 /* ---------------------------------------------------- */
 export async function getProductSlugAndRelatedProducts(slug: string): Promise<{
@@ -30,7 +31,7 @@ export async function getProductSlugAndRelatedProducts(slug: string): Promise<{
     .select({
       ...getTableColumns(productsTable),
       isNew:
-        sql<boolean>`${productsTable.created_at} > NOW() - INTERVAL '2 days'`.as(
+        sql<boolean>`${productsTable.created_at} > NOW() - INTERVAL '${sql.raw(NEW_PRODUCT_DAYS.toString())} days'`.as(
           'isNew'
         ),
     })
@@ -55,7 +56,7 @@ export async function getProductSlugAndRelatedProducts(slug: string): Promise<{
       .select({
         ...getTableColumns(productsTable),
         isNew:
-          sql<boolean>`${productsTable.created_at} > NOW() - INTERVAL '2 days'`.as(
+          sql<boolean>`${productsTable.created_at} > NOW() - INTERVAL '${sql.raw(NEW_PRODUCT_DAYS.toString())} days'`.as(
             'isNew'
           ),
       })
@@ -73,7 +74,7 @@ export async function getProductSlugAndRelatedProducts(slug: string): Promise<{
       .select({
         ...getTableColumns(productsTable),
         isNew:
-          sql<boolean>`${productsTable.created_at} > NOW() - INTERVAL '2 days'`.as(
+          sql<boolean>`${productsTable.created_at} > NOW() - INTERVAL '${sql.raw(NEW_PRODUCT_DAYS.toString())} days'`.as(
             'isNew'
           ),
       })
@@ -358,7 +359,7 @@ export async function getInitialProducts({
         .select({
           ...getTableColumns(productsTable),
           isNew:
-            sql<boolean>`${productsTable.created_at} > NOW() - INTERVAL '2 days'`.as(
+            sql<boolean>`${productsTable.created_at} > NOW() - INTERVAL '${sql.raw(NEW_PRODUCT_DAYS.toString())} days'`.as(
               'isNew'
             ),
         })

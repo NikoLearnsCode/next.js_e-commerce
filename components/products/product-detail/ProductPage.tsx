@@ -6,6 +6,7 @@ import {twMerge} from 'tailwind-merge';
 import {Product} from '@/lib/validators';
 import {useState} from 'react';
 import Newsletter from '@/components/shared/Newsletter';
+import FavoriteButton from '@/components/shared/FavoriteButton';
 
 import MobileImageSwiper from './MobileImageSwiper';
 import dynamic from 'next/dynamic';
@@ -57,7 +58,7 @@ export default function ProductPage({
                 </div>
 
                 {/* Desktop view - Display all images in a grid */}
-                <div className='hidden flex-1 lg:grid md lg:grid-cols-2 lg:gap-1 '>
+                <div className='hidden flex-1 lg:grid md lg:grid-cols-2 lg:gap-0.5 '>
                   {product.images.map((img: string, idx: number) => (
                     <div key={idx} className='relative     aspect-[7/9]'>
                       <Image
@@ -134,13 +135,17 @@ export default function ProductPage({
               </div>
             </div>
 
-            <AddToCartButton
-              product={product}
-              selectedSize={selectedSize}
-              onAddSuccess={handleAddToCartSuccess}
-              className='w-full h-13 mt-2 text-sm font-semibold transition duration-300 rounded-none'
-              disabled={!selectedSize}
-            />
+            {/* Add to cart and favorites buttons */}
+            <div className='flex gap-2 mt-2'>
+              <AddToCartButton
+                product={product}
+                selectedSize={selectedSize}
+                onAddSuccess={handleAddToCartSuccess}
+                className='flex-1 h-13 text-sm font-semibold transition duration-300 rounded-none'
+                disabled={!selectedSize}
+              />
+              <FavoriteButton product={product} size={18} variant='styled' />
+            </div>
           </div>
         </div>
       </div>

@@ -89,19 +89,22 @@ export default function CartDropdown({
         <PiBagSimpleThin
           size={25}
           strokeWidth={0.8}
-          className='cursor-pointer md:hidden'
+          className='cursor-pointer lg:hidden'
           aria-hidden='true'
         />
-        <span className='hidden md:block text-sm font-medium uppercase border-b border-transparent hover:border-black transition text-nowrap'>
+        <span className='hidden lg:block text-sm font-medium uppercase border-b border-transparent hover:border-black transition text-nowrap'>
           Varukorg {''}({itemCount})
         </span>
 
-        <span
-          className='absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pt-[2.5px] text-black text-xs font-medium md:hidden'
-          aria-hidden='true'
-        >
-          {itemCount}
-        </span>
+        {/* Mobile badge */}
+        {itemCount > 0 && (
+          <span
+            className='absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pt-[2.5px] text-black text-[11px] font-medium lg:hidden'
+            aria-hidden='true'
+          >
+            {itemCount}
+          </span>
+        )}
       </button>
 
       {/* Dropdown cart */}
@@ -110,11 +113,11 @@ export default function CartDropdown({
           <motion.div
             ref={dropdownRef}
             tabIndex={-1}
-            className={`absolute -right-1 md:right-0 top-10 md:top-9.5 w-72 md:w-96 bg-white shadow-lg rounded-xs z-20 outline-none border border-gray-300  
+            className={`absolute -right-1 lg:right-0 top-10 lg:top-9.5 w-72 sm:w-96 bg-white shadow-lg rounded-xs z-20 outline-none border border-gray-300  
 
-            before:content-[''] before:absolute before:bottom-full before:right-2 md:before:right-12  before:w-0 before:h-0  before:border-[8px] before:border-transparent before:border-b-gray-400/70
+            before:content-[''] before:absolute before:bottom-full before:right-2 lg:before:right-12  before:w-0 before:h-0  before:border-[8px] before:border-transparent before:border-b-gray-400/70
 
-            after:content-[''] after:absolute after:bottom-full after:right-2 md:after:right-12 after:w-0 after:h-0  after:border-[8px] after:border-transparent after:border-b-white after:-mb-px
+            after:content-[''] after:absolute after:bottom-full after:right-2 lg:after:right-12 after:w-0 after:h-0  after:border-[8px] after:border-transparent after:border-b-white after:-mb-px
             `}
             initial={{opacity: 0, y: -10}}
             animate={{opacity: 1, y: 0}}
@@ -122,7 +125,7 @@ export default function CartDropdown({
             transition={{duration: 0.1}}
           >
             <div className='flex justify-between items-center p-3 border-b border-gray-100'>
-              <h2 className='font-medium text-sm md:text-base'>
+              <h2 className='font-medium text-sm lg:text-base'>
                 Din varukorg ({itemCount})
               </h2>
               <div aria-label='Stäng varukorg' className='absolute right-1'>

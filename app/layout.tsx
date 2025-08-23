@@ -4,6 +4,7 @@ import '@/styles/globals.css';
 import {Arimo, Syne} from 'next/font/google';
 import AuthProvider from '@/context/AuthProvider';
 import {CartProvider} from '@/context/CartProvider';
+import {FavoritesProvider} from '@/context/FavoritesProvider';
 import {SpeedInsights} from '@vercel/speed-insights/next';
 import QueryProvider from '@/context/QueryProvider';
 import {getServerSession} from 'next-auth';
@@ -60,10 +61,12 @@ export default async function RootLayout({
         <QueryProvider>
           <AuthProvider session={session}>
             <CartProvider>
-              <NavigatedHistoryProvider>
-                <SpeedInsights />
-                {children}
-              </NavigatedHistoryProvider>
+              <FavoritesProvider>
+                <NavigatedHistoryProvider>
+                  <SpeedInsights />
+                  {children}
+                </NavigatedHistoryProvider>
+              </FavoritesProvider>
             </CartProvider>
           </AuthProvider>
         </QueryProvider>

@@ -30,7 +30,7 @@ function LogoutButton() {
       onClick={handleLogout}
       type='button'
       disabled={isPending}
-      className='flex items-center w-full  px-4 py-2 md:py-2.5 text-sm  disabled:opacity-70 cursor-pointer'
+      className='flex items-center w-full  px-4 py-2 lg:py-2.5 text-sm  disabled:opacity-70 cursor-pointer'
     >
       {isPending ? (
         <>
@@ -98,8 +98,8 @@ const UserButton = ({
     return (
       <span className='flex items-center justify-center'>
         {/* <SpinningLogo width='30' height='25' /> */}
-        <User size={24} strokeWidth={1} className='md:hidden' />
-        <span className='hidden md:block  text-sm font-medium uppercase'>
+        <User size={24} strokeWidth={1} className='lg:hidden' />
+        <span className='hidden lg:block  text-sm font-medium uppercase'>
           Logga in
         </span>
       </span>
@@ -116,8 +116,8 @@ const UserButton = ({
           handleLogin();
         }}
       >
-        <User size={24} strokeWidth={1} className='md:hidden' />
-        <span className='hidden md:block text-sm font-medium uppercase border-b border-transparent hover:border-black transition cursor-pointer text-nowrap'>
+        <User size={24} strokeWidth={1} className='lg:hidden' />
+        <span className='hidden lg:block text-sm font-medium uppercase border-b border-transparent hover:border-black transition cursor-pointer text-nowrap'>
           Logga in
         </span>
       </button>
@@ -150,7 +150,7 @@ const UserButton = ({
       >
         {/* Mobile user button */}
         <div
-          className={`h-6 w-6 rounded-full uppercase  border  bg-white flex items-center justify-center text-[11px]  font-medium md:hidden ${
+          className={`h-6 w-6 rounded-full uppercase  border  bg-white flex items-center justify-center text-[11px]  font-medium lg:hidden ${
             role === 1
               ? 'text-red-800 border-red-800'
               : 'text-gray-700 border-black/80'
@@ -160,7 +160,7 @@ const UserButton = ({
         </div>
         {/* Desktop user button */}
         <span
-          className={`hidden md:block text-sm font-medium uppercase border-b border-transparent transition text-nowrap ${
+          className={`hidden lg:block text-sm font-medium uppercase border-b border-transparent transition text-nowrap ${
             role === 1
               ? 'text-red-800 hover:border-red-800'
               : ' hover:border-black '
@@ -173,19 +173,19 @@ const UserButton = ({
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            className={`absolute top-10 md:top-9.5  -right-5 md:-right-25 w-64 md:w-[300px] bg-white  rounded-xs shadow-lg py-1 z-20 border  border-gray-300
+            className={`absolute top-10 lg:top-9.5  -right-5 lg:-right-25 w-64 lg:w-[300px] bg-white  rounded-xs shadow-lg py-1 z-20 border  border-gray-300
             
-            before:content-[''] before:absolute before:bottom-full before:right-6 md:before:left-1/2 before:w-0 before:h-0 before:border-[8px] before:border-transparent before:border-b-gray-400/80
+            before:content-[''] before:absolute before:bottom-full before:right-6 lg:before:left-1/2 before:w-0 before:h-0 before:border-[8px] before:border-transparent before:border-b-gray-400/80
 
-            after:content-[''] after:absolute after:bottom-full after:right-6 md:after:left-1/2 after:w-0 after:h-0 after:border-[8px] after:border-transparent after:border-b-white after:-mb-px
+            after:content-[''] after:absolute after:bottom-full after:right-6 lg:after:left-1/2 after:w-0 after:h-0 after:border-[8px] after:border-transparent after:border-b-white after:-mb-px
             `}
             initial={{opacity: 0, y: -10}}
             animate={{opacity: 1, y: 0}}
             exit={{opacity: 0, y: -10}}
             transition={{duration: 0.1}}
           >
-            <div className='px-4 py-2.5 md:py-2.5.5 relative border-b border-gray-300'>
-              <h5 className='text-base md:text-lg flex items-center  font-medium text-gray-900 truncate leading-tight '>
+            <div className='px-4 py-2.5 lg:py-2.5.5 relative border-b border-gray-300'>
+              <h5 className='text-base lg:text-lg flex items-center  font-medium text-gray-900 truncate leading-tight '>
                 {user.name || 'Användare'}{' '}
                 {role === 1 && (
                   <span className='text-xs underline underline-offset-2 text-red-800 font-semibold  ml-2'>
@@ -209,7 +209,7 @@ const UserButton = ({
             {role === 1 && (
               <Link
                 href='/admin'
-                className='flex items-center px-4  hover:text-gray-700 py-2 md:py-2.5 text-sm   border-b  border-gray-200'
+                className='flex items-center px-4  hover:text-gray-700 py-2 lg:py-2.5 text-sm   border-b  border-gray-200'
                 onClick={() => setIsOpen(false)}
               >
                 <span className='flex w-full font-medium  justify-between group relative items-center gap-2 '>
@@ -224,7 +224,7 @@ const UserButton = ({
             )}
             <Link
               href='/profile'
-              className='flex items-center px-4 py-2 md:py-2.5 text-sm  text-gray-700  border-b  border-gray-200'
+              className='flex items-center px-4 py-2 lg:py-2.5 text-sm  text-gray-700  border-b  border-gray-200'
               onClick={() => setIsOpen(false)}
             >
               <span className='flex w-full font-medium hover:text-black justify-between group relative items-center gap-2 '>

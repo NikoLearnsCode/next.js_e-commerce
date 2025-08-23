@@ -4,6 +4,7 @@ import GoogleProvider from 'next-auth/providers/google';
 import {db} from '@/drizzle';
 import {usersTable, accountsTable, sessionsTable} from '@/drizzle/db/schema';
 import {transferCartOnLogin} from '@/actions/cart';
+import {transferFavoritesOnLogin} from '@/actions/favorites';
 import {CART_SESSION_COOKIE} from '@/utils/cookies';
 import {cookies} from 'next/headers';
 import GitHubProvider from 'next-auth/providers/github';
@@ -36,11 +37,18 @@ export const authOptions: NextAuthOptions = {
 
       if (user?.id) {
         try {
-          await transferCartOnLogin(user.id);
+          // Transfer both cart and favorites on login
+          await Promise.all([
+            transferCartOnLogin(user.id),
+            transferFavoritesOnLogin(user.id),
+          ]);
           const cookieStore = await cookies();
           cookieStore.delete(CART_SESSION_COOKIE);
         } catch (error) {
-          console.error('Error transferring cart on login:', error);
+          console.error(
+            'Error transferring cart and favorites on login:',
+            error
+          );
         }
       }
       return true;

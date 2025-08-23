@@ -75,7 +75,7 @@ export default function MobileNav({navLinks}: MobileNavProps) {
 
   useEffect(() => {
     const checkScreenSize = () => {
-      if (window.innerWidth >= 768) {
+      if (window.innerWidth >= 1024) {
         document.body.style.overflow = '';
         closeMenu();
       }

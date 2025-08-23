@@ -5,6 +5,7 @@ import {
   ordersTable,
   orderItemsTable,
   categoriesTable,
+  favoritesTable,
 } from '@/drizzle/db/schema';
 
 export const cartItemSchema = z.object({
@@ -85,3 +86,8 @@ export type OrderWithItems = Order & {
 
 export type Category = typeof categoriesTable.$inferSelect;
 export type NewCategory = typeof categoriesTable.$inferInsert;
+
+// Use database Favorite type directly - no need for separate schema
+
+export type Favorite = typeof favoritesTable.$inferSelect;
+export type NewFavorite = typeof favoritesTable.$inferInsert;

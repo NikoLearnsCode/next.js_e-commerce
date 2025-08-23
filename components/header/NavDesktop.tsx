@@ -130,7 +130,7 @@ export default function DesktopNav({navLinks}: DesktopNavProps) {
                 handleKeyOpen(e, index)
               }
               tabIndex={0}
-              className='hidden md:inline-flex w-3 justify-center items-center focus:text-black text-white cursor-default'
+              className='hidden lg:inline-flex w-3 justify-center items-center focus:text-black text-white cursor-default'
             >
               ˅
             </span>

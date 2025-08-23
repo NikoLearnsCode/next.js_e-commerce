@@ -35,24 +35,20 @@ export default function Carousel<T>({
   title,
   id = 'carousel',
   className = '',
-  spaceBetween = 4,
-  slidesOffsetBefore = 20,
+  spaceBetween = 3,
+  slidesOffsetBefore = 0,
   breakpoints = {
     640: {
       slidesPerView: 2,
-      spaceBetween: 4,
     },
     768: {
       slidesPerView: 3,
-      spaceBetween: 4,
     },
     1024: {
       slidesPerView: 4,
-      spaceBetween: 4,
     },
     1280: {
       slidesPerView: 5,
-      spaceBetween: 4,
     },
   },
   showNavigation = true,
@@ -93,7 +89,7 @@ export default function Carousel<T>({
           {showNavigation && (
             <div className={twMerge('flex z-10', navigationClassName)}>
               <button
-                className={`${prevButtonClass} py-1.5 px-3 transition cursor-pointer ${
+                className={`${prevButtonClass} py-1.5 pl-3 pr-1.5 transition cursor-pointer ${
                   isBeginning ? 'opacity-50 pointer-events-none' : 'opacity-100'
                 }`}
                 aria-label='Föregående'
@@ -106,7 +102,7 @@ export default function Carousel<T>({
               </button>
 
               <button
-                className={`${nextButtonClass} py-1.5 px-3 transition cursor-pointer ${
+                className={`${nextButtonClass} py-1.5 pr-3 pl-1.5 transition cursor-pointer ${
                   isEnd ? 'opacity-50 pointer-events-none' : 'opacity-100'
                 }`}
                 aria-label='Nästa'
