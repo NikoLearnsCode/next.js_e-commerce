@@ -5,11 +5,12 @@ import {createContext, useContext, useState, useEffect, ReactNode} from 'react';
 type NavigatedProduct = {
   slug: string;
   image: string;
+  name: string;
 };
 
 type NavigatedHistoryContextType = {
   navigatedProducts: NavigatedProduct[];
-  handleSaveNavigated: (product: {slug: string; image: string}) => void;
+  handleSaveNavigated: (product: {slug: string; image: string, name: string}) => void;
   searchHistory: string[];
   handleSaveSearch: (searchTerm: string) => void;
   handleRemoveAllSearches: () => void;
@@ -50,12 +51,12 @@ export const NavigatedHistoryProvider = ({children}: {children: ReactNode}) => {
   }, []);
 
   // Using in ProductCard.tsx - saves clicked product to navigated history
-  const handleSaveNavigated = (product: {slug: string; image: string}) => {
+  const handleSaveNavigated = (product: {slug: string; image: string, name: string}) => {
     setNavigatedProducts((prevNavigatedProducts) => {
       const newNavigatedList = [
         product,
         ...prevNavigatedProducts.filter((p) => p.slug !== product.slug),
-      ].slice(0, 10);
+      ].slice(0, 9);
       try {
         localStorage.setItem('navigated', JSON.stringify(newNavigatedList));
       } catch (error) {

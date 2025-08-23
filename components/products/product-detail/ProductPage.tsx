@@ -42,7 +42,7 @@ export default function ProductPage({
   return (
     <>
       <div className='w-full mx-auto lg:pt-4 lg:pb-8 '>
-        <div className='flex  flex-col justify-center gap-4 lg:gap-8 lg:flex-row xl:gap-16 '>
+        <div className='flex  flex-col justify-center gap-4 lg:gap-8 lg:flex-row xl:gap-10 '>
           {/* Left column - images */}
           <div className='h-full w-full '>
             {product.images && product.images.length > 0 ? (
@@ -84,7 +84,7 @@ export default function ProductPage({
           </div>
 
           {/* Right column - product info */}
-          <div className='flex flex-col lg:pt-12 px-5 lg:mr-12 sticky top-18 h-full   gap-3 lg:gap-1 mb-10   lg:w-[35%] transition-all duration-300'>
+          <div className='flex flex-col lg:pt-12 px-5 lg:px-0 2xl:px-4 lg:mr-7 sticky top-18 h-full   gap-3 lg:gap-1 mb-10   lg:w-[35%] transition-all duration-300'>
             {/* Product name */}
             <div>
               <h1 className='text-lg sm:text-xl mt-2 lg:mt-4 font-medium'>
@@ -148,9 +148,9 @@ export default function ProductPage({
               />
               <FavoriteButton
                 product={product}
-                size={22}
+                size={20}
                 strokeWidth={2}
-                className='border bg-black border-black/70 rounded-xs h-13 p-0 w-13 text-whiten'
+                className='border bg-black/90 hover:bg-black/80 border-black/60 rounded-xs h-13 p-0 w-13 text-white'
                 variant='inverted'
               />
             </div>

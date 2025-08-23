@@ -46,6 +46,7 @@ export default function SearchBar({
     if (trimmedQuery) {
       handleSaveSearch(trimmedQuery);
       router.push(`/search?q=${encodeURIComponent(trimmedQuery)}`);
+
       setIsExpanded(false);
       setSearchQuery('');
     }

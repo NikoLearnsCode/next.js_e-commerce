@@ -9,7 +9,7 @@ import {MotionDropdown, MotionOverlay} from '../shared/AnimatedDropdown';
 import {Button} from '@/components/shared/ui/button';
 import {useMediaQuery} from '@/hooks/useMediaQuery';
 
-const popularSearches = ['T-shirts', 'Overshirt', 'Jackor', 'Byxor', 'Toppar'];
+const popularSearches = ['T-shirts', 'Overshirt', 'Dam', 'Jackor', 'Byxor', 'Toppar', 'Herr',];
 
 type SearchDropdownProps = {
   isSearchExpanded: boolean;
@@ -33,7 +33,7 @@ export default function SearchDropdown({
     ? searchHistory.slice(0, 7)
     : searchHistory; */
   const displayedProducts = isDesktop
-    ? navigatedProducts.slice(0, 4)
+    ? navigatedProducts.slice(0, 6)
     : navigatedProducts;
 
   return (
@@ -52,16 +52,16 @@ export default function SearchDropdown({
             >
               {/* Placeholder for search with popular searches */}
               {!searchHistory.length && (
-                <div className=' w-full lg:max-w-80 '>
+                <div className=' w-full lg:max-w-96 '>
                   <h2 className='text-sm  uppercase mb-5'>
                     Andra har sökt efter
                   </h2>
-                  <ul className='flex flex-wrap gap-3  '>
+                  <ul className='flex flex-wrap gap-3 lg:pr-10 '>
                     {popularSearches.map((search, index) => (
                       <li key={index}>
                         <Link
                           href={`/search?q=${encodeURIComponent(search)}`}
-                          className='border flex border-gray-200 px-4 py-2     rounded-full bg-gray-50 text-xs  hover:border-black transition-colors duration-200  max-w-full'
+                          className='border flex border-gray-200 px-3 py-2     rounded-full bg-gray-50 text-xs  hover:border-gray-400 transition-colors duration-200  max-w-full'
                           onClick={() => {
                             handleSaveSearch(search);
                             setIsSearchExpanded(false);
@@ -75,7 +75,7 @@ export default function SearchDropdown({
                 </div>
               )}
               {searchHistory.length > 0 && (
-                <div className='overflow-y-auto w-full lg:max-w-80 '>
+                <div className='overflow-y-auto w-full lg:max-w-96 '>
                   <>
                     <div className='flex justify-between mb-5'>
                       <h2 className='text-sm    uppercase '>
@@ -90,7 +90,7 @@ export default function SearchDropdown({
                       </Button>
                     </div>
 
-                    <ul className='flex flex-wrap gap-3  '>
+                    <ul className='flex flex-wrap gap-3 lg:pr-10 '>
                       {searchHistory.map((term, index) => (
                         <li
                           key={index}
@@ -102,7 +102,7 @@ export default function SearchDropdown({
                               handleSaveSearch(term);
                               setIsSearchExpanded(false);
                             }}
-                            className='border  border-gray-200 px-4 py-2     rounded-full bg-gray-50 text-xs  hover:border-black transition-colors duration-200 overflow-hidden text-ellipsis  max-w-full'
+                            className='border  border-gray-200 px-3 py-2     rounded-full bg-gray-50 text-xs  hover:border-gray-400 transition-colors duration-200 overflow-hidden text-ellipsis  max-w-full'
                           >
                             {term}
                           </Link>
@@ -115,17 +115,17 @@ export default function SearchDropdown({
 
               {navigatedProducts.length > 0 && (
                 <>
-                  <div className='flex-1 '>
+                  <div className=' lg:pl-10'>
                     <h2 className='text-sm  uppercase mb-4'>Nyligen besökta</h2>
-                    <div className='grid  grid-cols-3 sm:grid-cols-5  lg:grid-cols-4 2xl:grid-cols-6  gap-0.5 lg:gap-1 overflow-y-auto'>
+                    <div className='grid  grid-cols-3 gap-0.5 lg:gap-2 lg:flex flex-col overflow-y-auto '>
                       {displayedProducts.map((product) => (
                         <div
                           key={product.slug}
-                          className='relative aspect-[7/9]  w-full h-full '
+                          className='relative aspect-[7/9] lg:aspect-auto w-full h-full '
                         >
                           <Link
                             href={`/${product.slug}`}
-                            className='group'
+                            className='group lg:flex lg:items-center lg:gap-x-5'
                             tabIndex={0}
                             onClick={() => setIsSearchExpanded(false)}
                           >
@@ -135,8 +135,21 @@ export default function SearchDropdown({
                               quality={90}
                               tabIndex={-1}
                               fill
-                              className='object-cover border border-gray-200  hover:border-black transition-colors duration-200 active:border-black group-focus:border-black'
+                              sizes='(max-width: 768px) 100vw, 50vw'
+                              className='block lg:hidden object-cover border border-gray-200  hover:border-black transition-colors duration-200 active:border-black group-focus:border-black'
                             />
+                            <Image
+                              src={product.image}
+                              alt={product.slug}
+                              quality={90}
+                              tabIndex={-1}
+                              height={50}
+                              width={50}
+                              className='hidden w-10 h-10 rounded-full lg:block object-cover border border-gray-200   transition-colors duration-200 opacity-85 active:border-black group-focus:opacity-10 group-hover:opacity-100 '
+                            />
+                            <p className='text-xs group-hover:text-black text-gray-700 hidden lg:block'>
+                              {product.name}
+                            </p>
                           </Link>
                         </div>
                       ))}
