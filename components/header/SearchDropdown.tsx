@@ -52,7 +52,7 @@ export default function SearchDropdown({
             >
               {/* Placeholder for search with popular searches */}
               {!searchHistory.length && (
-                <div className=' w-full lg:max-w-96 '>
+                <div className=' w-full lg:max-w-96 lg:py-1'>
                   <h2 className='text-sm  uppercase mb-5'>
                     Andra har sökt efter
                   </h2>
@@ -75,7 +75,7 @@ export default function SearchDropdown({
                 </div>
               )}
               {searchHistory.length > 0 && (
-                <div className='overflow-y-auto w-full lg:max-w-96 '>
+                <div className='overflow-y-auto lg:py-1 lg:overflow-y-visible w-full lg:max-w-96 '>
                   <>
                     <div className='flex justify-between mb-5'>
                       <h2 className='text-sm    uppercase '>
@@ -83,7 +83,7 @@ export default function SearchDropdown({
                       </h2>
                       <Button
                         variant='link'
-                        className='text-xs underline hover:text-gray-500 m-0 py-0 h-auto px-3'
+                        className='text-xs underline hover:text-gray-500 m-0 py-0 h-auto px-3 '
                         onClick={() => handleRemoveAllSearches()}
                       >
                         Radera allt
@@ -115,9 +115,9 @@ export default function SearchDropdown({
 
               {navigatedProducts.length > 0 && (
                 <>
-                  <div className=' lg:pl-10'>
+                  <div className=' lg:pl-10 lg:py-1'>
                     <h2 className='text-sm  uppercase mb-4'>Nyligen besökta</h2>
-                    <div className='grid  grid-cols-3 gap-0.5 lg:gap-2 lg:flex flex-col overflow-y-auto '>
+                    <div className='grid  grid-cols-3 gap-0.5 lg:gap-2 lg:pb-2 lg:flex flex-col overflow-y-auto lg:overflow-y-visible '>
                       {displayedProducts.map((product) => (
                         <div
                           key={product.slug}
@@ -125,7 +125,7 @@ export default function SearchDropdown({
                         >
                           <Link
                             href={`/${product.slug}`}
-                            className='group lg:flex lg:items-center lg:gap-x-5'
+                            className='group lg:flex lg:items-center lg:gap-5'
                             tabIndex={0}
                             onClick={() => setIsSearchExpanded(false)}
                           >
@@ -145,9 +145,9 @@ export default function SearchDropdown({
                               tabIndex={-1}
                               height={50}
                               width={50}
-                              className='hidden w-10 h-10 rounded-full lg:block object-cover border border-gray-200   transition-colors duration-200 opacity-85 active:border-black group-focus:opacity-10 group-hover:opacity-100 '
+                              className='hidden w-10 h-10 rounded-full lg:block object-cover border border-gray-200   transition-colors duration-200 opacity-85 active:border-black group-hover:border-gray-300 group-hover:opacity-100 '
                             />
-                            <p className='text-xs group-hover:text-black text-gray-700 hidden lg:block'>
+                            <p className='text-xs group-hover:text-black text-gray-700 hidden  lg:block'>
                               {product.name}
                             </p>
                           </Link>

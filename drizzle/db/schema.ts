@@ -125,7 +125,7 @@ export const categoriesTable = pgTable('categories', {
   updated_at: timestamp('updated_at').defaultNow(),
 });
 
-// FAVORITES
+// FAVORITES - Normalized approach (no data duplication)
 export const favoritesTable = pgTable('favorites', {
   id: uuid('id').primaryKey().defaultRandom(),
   user_id: uuid('user_id').references(() => usersTable.id, {
@@ -136,16 +136,6 @@ export const favoritesTable = pgTable('favorites', {
     .references(() => productsTable.id, {
       onDelete: 'cascade',
     })
-    .notNull(),
-  product_info: jsonb('product_info')
-    .$type<{
-      name: string;
-      price: string;
-      slug: string;
-      images: string[];
-      brand: string;
-      color: string;
-    }>()
     .notNull(),
   created_at: timestamp('created_at').defaultNow(),
 });

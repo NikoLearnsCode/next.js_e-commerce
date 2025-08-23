@@ -83,7 +83,14 @@ export type OrderWithItems = Order & {
 export type Category = typeof categoriesTable.$inferSelect;
 export type NewCategory = typeof categoriesTable.$inferInsert;
 
-// Use database Favorite type directly - no need for separate schema
+// Favorite types using normalized approach with joins
+export type Favorite = {
+  id: string;
+  user_id: string | null;
+  session_id: string | null;
+  product_id: string;
+  created_at: Date | null;
+  product: typeof productsTable.$inferSelect;
+};
 
-export type Favorite = typeof favoritesTable.$inferSelect;
 export type NewFavorite = typeof favoritesTable.$inferInsert;

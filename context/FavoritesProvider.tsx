@@ -20,6 +20,7 @@ import {useAuth} from '@/hooks/useAuth';
 
 interface FavoritesContextType {
   favorites: Favorite[];
+
   favoriteCount: number;
   loading: boolean;
   refreshFavorites: () => Promise<void>;

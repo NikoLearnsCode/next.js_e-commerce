@@ -189,7 +189,7 @@ export default function ProductCard({
                   type='button'
                 >
                   <ChevronLeft
-                    size={22}
+                    size={20}
                     strokeWidth={1.25}
                     className='text-gray-700 '
                   />
@@ -202,7 +202,7 @@ export default function ProductCard({
                   type='button'
                 >
                   <ChevronRight
-                    size={22}
+                    size={20}
                     strokeWidth={1.25}
                     className='text-gray-700'
                   />

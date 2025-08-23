@@ -5,7 +5,7 @@ import {authOptions} from '@/lib/auth';
 import {getOrCreateSessionId, getSessionId} from '@/utils/cookies';
 import type {NewFavorite, Product} from '@/lib/validators';
 import {db} from '@/drizzle/index';
-import {favoritesTable} from '@/drizzle/db/schema';
+import {favoritesTable, productsTable} from '@/drizzle/db/schema';
 import {eq, and, isNull} from 'drizzle-orm';
 
 /* ------------------------------------------------- */
@@ -18,10 +18,21 @@ export async function getFavorites() {
     let favorites;
 
     if (user) {
-      // If logged in, find user's favorites
+      // If logged in, find user's favorites with product data via join
       favorites = await db
-        .select()
+        .select({
+          id: favoritesTable.id,
+          user_id: favoritesTable.user_id,
+          session_id: favoritesTable.session_id,
+          product_id: favoritesTable.product_id,
+          created_at: favoritesTable.created_at,
+          product: productsTable,
+        })
         .from(favoritesTable)
+        .innerJoin(
+          productsTable,
+          eq(favoritesTable.product_id, productsTable.id)
+        )
         .where(eq(favoritesTable.user_id, user.id));
     } else {
       // If not logged in, check if there is a session_id
@@ -32,10 +43,21 @@ export async function getFavorites() {
         return {favorites: []};
       }
 
-      // Otherwise get favorites associated with session_id
+      // Otherwise get favorites associated with session_id with product data via join
       favorites = await db
-        .select()
+        .select({
+          id: favoritesTable.id,
+          user_id: favoritesTable.user_id,
+          session_id: favoritesTable.session_id,
+          product_id: favoritesTable.product_id,
+          created_at: favoritesTable.created_at,
+          product: productsTable,
+        })
         .from(favoritesTable)
+        .innerJoin(
+          productsTable,
+          eq(favoritesTable.product_id, productsTable.id)
+        )
         .where(
           and(
             eq(favoritesTable.session_id, sessionId),
@@ -103,13 +125,11 @@ export async function addToFavorites(product: Product) {
       };
     }
 
-    // Add to favorites
-    const {id, isNew: _isNew, ...productInfo} = product;
+    // Add to favorites - only store the relationship, no product data duplication
     const newFavorite: NewFavorite = {
       user_id: user?.id || null,
       session_id: user ? null : sessionId,
-      product_id: id,
-      product_info: productInfo,
+      product_id: product.id,
     };
 
     await db.insert(favoritesTable).values(newFavorite);

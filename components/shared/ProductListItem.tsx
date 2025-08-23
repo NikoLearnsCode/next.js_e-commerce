@@ -45,12 +45,12 @@ export default function ProductListItem({
       return {
         id: favItem.id,
         productId: favItem.product_id,
-        name: favItem.product_info.name,
-        price: favItem.product_info.price,
-        slug: favItem.product_info.slug,
-        images: favItem.product_info.images,
-        brand: favItem.product_info.brand,
-        color: favItem.product_info.color,
+        name: favItem.product.name,
+        price: favItem.product.price,
+        slug: favItem.product.slug,
+        images: favItem.product.images,
+        brand: favItem.product.brand,
+        color: favItem.product.color,
       };
     }
   })();
@@ -114,7 +114,7 @@ export default function ProductListItem({
         </button>
       </div>
 
-      <div className='px-3 py-2 relative min-w-1/3 lg:pb-10 lg:px-4 flex flex-col mb-2'>
+      <div className='px-3 py-2 relative min-w-1/3 lg:pb-10 lg:px-2 flex flex-col mb-2'>
         <div className='flex flex-col flex-1 gap-1 sm:gap-0 justify-center items-center sm:items-start text-sm '>
           <Link
             href={`/${itemData.slug}`}

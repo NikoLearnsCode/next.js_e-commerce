@@ -108,12 +108,13 @@ export default function ProductPage({
 
             {/* Size */}
             <div className='flex flex-col mt-4 lg:mt-7 gap-2'>
-              {showSizeWarning && !selectedSize && (
-                <p className='text-red-900 text-xs my-1 font-semibold'>
-                  Vänligen välj en storlek.
-                </p>
-              )}
-
+              <div className='h-4'>
+                {showSizeWarning && !selectedSize && (
+                  <p className='text-red-900 text-xs  font-semibold'>
+                    Vänligen välj en storlek
+                  </p>
+                )}
+              </div>
               <div className='flex items-center flex-wrap'>
                 {product.sizes.map((size: string) => (
                   <button
