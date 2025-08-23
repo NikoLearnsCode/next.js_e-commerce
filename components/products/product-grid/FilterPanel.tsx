@@ -1,16 +1,16 @@
 'use client';
 
 import {AnimatePresence} from 'framer-motion';
-import {Accordion} from '@/components/shared/Accordion';
-import {CheckboxOption} from '@/components/shared/CheckboxOption';
-import {RadioOption} from '@/components/shared/RadioOption';
+import {Accordion} from '@/components/shared/ui/Accordion';
+import {CheckboxOption} from '@/components/shared/ui/CheckboxOption';
+import {RadioOption} from '@/components/shared/ui/RadioOption';
 
 import {
   MotionCloseX,
   MotionOverlay,
   MotionDropdown,
 } from '@/components/shared/AnimatedDropdown';
-import {Button} from '@/components/shared/button';
+import {Button} from '@/components/shared/ui/button';
 
 interface FilterPanelProps {
   isOpen: boolean;

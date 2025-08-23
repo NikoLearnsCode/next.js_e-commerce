@@ -6,7 +6,7 @@ import type {Product} from '@/lib/validators';
 import ProductGrid from '@/components/products/product-grid/ProductGrid';
 import {useInfiniteProducts} from '@/hooks/useInfiniteProducts';
 // import {useScrollRestoration} from '@/hooks/useScrollRestoration';
-import SpinningLogo from '@/components/shared/SpinningLogo';
+import SpinningLogo from '@/components/shared/ui/SpinningLogo';
 
 type InfiniteScrollProductsProps = {
   initialProducts: Product[];
@@ -24,8 +24,8 @@ export default function InfiniteScrollProducts({
   category,
 }: InfiniteScrollProductsProps) {
   const searchParams = useSearchParams();
-    // const {restoreScrollPosition} = useScrollRestoration();
-    // const hasRestoredRef = useRef(false);
+  // const {restoreScrollPosition} = useScrollRestoration();
+  // const hasRestoredRef = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Extract filter parameters from URL
@@ -75,7 +75,7 @@ export default function InfiniteScrollProducts({
   const displayProducts =
     !isLoading && products.length > 0 ? products : initialProducts;
 
-/*   // Reset scroll restoration flag when URL changes (new filters applied)
+  /*   // Reset scroll restoration flag when URL changes (new filters applied)
   useEffect(() => {
     hasRestoredRef.current = false;
   }, [searchParams]);

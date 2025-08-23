@@ -5,43 +5,11 @@ import Link from 'next/link';
 import {X, Minus, Plus} from 'lucide-react';
 import {motion} from 'framer-motion';
 import {formatPrice} from '@/utils/helpers';
-import SpinningLogo from '@/components/shared/SpinningLogo';
-
-type BaseItem = {
-  id: string;
-  name: string;
-  price: string | number;
-  slug: string;
-  images: string[];
-  brand?: string;
-  color?: string;
-};
-
-type CartItemType = BaseItem & {
-  quantity: number;
-  size: string;
-};
-
-type FavoriteItemType = {
-  id: string;
-  product_id: string;
-  user_id: string | null;
-  session_id: string | null;
-  created_at: Date | null;
-  product_info: {
-    name: string;
-    price: string;
-    slug: string;
-    images: string[];
-    brand: string;
-    gender: string;
-    category: string;
-    color: string;
-  };
-};
+import SpinningLogo from '@/components/shared/ui/SpinningLogo';
+import type {CartItem, Favorite} from '@/lib/validators';
 
 type ProductListItemProps = {
-  item: CartItemType | FavoriteItemType;
+  item: CartItem | Favorite;
   type: 'cart' | 'favorite';
   isUpdating?: boolean;
   isRemoving?: boolean;
@@ -57,12 +25,12 @@ export default function ProductListItem({
   onRemove,
   onUpdateQuantity,
 }: ProductListItemProps) {
-  // Extract common properties
-  const getItemData = () => {
+  const itemData = (() => {
     if (type === 'cart') {
-      const cartItem = item as CartItemType;
+      const cartItem = item as CartItem;
       return {
         id: cartItem.id,
+        productId: cartItem.product_id,
         name: cartItem.name,
         price: cartItem.price,
         slug: cartItem.slug,
@@ -73,26 +41,24 @@ export default function ProductListItem({
         size: cartItem.size,
       };
     } else {
-      const favItem = item as FavoriteItemType;
+      const favItem = item as Favorite;
       return {
         id: favItem.id,
+        productId: favItem.product_id,
         name: favItem.product_info.name,
         price: favItem.product_info.price,
         slug: favItem.product_info.slug,
         images: favItem.product_info.images,
         brand: favItem.product_info.brand,
         color: favItem.product_info.color,
-        productId: favItem.product_id,
       };
     }
-  };
-
-  const itemData = getItemData();
+  })();
 
   return (
     <motion.div
       key={itemData.id}
-      className='flex flex-row sm:flex-col pb-4 mb-4 sm:mb-0 border-b border-gray-50 sm:border-none overflow-hidden '
+      className='flex flex-row sm:flex-col pb-4 mb-4  sm:mb-0 border-b border-gray-50 sm:border-none overflow-hidden '
       initial={{opacity: 0, y: 20}}
       animate={{opacity: 1, y: 0}}
       exit={{
@@ -114,7 +80,7 @@ export default function ProductListItem({
       {/* Image section */}
       <div className='relative min-w-2/3 w-full h-full aspect-7/9'>
         <Link tabIndex={-1} href={`/${itemData.slug}`}>
-          {itemData.images[0] ? (
+          {itemData.images && itemData.images[0] ? (
             <Image
               src={itemData.images[0]}
               alt={itemData.name}
@@ -130,12 +96,13 @@ export default function ProductListItem({
             </div>
           )}
         </Link>
+
         <button
           className='absolute top-0 right-0 z-1 hover:text-red-800 p-3 cursor-pointer'
           onClick={() =>
             type === 'cart'
               ? onRemove(itemData.id)
-              : onRemove((itemData as any).productId)
+              : itemData.productId && onRemove(itemData.productId)
           }
           disabled={isRemoving || isUpdating}
         >
@@ -147,7 +114,7 @@ export default function ProductListItem({
         </button>
       </div>
 
-      <div className='px-3 py-2 relative min-w-1/3 lg:pb-10 lg:px-2.5 flex flex-col mb-2'>
+      <div className='px-3 py-2 relative min-w-1/3 lg:pb-10 lg:px-4 flex flex-col mb-2'>
         <div className='flex flex-col flex-1 gap-1 sm:gap-0 justify-center items-center sm:items-start text-sm '>
           <Link
             href={`/${itemData.slug}`}
@@ -158,12 +125,12 @@ export default function ProductListItem({
           <span className='text-black/80 text-sm '>
             {typeof itemData.price === 'string'
               ? formatPrice(Number(itemData.price))
-              : formatPrice(itemData.price)}
+              : formatPrice(itemData.price || 0)}
           </span>
         </div>
 
         <div className='text-sm mt-1 gap-2 md:text-base flex flex-col sm:flex-row items-center'>
-          {type === 'cart' && onUpdateQuantity && (
+          {type === 'cart' && onUpdateQuantity && itemData.quantity && (
             <div className='flex items-center gap-2 pr-2 justify-center'>
               <button
                 onClick={() =>

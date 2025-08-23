@@ -6,7 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import {MotionDropdown, MotionOverlay} from '../shared/AnimatedDropdown';
 
-import {Button} from '@/components/shared/button';
+import {Button} from '@/components/shared/ui/button';
 import {useMediaQuery} from '@/hooks/useMediaQuery';
 
 const popularSearches = ['T-shirts', 'Overshirt', 'Jackor', 'Byxor', 'Toppar'];

@@ -137,7 +137,6 @@ export const favoritesTable = pgTable('favorites', {
       onDelete: 'cascade',
     })
     .notNull(),
-  // Store product info to avoid joins and handle deleted products
   product_info: jsonb('product_info')
     .$type<{
       name: string;
@@ -145,8 +144,6 @@ export const favoritesTable = pgTable('favorites', {
       slug: string;
       images: string[];
       brand: string;
-      gender: string;
-      category: string;
       color: string;
     }>()
     .notNull(),

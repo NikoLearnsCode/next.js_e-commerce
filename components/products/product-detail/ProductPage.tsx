@@ -6,7 +6,7 @@ import {twMerge} from 'tailwind-merge';
 import {Product} from '@/lib/validators';
 import {useState} from 'react';
 import Newsletter from '@/components/shared/Newsletter';
-import FavoriteButton from '@/components/shared/FavoriteButton';
+import FavoriteButton from '@/components/favorites/FavoriteButton';
 
 import MobileImageSwiper from './MobileImageSwiper';
 import dynamic from 'next/dynamic';
@@ -31,6 +31,7 @@ export default function ProductPage({
   genderProducts = [],
 }: ProductPageProps) {
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
+  const [showSizeWarning, setShowSizeWarning] = useState(false);
   const initialImageIndex = 0;
   const [activeImageIndex, setActiveImageIndex] = useState(initialImageIndex);
 
@@ -98,7 +99,6 @@ export default function ProductPage({
               {product.price} kr
             </div>
             <div className='flex items-center gap-1 text-sm '>
-              <span className=' uppercase text-xs font-medium'>Färg:</span>
               <p className='text-sm text-black '>
                 {product.color &&
                   product.color.charAt(0).toUpperCase() +
@@ -107,15 +107,13 @@ export default function ProductPage({
             </div>
 
             {/* Size */}
-            <div className='flex flex-col mt-3 lg:mt-5 gap-2'>
-              <span
-                className={twMerge(
-                  'text-gray-700 font-medium  uppercase text-xs mb-1',
-                  selectedSize ? 'text-green-950 ' : 'text-gray-800'
-                )}
-              >
-                {selectedSize ? `Vald storlek: ${selectedSize}` : 'Storlek:'}
-              </span>
+            <div className='flex flex-col mt-4 lg:mt-7 gap-2'>
+              {showSizeWarning && !selectedSize && (
+                <p className='text-red-900 text-xs my-1 font-semibold'>
+                  Vänligen välj en storlek.
+                </p>
+              )}
+
               <div className='flex items-center flex-wrap'>
                 {product.sizes.map((size: string) => (
                   <button
@@ -126,7 +124,10 @@ export default function ProductPage({
                         ? 'border border-black bg-gray-100'
                         : ''
                     )}
-                    onClick={() => setSelectedSize(size)}
+                    onClick={() => {
+                      setSelectedSize(size);
+                      setShowSizeWarning(false);
+                    }}
                     disabled={selectedSize === size}
                   >
                     {size}
@@ -136,15 +137,22 @@ export default function ProductPage({
             </div>
 
             {/* Add to cart and favorites buttons */}
-            <div className='flex gap-2 mt-2'>
+            <div className='flex gap-1 mt-3 items-center'>
               <AddToCartButton
                 product={product}
-                selectedSize={selectedSize}
+                quantity={1}
+                selectedSize={selectedSize || ''}
                 onAddSuccess={handleAddToCartSuccess}
-                className='flex-1 h-13 text-sm font-semibold transition duration-300 rounded-none'
-                disabled={!selectedSize}
+                className='flex-1 h-13 text-sm m-0 font-semibold transition duration-300 rounded-none'
+                onSizeMissing={() => setShowSizeWarning(true)}
               />
-              <FavoriteButton product={product} size={18} variant='styled' />
+              <FavoriteButton
+                product={product}
+                size={22}
+                strokeWidth={2}
+                className='border bg-black border-black/70 rounded-xs h-13 p-0 w-13 text-whiten'
+                variant='inverted'
+              />
             </div>
           </div>
         </div>

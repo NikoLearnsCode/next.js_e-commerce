@@ -5,7 +5,7 @@ import {useInView} from 'react-intersection-observer';
 import {Product} from '@/lib/validators';
 import ProductGrid from '@/components/products/product-grid/ProductGrid';
 import {useInfiniteProducts} from '@/hooks/useInfiniteProducts';
-import SpinningLogo from '@/components/shared/SpinningLogo';
+import SpinningLogo from '@/components/shared/ui/SpinningLogo';
 
 type SearchInfiniteScrollProps = {
   initialProducts: Product[];

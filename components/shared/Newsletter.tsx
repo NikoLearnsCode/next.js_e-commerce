@@ -1,6 +1,6 @@
 'use client';
-import {FloatingLabelInput} from './floatingLabelInput';
-import {Button} from './button';
+import {FloatingLabelInput} from './ui/floatingLabelInput';
+import {Button} from './ui/button';
 
 export default function Newsletter() {
   return (

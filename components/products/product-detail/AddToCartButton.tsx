@@ -1,7 +1,7 @@
 'use client';
 
 import {useState} from 'react';
-import {Button} from '@/components/shared/button';
+import {Button} from '@/components/shared/ui/button';
 import {addToCart} from '@/actions/cart';
 import {Product, CartItem} from '@/lib/validators';
 import {v4 as uuidv4} from 'uuid';
@@ -9,11 +9,11 @@ import {useCart} from '@/context/CartProvider';
 
 type AddToCartButtonProps = {
   product: Product;
-  quantity?: number;
+  quantity: number;
   className?: string;
-  onAddSuccess?: () => void;
-  disabled?: boolean;
-  selectedSize: string | null;
+  onAddSuccess: () => void;
+  onSizeMissing?: () => void;
+  selectedSize: string;
 };
 
 export default function AddToCartButton({
@@ -22,12 +22,17 @@ export default function AddToCartButton({
   className,
   selectedSize,
   onAddSuccess,
-  disabled,
+  onSizeMissing,
 }: AddToCartButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const {updateCartItems, openCart} = useCart();
 
   const handleAddToCart = async () => {
+    if (!selectedSize) {
+      onSizeMissing?.();
+      return;
+    }
+
     setIsLoading(true);
     try {
       // Skapa ett CartItem objekt från produkten
@@ -36,16 +41,15 @@ export default function AddToCartButton({
         product_id: product.id,
         quantity: quantity,
         price: Number(product.price),
-        gender: product.gender,
-        color: product.color,
+        color: product.color.charAt(0).toUpperCase() + product.color.slice(1),
         brand: product.brand,
         name: product.name,
         slug: product.slug,
-        category: product.category,
         size: selectedSize || '',
         images: product.images.slice(0, 1),
       };
 
+      console.log('cartItem', cartItem);
       const result = await addToCart(cartItem);
 
       if (result.success) {
@@ -72,14 +76,10 @@ export default function AddToCartButton({
   return (
     <Button
       onClick={handleAddToCart}
-      disabled={isLoading || disabled}
+      disabled={isLoading}
       className={className}
     >
-      {disabled
-        ? 'Välj storlek'
-        : isLoading
-          ? 'Lägger till...'
-          : 'Lägg i varukorg'}
+      {isLoading ? 'Lägger till...' : 'Lägg till'}
     </Button>
   );
 }

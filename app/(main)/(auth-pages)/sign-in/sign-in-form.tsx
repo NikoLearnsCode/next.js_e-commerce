@@ -1,8 +1,8 @@
 'use client';
 
 import {useState} from 'react';
-import {Button} from '@/components/shared/button';
-import {Link} from '@/components/shared/link';
+import {Button} from '@/components/shared/ui/button';
+import {Link} from '@/components/shared/ui/link';
 import {signIn} from 'next-auth/react';
 import {useSearchParams} from 'next/navigation';
 import {ArrowLeft, Loader2} from 'lucide-react';

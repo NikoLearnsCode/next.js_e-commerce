@@ -7,7 +7,7 @@ import CartItems from './CartItems';
 import CartSummary from './CartSummary';
 import EmptyCart from './EmptyCart';
 import StickyMobileSummary from './StickyMobileSummary';
-import SpinningLogo from '@/components/shared/SpinningLogo';
+import SpinningLogo from '@/components/shared/ui/SpinningLogo';
 
 export default function CartPage() {
   const {cartItems, loading: isLoading, totalPrice, itemCount} = useCart();
@@ -76,7 +76,7 @@ export default function CartPage() {
             {/* Desktop Order summary section, always visible */}
             <div
               ref={normalSummaryRef}
-              className='w-full lg:min-w-[350px] lg:max-w-[350px] xl:min-w-[420px] xl:max-w-[420px]  lg:sticky lg:top-30 lg:self-start px-5 sm:px-0 border-t border-gray-200 sm:border-none  bg-white mt-4  pt-5 sm:pt-0 lg:mt-0 transition-all duration-300'
+              className='w-full lg:min-w-[350px] lg:max-w-[350px] xl:min-w-[420px] xl:max-w-[420px]  lg:sticky lg:top-30 lg:self-start px-5 lg:px-0 border-t border-gray-100 sm:border-none  bg-white mt-4  pt-5 sm:pt-0 lg:mt-0 transition-all duration-300'
             >
               <h2 className='text-lg   mb-5'>Ordersammanställning</h2>
               <CartSummary totalPrice={totalPrice} />

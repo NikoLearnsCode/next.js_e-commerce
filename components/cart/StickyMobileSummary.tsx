@@ -2,7 +2,7 @@
 
 import {motion} from 'framer-motion';
 import {formatPrice} from '@/utils/helpers';
-import {Link} from '@/components/shared/link';
+import {Link} from '@/components/shared/ui/link';
 
 type StickyMobileSummaryProps = {
   totalPrice: number;

@@ -3,15 +3,15 @@
 import {useState} from 'react';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
-import {FloatingLabelInput} from '@/components/shared/floatingLabelInput';
+import {FloatingLabelInput} from '@/components/shared/ui/floatingLabelInput';
 import OrderTotals from '../shared/OrderTotals';
 import {
   PaymentFormData,
   paymentSchema,
   DeliveryFormData,
 } from '@/lib/validators';
-import {Button} from '@/components/shared/button';
-import {Accordion} from '@/components/shared/Accordion';
+import {Button} from '@/components/shared/ui/button';
+import {Accordion} from '@/components/shared/ui/Accordion';
 import {SiKlarna} from 'react-icons/si';
 import Image from 'next/image';
 import {CiCreditCard1} from 'react-icons/ci';

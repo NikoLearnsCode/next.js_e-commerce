@@ -6,7 +6,7 @@ import {AnimatePresence, motion} from 'framer-motion';
 import CartItems from './CartItems';
 import CartSummary from './CartSummary';
 import EmptyCart from './EmptyCart';
-import SpinningLogo from '../shared/SpinningLogo';
+import SpinningLogo from '../shared/ui/SpinningLogo';
 import {PiBagSimpleThin} from 'react-icons/pi';
 
 import {MotionCloseX} from '../shared/AnimatedDropdown';
@@ -99,7 +99,7 @@ export default function CartDropdown({
         {/* Mobile badge */}
         {itemCount > 0 && (
           <span
-            className='absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pt-[2.5px] text-black text-[11px] font-medium lg:hidden'
+            className='absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pt-[2.5px] text-black text-[10px] font-medium lg:hidden'
             aria-hidden='true'
           >
             {itemCount}

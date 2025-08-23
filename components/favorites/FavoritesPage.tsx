@@ -3,7 +3,7 @@
 import {useFavorites} from '@/context/FavoritesProvider';
 import FavoritesItems from './FavoritesItems';
 import EmptyFavorites from './EmptyFavorites';
-import SpinningLogo from '@/components/shared/SpinningLogo';
+import SpinningLogo from '@/components/shared/ui/SpinningLogo';
 
 export default function FavoritesPage() {
   const {favorites, loading: isLoading, favoriteCount} = useFavorites();

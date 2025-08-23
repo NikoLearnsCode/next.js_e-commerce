@@ -2,7 +2,7 @@
 
 import {useState} from 'react';
 import {signOut} from 'next-auth/react';
-import {Button} from '@/components/shared/button';
+import {Button} from '@/components/shared/ui/button';
 import {Loader2} from 'lucide-react';
 import {twMerge} from 'tailwind-merge';
 

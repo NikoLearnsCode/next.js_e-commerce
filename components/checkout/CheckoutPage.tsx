@@ -13,7 +13,7 @@ import CheckoutLayoutMobile from './mobile/CheckoutLayoutMobile';
 import {useMediaQuery} from '@/hooks/useMediaQuery';
 import {DeliveryFormData} from '@/lib/validators';
 import {CheckoutStep, validateStep, getCheckoutUrl} from '@/lib/checkoutSteps';
-import SpinningLoader from '@/components/shared/SpinningLogo';
+import SpinningLoader from '@/components/shared/ui/SpinningLogo';
 
 export default function CheckoutPage() {
   const {loading} = useCart();

@@ -26,7 +26,7 @@ export default function HeaderFavoritesButton({
     >
       {/* Mobile heart icon */}
       <Heart
-        size={26}
+        size={24}
         strokeWidth={1}
         className='cursor-pointer lg:hidden'
         aria-hidden='true'
@@ -40,7 +40,7 @@ export default function HeaderFavoritesButton({
       {/* Mobile badge */}
       {favoriteCount > 0 && (
         <span
-          className='absolute top-1/2 -translate-y-1/2 pb-1 text-[11px] font-medium rounded-full   flex items-center justify-center px-1 lg:hidden'
+          className='absolute top-1/2 -translate-y-1/2 pb-1 text-[10px] font-medium rounded-full pt-[1px] flex items-center justify-center px-1 lg:hidden'
           aria-hidden='true'
         >
           {favoriteCount > 99 ? '99+' : favoriteCount}

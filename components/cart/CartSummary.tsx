@@ -1,6 +1,6 @@
 'use client';
 
-import {Link} from '@/components/shared/link';
+import {Link} from '@/components/shared/ui/link';
 import {formatPrice} from '@/utils/helpers';
 import {getCheckoutUrl} from '@/lib/checkoutSteps';
 
@@ -41,7 +41,7 @@ export default function CartSummary({
   }
 
   return (
-    <div>
+    <div className=''>
       <div className='flex justify-between flex-col gap-2 text-sm lg:text-lg pr-2'>
         <span className='text-sm flex justify-between'>
           Delsumma <span>{formatPrice(totalPrice)}</span>

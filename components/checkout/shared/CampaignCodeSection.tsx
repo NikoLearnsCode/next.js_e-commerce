@@ -1,9 +1,9 @@
 'use client';
 
 import {useState} from 'react';
-import {Button} from '@/components/shared/button';
-import {Accordion} from '@/components/shared/Accordion';
-import {FloatingLabelInput} from '@/components/shared/floatingLabelInput';
+import {Button} from '@/components/shared/ui/button';
+import {Accordion} from '@/components/shared/ui/Accordion';
+import {FloatingLabelInput} from '@/components/shared/ui/floatingLabelInput';
 
 export default function CampaignCodeSection() {
   const [campaignCode, setCampaignCode] = useState('');

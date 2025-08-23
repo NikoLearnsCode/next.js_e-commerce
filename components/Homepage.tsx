@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import {Link} from '@/components/shared/link';
+import {Link} from '@/components/shared/ui/link';
 import {useState, useEffect} from 'react';
 
 export default function Homepage() {

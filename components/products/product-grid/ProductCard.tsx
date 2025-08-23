@@ -12,7 +12,7 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import {useNavigatedHistory} from '@/context/NavigatedHistoryProvider';
 
-import FavoriteButton from '@/components/shared/FavoriteButton';
+import FavoriteButton from '@/components/favorites/FavoriteButton';
 import NewBadge from '@/components/shared/NewBadge';
 
 type ProductCardProps = {
@@ -103,7 +103,7 @@ export default function ProductCard({
         {showNewBadge && (
           <div className='px-2 pt-1 flex items-center justify-between'>
             <NewBadge />
-            <FavoriteButton product={product}  />
+            <FavoriteButton product={product} />
           </div>
         )}
 
@@ -115,7 +115,7 @@ export default function ProductCard({
             >
               <h2 className='text-xs sm:text-sm font-medium'>{product.name}</h2>
             </Link>
-            {!showNewBadge && <FavoriteButton product={product}  />}
+            {!showNewBadge && <FavoriteButton product={product} />}
           </div>
           <p className='text-xs text-gray-700 sm:text-sm'>{product.price} kr</p>
         </div>
