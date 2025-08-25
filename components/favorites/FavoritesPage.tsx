@@ -25,9 +25,9 @@ export default function FavoritesPage() {
 
       {/* Favorites with items */}
       {favorites.length > 0 && (
-        <div className='space-y-6 py-2'>
-          <div className=' px-4 sm:px-8'>
-            <h1 className='text-sm sm:text-base uppercase mb-4'>
+        <div className='space-y-5 py-2'>
+          <div className=' px-4 sm:px-6'>
+            <h1 className='text-sm sm:text-base uppercase '>
               Dina favoriter ({favoriteCount})
             </h1>
           </div>
