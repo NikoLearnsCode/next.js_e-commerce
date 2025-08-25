@@ -10,9 +10,9 @@ import FavoriteButton from '@/components/favorites/FavoriteButton';
 
 import MobileImageSwiper from './MobileImageSwiper';
 import dynamic from 'next/dynamic';
+import Carousel from '@/components/shared/Carousel';
 
-// Dynamically import the carousel
-const Carousel = dynamic(() => import('@/components/shared/Carousel'));
+
 const ProductCard = dynamic(
   () => import('@/components/products/product-grid/ProductCard')
 );
@@ -61,7 +61,7 @@ export default function ProductPage({
                 {/* Desktop view - Display all images in a grid */}
                 <div className='hidden flex-1 lg:grid md lg:grid-cols-2 lg:gap-0.5 '>
                   {product.images.map((img: string, idx: number) => (
-                    <div key={idx} className='relative     aspect-[7/9]'>
+                    <div key={idx} className='relative  aspect-[7/9]'>
                       <Image
                         src={img}
                         alt={`${product.name} - bild ${idx + 1}`}
@@ -151,8 +151,8 @@ export default function ProductPage({
                 product={product}
                 size={20}
                 strokeWidth={2}
-                className='border bg-black/90 hover:bg-black/80 border-black/60 rounded-xs h-13 p-0 w-13 text-white'
-                variant='inverted'
+                className='border  border-black/20 hover:border-black/60 rounded-xs h-13 p-0 w-13 text-white'
+
               />
             </div>
           </div>
@@ -171,10 +171,11 @@ export default function ProductPage({
         <div className='mx-auto pt-24 lg:pt-40 pb-8'>
           <Carousel
             items={categoryProducts}
+            titelDivClassName='px-4'
             title='Liknande produkter'
             renderItem={(product) => (
               <ProductCard
-                product={product as Product}
+                product={product}
                 priorityLoading={false}
                 interactionMode='carouselItem'
               />
@@ -190,9 +191,10 @@ export default function ProductPage({
           <Carousel
             items={genderProducts}
             title='Du kanske också gillar'
+            titelDivClassName='px-4'
             renderItem={(product) => (
               <ProductCard
-                product={product as Product}
+                product={product}
                 priorityLoading={false}
                 interactionMode='carouselItem'
               />

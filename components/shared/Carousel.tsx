@@ -27,9 +27,10 @@ interface CarouselProps<T> {
   showNavigation?: boolean;
   navigationClassName?: string;
   titleClassName?: string;
+  titelDivClassName?: string;
 }
 
-export default function Carousel<T>({
+const Carousel = <T,>({
   items,
   renderItem,
   title,
@@ -54,7 +55,8 @@ export default function Carousel<T>({
   showNavigation = true,
   navigationClassName = '',
   titleClassName = '',
-}: CarouselProps<T>) {
+  titelDivClassName = '',
+}: CarouselProps<T>) => {
   const [isBeginning, setIsBeginning] = useState(true);
   const [isEnd, setIsEnd] = useState(false);
 
@@ -74,7 +76,7 @@ export default function Carousel<T>({
     <div className={twMerge('w-full mx-auto', className)}>
       {/* Header with title and navigation */}
       {(title || showNavigation) && (
-        <div className='flex justify-between items-center mb-4'>
+        <div className={twMerge('flex justify-between items-center mb-4', titelDivClassName)}>
           {title && (
             <h2
               className={twMerge(
@@ -86,7 +88,7 @@ export default function Carousel<T>({
             </h2>
           )}
 
-          {showNavigation &&  (
+          {showNavigation && (
             <div className={twMerge('flex z-10', navigationClassName)}>
               <button
                 className={`${prevButtonClass} py-1.5 pl-3 pr-1.5 transition cursor-pointer ${
@@ -141,4 +143,6 @@ export default function Carousel<T>({
       </Swiper>
     </div>
   );
-}
+};
+
+export default Carousel;
