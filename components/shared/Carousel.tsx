@@ -74,11 +74,11 @@ export default function Carousel<T>({
     <div className={twMerge('w-full mx-auto', className)}>
       {/* Header with title and navigation */}
       {(title || showNavigation) && (
-        <div className='flex justify-between items-center px-3 sm:px-4 mb-4'>
+        <div className='flex justify-between items-center mb-4'>
           {title && (
             <h2
               className={twMerge(
-                'text-base sm:text-lg text-gray-800 px-2 font-medium',
+                'text-base sm:text-lg text-gray-800 px-5 sm:px-4 font-medium',
                 titleClassName
               )}
             >
@@ -86,7 +86,7 @@ export default function Carousel<T>({
             </h2>
           )}
 
-          {showNavigation && (
+          {showNavigation &&  (
             <div className={twMerge('flex z-10', navigationClassName)}>
               <button
                 className={`${prevButtonClass} py-1.5 pl-3 pr-1.5 transition cursor-pointer ${

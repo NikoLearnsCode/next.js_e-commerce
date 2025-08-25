@@ -16,10 +16,13 @@ export default function OrdersClientContent({
   orders,
 }: OrdersClientContentProps) {
   return (
-    <AnimatedAuthContainer direction='left' className='max-w-4xl w-full'>
+    <AnimatedAuthContainer
+      direction='left'
+      className={`${orders.length === 0 ? 'max-w-lg' : 'max-w-5xl'} w-full`}
+    >
       {/* Header */}
-      <div className=' flex justify-between items-center mb-8 px-8'>
-        <h1 className='text-lg uppercase font-syne font-medium'>Mina Ordrar</h1>
+      <div className=' flex justify-between items-center mb-8 pl-4 sm:px-0'>
+        <h1 className='text-lg uppercase font-medium'>Mina beställningar</h1>
         <Link
           className='text-xs text-primary font-medium hover:underline flex gap-2 group tracking-wider'
           href='/profile'
@@ -34,11 +37,11 @@ export default function OrdersClientContent({
       </div>
 
       {orders.length === 0 ? (
-        <p className='text-center text-gray-600 py-12'>
+        <p className='text-center  text-gray-600 py-12'>
           Du har inte lagt några ordrar än.
         </p>
       ) : (
-        <div className='space-y-12 px-4 h-full'>
+        <div className='space-y-12  h-full'>
           {/* Section Header */}
 
           {orders.map((order) => {
@@ -56,7 +59,7 @@ export default function OrdersClientContent({
                 <Carousel
                   items={order.order_items}
                   title={formattedDate}
-                  titleClassName='text-sm font-normal text-gray-600'
+                  titleClassName='text-sm  text-gray-600 px-3 sm:px-0 sm:text-base'
                   renderItem={(item, _index) => (
                     <div className='aspect-[7/9]'>
                       <Link
@@ -81,12 +84,10 @@ export default function OrdersClientContent({
                     </div>
                   )}
                   breakpoints={{
-                    640: {slidesPerView: 2, spaceBetween: 4},
-                    768: {slidesPerView: 3, spaceBetween: 4},
-                    1024: {slidesPerView: 4, spaceBetween: 4},
-                    1280: {slidesPerView: 4, spaceBetween: 4},
+                    640: {slidesPerView: 2, spaceBetween: 3},
+                    768: {slidesPerView: 3, spaceBetween: 3},
                   }}
-                  showNavigation={true}
+                  showNavigation={order.order_items.length > 3}
                   id={`order-${order.id}`}
                 />
               </div>

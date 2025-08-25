@@ -5,33 +5,23 @@ import {ArrowLeft} from 'lucide-react';
 
 import type {OrderWithItems, DeliveryFormData} from '@/lib/validators';
 import AnimatedAuthContainer from '@/components/shared/AnimatedContainer';
-import {Link} from '@/components/shared/ui/link';
+import Link from 'next/link';
+
+import {formatPrice} from '@/utils/helpers';
 
 interface OrderDetailContentProps {
   order: OrderWithItems;
-}
-
-// Helper function to format currency
-function formatPrice(price: string | number | undefined | null): string {
-  if (price === undefined || price === null) {
-    return '-';
-  }
-  const numPrice = typeof price === 'string' ? parseFloat(price) : price;
-  return new Intl.NumberFormat('sv-SE', {
-    style: 'currency',
-    currency: 'SEK',
-  }).format(numPrice);
 }
 
 export default function OrderDetailContent({order}: OrderDetailContentProps) {
   // Type assertion för delivery_info eftersom det kommer som unknown från databasen, tillfällig fix
   const deliveryInfo = order.delivery_info as DeliveryFormData;
   return (
-    <AnimatedAuthContainer direction='right' className='max-w-4xl w-full'>
+    <AnimatedAuthContainer direction='right' className='max-w-5xl w-full'>
       {/* Header */}
-      <div className=' mb-8'>
+      <div className='px-5 mb-8'>
         <Link
-          className='text-xs  mb-5 text-primary font-medium hover:underline inline-flex flex-row-reverse gap-2 group tracking-wider'
+          className='text-xs   mb-8 text-primary font-medium hover:underline inline-flex flex-row-reverse gap-2 group tracking-wider'
           href='/profile/orders'
         >
           Tillbaka
@@ -42,29 +32,27 @@ export default function OrderDetailContent({order}: OrderDetailContentProps) {
           />
         </Link>
 
-        <h1 className='text-2xl px-4 font-bold text-gray-900 '>
-          ORDERDETALJER
-        </h1>
+        <h1 className='text-lg  font-semibold text-gray-900 '>ORDERDETALJER</h1>
       </div>
 
-      <div className='px-4'>
-        <div className='grid lg:grid-cols-2 gap-12'>
+      <div className=''>
+        <div className='grid md:grid-cols-2 '>
           {/* Left Side - Order Information */}
-          <div className='space-y-8'>
+          <div className='space-y-8 px-5 '>
             {/* Order Details */}
             <div>
-              <h2 className='text-lg font-medium mb-4 text-gray-900'>
+              <h2 className='text-base font-medium mb-2 text-gray-900'>
                 BESTÄLLNINGSNR
               </h2>
-              <p className='text-gray-700'>{order.id}</p>
+              <p className='text-gray-600 text-[15px]'>{order.id}</p>
             </div>
 
             {/* Purchase Date */}
             <div>
-              <h2 className='text-lg font-medium mb-4 text-gray-900'>
+              <h2 className='text-base font-medium mb-2 text-gray-900'>
                 KÖPDATUM
               </h2>
-              <p className='text-gray-700'>
+              <p className='text-gray-800 text-[15px]'>
                 {order.created_at
                   ? new Date(order.created_at).toLocaleDateString('sv-SE')
                   : 'Okänt datum'}
@@ -74,10 +62,10 @@ export default function OrderDetailContent({order}: OrderDetailContentProps) {
             {/* Delivery Information */}
             {deliveryInfo && (
               <div>
-                <h2 className='text-lg font-medium mb-4 text-gray-900'>
+                <h2 className='text-base font-medium mb-2 text-gray-900'>
                   LEVERANSUPPGIFTER
                 </h2>
-                <div className='space-y-1 text-gray-700'>
+                <div className='space-y-1 text-[15px]   text-gray-800'>
                   <p>
                     {deliveryInfo.firstName} {deliveryInfo.lastName}
                   </p>
@@ -90,52 +78,31 @@ export default function OrderDetailContent({order}: OrderDetailContentProps) {
                 </div>
               </div>
             )}
-
-            {/* Invoice Information */}
-            <div>
-              <h2 className='text-lg font-medium mb-4 text-gray-900'>
-                FAKTURAUPPGIFTER
-              </h2>
-              <div className='space-y-1 text-gray-700'>
-                {deliveryInfo && (
-                  <>
-                    <p>
-                      {deliveryInfo.firstName} {deliveryInfo.lastName}
-                    </p>
-                    <p>{deliveryInfo.address}</p>
-                    <p>
-                      {deliveryInfo.postalCode} {deliveryInfo.city}
-                    </p>
-                    {deliveryInfo.phone && <p>{deliveryInfo.phone}</p>}
-                    {deliveryInfo.email && <p>{deliveryInfo.email}</p>}
-                  </>
-                )}
-              </div>
-            </div>
           </div>
 
           {/* Right Side - Product Images */}
           <div>
-            <h2 className='text-lg font-medium mb-6 text-gray-900'>ARTIKLAR</h2>
-            <div className='space-y-6'>
+            <h2 className='text-base  px-5 md:px-0 font-medium mt-10 md:mt-0 mb-6 text-gray-900'>
+              ARTIKLAR ({order.order_items.length})
+            </h2>
+            <div className='space-y-1'>
               {order.order_items.map((item, index) => (
                 <div
                   key={`${item.product_id}-${item.size || index}`}
-                  className='flex items-start space-x-4'
+                  className='flex '
                 >
                   {/* Product Image */}
-                  <div className='w-32 h-40 bg-gray-50 rounded-lg overflow-hidden flex-shrink-0'>
+                  <div className='relative aspect-[7/9] min-w-2/3'>
                     {item.image ? (
                       <Link
                         href={`/${item.slug}`}
-                        className='block w-full h-full'
+                        className=' w-full h-full cursor-pointer'
                       >
                         <Image
                           src={item.image}
                           alt={item.name}
-                          width={128}
-                          height={160}
-                          className='object-cover w-full h-full hover:scale-105 transition-transform duration-200'
+                          fill
+                          className='object-cover w-full h-full'
                         />
                       </Link>
                     ) : (
@@ -146,29 +113,18 @@ export default function OrderDetailContent({order}: OrderDetailContentProps) {
                   </div>
 
                   {/* Product Info */}
-                  <div className='flex-grow'>
+                  <div className='min-w-1/3 text-xs md:text-sm py-2 px-4'>
                     <Link href={`/${item.slug}`}>
                       <h3 className='font-medium text-gray-900 mb-2 hover:text-gray-700 transition-colors cursor-pointer'>
                         {item.name}
                       </h3>
                     </Link>
-                    <div className='space-y-2 text-sm text-gray-600'>
+                    <div className='space-y-1  text-gray-600'>
                       <p>Artikel-ID: {item.product_id?.substring(0, 8)}</p>
                       {item.size && <p>Storlek: {item.size}</p>}
                       {item.color && <p>Färg: {item.color}</p>}
                       <p>Antal: {item.quantity}</p>
-                    </div>
-
-                    {/* Price */}
-                    <div className='mt-4'>
-                      <span className='font-medium text-gray-900'>
-                        {formatPrice(parseFloat(item.price) * item.quantity)}
-                      </span>
-                      {item.quantity > 1 && (
-                        <span className='text-sm text-gray-500 ml-2'>
-                          ({formatPrice(item.price)}/st)
-                        </span>
-                      )}
+                      <p>Pris: {formatPrice(parseFloat(item.price))}</p>
                     </div>
                   </div>
                 </div>
@@ -178,29 +134,28 @@ export default function OrderDetailContent({order}: OrderDetailContentProps) {
         </div>
 
         {/* Bottom Section - Order Summary */}
-        <div className='mt-8 pt-4 pb-12 border-t border-gray-200'>
-          <div className=' mx-auto   rounded-lg'>
-            <h3 className='text-lg font-medium mb-4 text-gray-900'>
-              SAMMANFATTNING AV BESTÄLLNING
-            </h3>
-            <div className='space-y-3'>
-              <div className='flex justify-between'>
-                <span className='text-gray-700'>Delsumma</span>
+
+        <div className='float-right pb-10 px-5 md:px-0 w-full md:w-[510px] p-3 mt-7'>
+          <h3 className='text-base pt-5 border-t border-gray-200 font-medium mb-4 text-gray-900'>
+            SAMMANFATTNING AV BESTÄLLNING
+          </h3>
+          <div className='space-y-3'>
+            <div className='flex justify-between'>
+              <span className='text-gray-700'>Delsumma</span>
+              <span className='text-gray-900'>
+                {formatPrice(parseFloat(order.total_amount))}
+              </span>
+            </div>
+            <div className='flex justify-between'>
+              <span className='text-gray-700'>Frakt</span>
+              <span className='text-gray-900'>Gratis</span>
+            </div>
+            <div className='border-t border-gray-200 pt-3'>
+              <div className='flex justify-between  font-bold'>
+                <span className='text-gray-900'>Totalsumma</span>
                 <span className='text-gray-900'>
-                  {formatPrice(order.total_amount)}
+                  {formatPrice(parseFloat(order.total_amount))}
                 </span>
-              </div>
-              <div className='flex justify-between'>
-                <span className='text-gray-700'>Frakt</span>
-                <span className='text-gray-900'>Gratis</span>
-              </div>
-              <div className='border-t border-gray-200 pt-3'>
-                <div className='flex justify-between text-lg font-bold'>
-                  <span className='text-gray-900'>Totalsumma</span>
-                  <span className='text-gray-900'>
-                    {formatPrice(order.total_amount)}
-                  </span>
-                </div>
               </div>
             </div>
           </div>

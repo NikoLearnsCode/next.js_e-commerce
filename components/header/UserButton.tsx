@@ -223,12 +223,12 @@ const UserButton = ({
               </Link>
             )}
             <Link
-              href='/profile'
+              href='/profile/orders'
               className='flex items-center px-4 py-2 lg:py-2.5 text-sm  text-gray-700  border-b  border-gray-200'
               onClick={() => setIsOpen(false)}
             >
               <span className='flex w-full font-medium hover:text-black justify-between group relative items-center gap-2 '>
-                Mitt konto
+                Mina beställningar
                 <ArrowRight
                   size={12}
                   strokeWidth={1.5}

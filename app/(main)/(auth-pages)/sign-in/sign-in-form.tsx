@@ -47,7 +47,7 @@ export default function SignInForm() {
 
   return (
     <div
-      className='w-full max-w-md mx-auto bg-white    
+      className='w-full max-w-md px-5 mx-auto bg-white    
     '
     >
       <div className='mb-8'>

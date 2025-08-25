@@ -49,7 +49,7 @@ export default function AddToCartButton({
         images: product.images.slice(0, 1),
       };
 
-      console.log('cartItem', cartItem);
+
       const result = await addToCart(cartItem);
 
       if (result.success) {

@@ -14,10 +14,8 @@ export default function LogoutButton({className, ...props}: LogoutButtonProps) {
 
   const handleLogout = async () => {
     setIsPending(true);
-    setTimeout(async () => {
-      await signOut();
-      setIsPending(false);
-    }, 1000);
+    await signOut();
+    setIsPending(false);
   };
 
   return (
@@ -26,7 +24,7 @@ export default function LogoutButton({className, ...props}: LogoutButtonProps) {
       disabled={isPending}
       variant='underline'
       className={twMerge(
-        'uppercase text-base px-0 text-red-700 font-medium',
+        'text-base px-0 text-red-700 font-medium',
         'flex items-center gap-2',
         className
       )}

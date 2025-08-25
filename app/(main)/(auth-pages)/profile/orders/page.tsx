@@ -32,5 +32,7 @@ export default async function ProfileOrdersPage() {
     );
   }
 
+  
+
   return <OrdersClientContent orders={orders as OrderWithItems[]} />;
 }

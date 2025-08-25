@@ -5,7 +5,7 @@ import {Metadata} from 'next';
 import {authOptions} from '@/lib/auth';
 import {getOrder} from '@/actions/orders';
 import OrderDetailContent from './OrderDetailContent';
-
+import {OrderWithItems} from '@/lib/validators';
 
 type Props = {
   params: Promise<{
@@ -40,5 +40,5 @@ export default async function OrderDetailPage({params}: Props) {
     return notFound();
   }
 
-  return <OrderDetailContent order={order as any} />;
+  return <OrderDetailContent order={order as OrderWithItems} />;
 }

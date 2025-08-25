@@ -4,6 +4,7 @@ import {redirect} from 'next/navigation';
 import {Metadata} from 'next';
 import {authOptions} from '@/lib/auth';
 import LogoutButton from '@/app/(main)/(auth-pages)/profile/LogoutButton';
+import { ArrowRight } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Mitt konto',
@@ -26,9 +27,14 @@ export default async function ProfilePage() {
       <div className='flex flex-col justify-center items-center space-y-6'>
         <Link
           href='/profile/orders'
-          className='text-lg  font-syne font-medium uppercase hover:underline w-fit underline-offset-4'
+          className='text-base font-medium  hover:underline w-fit underline-offset-4 flex items-center gap-2 group'
         >
-          Mina ordrar
+          Mina beställningar
+          <ArrowRight
+            size={16}
+            strokeWidth={1.5}
+            className='group-hover:translate-x-1  transition-transform duration-300'
+          />
         </Link>
 
         <LogoutButton className='mt-10' />
