@@ -12,7 +12,6 @@ import MobileImageSwiper from './MobileImageSwiper';
 import dynamic from 'next/dynamic';
 import Carousel from '@/components/shared/Carousel';
 
-
 const ProductCard = dynamic(
   () => import('@/components/products/product-grid/ProductCard')
 );
@@ -152,7 +151,6 @@ export default function ProductPage({
                 size={20}
                 strokeWidth={2}
                 className='border  border-black/20 hover:border-black/60 rounded-xs h-13 p-0 w-13 text-white'
-
               />
             </div>
           </div>

@@ -2,7 +2,7 @@
 
 import {AnimatePresence} from 'framer-motion';
 import {useFavorites} from '@/context/FavoritesProvider';
-import ProductListItem from '@/components/shared/ProductListItem';
+import FavoriteCard from '@/components/shared/CartFavoriteCard';
 
 export default function FavoritesItems() {
   const {favorites, removeFavorite, updatingItems} = useFavorites();
@@ -23,7 +23,7 @@ export default function FavoritesItems() {
           const isUpdating = updatingItems[fav.product_id] || false;
 
           return (
-            <ProductListItem
+            <FavoriteCard
               key={fav.id}
               item={fav}
               type='favorite'

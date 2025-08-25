@@ -135,8 +135,8 @@ export default function OrderDetailContent({order}: OrderDetailContentProps) {
 
         {/* Bottom Section - Order Summary */}
 
-        <div className='float-right pb-10 px-5 md:px-0 w-full md:w-[510px] p-3 mt-7'>
-          <h3 className='text-base pt-5 border-t border-gray-200 font-medium mb-4 text-gray-900'>
+        <div className='float-right pb-10 border-t border-gray-200 px-5 md:px-0 w-full md:w-[510px] p-3 mt-7'>
+          <h3 className='text-base pt-5  font-medium mb-4 text-gray-900'>
             SAMMANFATTNING AV BESTÄLLNING
           </h3>
           <div className='space-y-3'>
@@ -150,7 +150,7 @@ export default function OrderDetailContent({order}: OrderDetailContentProps) {
               <span className='text-gray-700'>Frakt</span>
               <span className='text-gray-900'>Gratis</span>
             </div>
-            <div className='border-t border-gray-200 pt-3'>
+            <div className=' pt-1'>
               <div className='flex justify-between  font-bold'>
                 <span className='text-gray-900'>Totalsumma</span>
                 <span className='text-gray-900'>

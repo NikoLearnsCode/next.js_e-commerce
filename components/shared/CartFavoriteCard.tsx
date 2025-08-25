@@ -58,7 +58,7 @@ export default function ProductListItem({
   return (
     <motion.div
       key={itemData.id}
-      className='flex flex-row sm:flex-col pb-4 mb-4  sm:mb-0 border-b border-gray-50 sm:border-none overflow-hidden '
+      className='flex flex-row sm:flex-col  pb-1 md:pb-0 overflow-hidden '
       initial={{opacity: 0, y: 20}}
       animate={{opacity: 1, y: 0}}
       exit={{
@@ -114,7 +114,7 @@ export default function ProductListItem({
         </button>
       </div>
 
-      <div className='px-3 py-2 relative min-w-1/3 lg:pb-10 lg:px-2 flex flex-col mb-2'>
+      <div className='px-3 py-2 relative min-w-1/3 lg:pb-10 lg:px-3 flex flex-col mb-2'>
         <div className='flex flex-col flex-1 gap-1 sm:gap-0 justify-center items-center sm:items-start text-sm '>
           <Link
             href={`/${itemData.slug}`}

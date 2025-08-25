@@ -5,7 +5,7 @@ import Link from 'next/link';
 import {AnimatePresence} from 'framer-motion';
 import {formatPrice} from '@/utils/helpers';
 import {useCart} from '@/context/CartProvider';
-import ProductListItem from '@/components/shared/ProductListItem';
+import CartCard from '@/components/shared/CartFavoriteCard';
 type CartItemsProps = {
   compact?: boolean;
 };
@@ -105,7 +105,7 @@ export default function CartItems({compact = false}: CartItemsProps) {
 
           // Full view for cart page
           return (
-            <ProductListItem
+            <CartCard
               key={item.id}
               item={item}
               type='cart'
