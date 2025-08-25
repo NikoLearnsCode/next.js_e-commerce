@@ -14,25 +14,20 @@ import {PaymentInfo} from '@/lib/types/query-types';
 export async function createOrder(
   cartItems: CartItem[],
   deliveryInfo: DeliveryFormData,
-  paymentInfo: PaymentInfo
+  paymentInfo: PaymentInfo,
+  totalPrice: number
 ) {
   try {
     // Check if user is logged in with NextAuth
     const session = await getServerSession(authOptions);
     const user = session?.user;
 
-    // Calculate total amount (ensure we're working with numbers)
-    const totalAmount = cartItems.reduce(
-      (sum, item) => sum + Number(item.price) * item.quantity,
-      0
-    );
-
     // Create order
     const newOrder = {
       user_id: user?.id,
       session_id: user ? null : await getSessionId(),
       status: 'pending',
-      total_amount: totalAmount.toFixed(2),
+      total_amount: totalPrice.toString(),
       delivery_info: deliveryInfo,
       payment_info: paymentInfo.method,
     };
@@ -46,7 +41,7 @@ export async function createOrder(
       order_id: order[0].id,
       product_id: item.product_id,
       quantity: item.quantity,
-      price: Number(item.price).toFixed(2),
+      price: item.price,
       name: item.name,
       size: item.size,
       color: item.color,
@@ -55,9 +50,6 @@ export async function createOrder(
     }));
 
     await db.insert(orderItemsTable).values(orderItems);
-
-    // Clear cart using the cart function
-
 
     return {success: true, orderId: order[0].id};
   } catch (error) {

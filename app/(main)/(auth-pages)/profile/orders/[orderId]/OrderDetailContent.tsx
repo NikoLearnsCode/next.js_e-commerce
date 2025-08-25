@@ -124,7 +124,7 @@ export default function OrderDetailContent({order}: OrderDetailContentProps) {
                       {item.size && <p>Storlek: {item.size}</p>}
                       {item.color && <p>Färg: {item.color}</p>}
                       <p>Antal: {item.quantity}</p>
-                      <p>Pris: {formatPrice(parseFloat(item.price))}</p>
+                      <p>Pris: {formatPrice(item.price)}</p>
                     </div>
                   </div>
                 </div>
@@ -143,7 +143,7 @@ export default function OrderDetailContent({order}: OrderDetailContentProps) {
             <div className='flex justify-between'>
               <span className='text-gray-700'>Delsumma</span>
               <span className='text-gray-900'>
-                {formatPrice(parseFloat(order.total_amount))}
+                {formatPrice(order.total_amount)}
               </span>
             </div>
             <div className='flex justify-between'>
@@ -154,7 +154,7 @@ export default function OrderDetailContent({order}: OrderDetailContentProps) {
               <div className='flex justify-between  font-bold'>
                 <span className='text-gray-900'>Totalsumma</span>
                 <span className='text-gray-900'>
-                  {formatPrice(parseFloat(order.total_amount))}
+                  {formatPrice(order.total_amount)}
                 </span>
               </div>
             </div>

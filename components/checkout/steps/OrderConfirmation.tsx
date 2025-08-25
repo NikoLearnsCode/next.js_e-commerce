@@ -1,28 +1,9 @@
 'use client';
 
-import {useEffect, useState} from 'react';
-import {useCart} from '@/context/CartProvider';
 import Link from 'next/link';
 import {GoArrowLeft} from 'react-icons/go';
 
 export default function OrderConfirmation() {
-  const {clearCartAction} = useCart();
-  const [hasRendered, setHasRendered] = useState(false);
-
-  useEffect(() => {
-    setHasRendered(true);
-    // console.log('OrderConfirmation mounted');
-  }, []);
-
-  useEffect(() => {
-    if (!hasRendered) return;
-
-    return () => {
-      // console.log('OrderConfirmation unmounting - clearing cart');
-      clearCartAction();
-    };
-  }, [hasRendered, clearCartAction]);
-
   return (
     <div className='max-w-lg mx-auto px-4 pt-20 py-8 text-center'>
       <h1 className='text-3xl font-medium mb-2'>Tack för din beställning!</h1>

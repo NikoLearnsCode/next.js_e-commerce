@@ -106,7 +106,6 @@ export function FavoritesProvider({children}: {children: React.ReactNode}) {
         if (result.success) {
           setFavorites(result.favorites || []);
         } else {
-          // Handle error silently and refresh favorites
           await refreshFavorites();
         }
       } catch (error) {

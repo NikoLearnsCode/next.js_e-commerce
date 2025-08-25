@@ -12,35 +12,69 @@ import {db} from '@/drizzle/index';
 import {cartsTable} from '@/drizzle/db/schema';
 import {eq, and, isNull} from 'drizzle-orm';
 import {cookies} from 'next/headers';
+import Decimal from 'decimal.js';
 
-/* ------------------------------------------------- */
+// Beräknar varukorgens totalpris med Decimal.js för exakthet
+function calculateCartTotal(items: CartItem[]): number {
+  if (!items || items.length === 0) {
+    return 0;
+  }
+  const total = items.reduce((sum, item) => {
+    const itemTotal = new Decimal(item.price).times(item.quantity);
+    return sum.plus(itemTotal);
+  }, new Decimal(0));
+  return total.toNumber();
+}
+
+// --------------------------------------------------------
+// Beräknar det totala antalet produkter i varukorgen
+function calculateItemCount(items: CartItem[]): number {
+  if (!items || items.length === 0) {
+    return 0;
+  }
+  return items.reduce((sum, item) => sum + item.quantity, 0);
+}
+
+// --------------------------------------------------------
+// Central funktion som uppdaterar databasen och returnerar det nya tillståndet
+async function updateCartInDbAndReturnState(
+  cartId: string,
+  updatedItems: CartItem[]
+) {
+  if (updatedItems.length === 0) {
+    await db.delete(cartsTable).where(eq(cartsTable.id, cartId));
+    const cookieStore = await cookies();
+    cookieStore.delete(CART_SESSION_COOKIE);
+    return {success: true, cartItems: [], totalPrice: 0, itemCount: 0};
+  }
+  await db
+    .update(cartsTable)
+    .set({items: updatedItems, updated_at: new Date()})
+    .where(eq(cartsTable.id, cartId));
+  const totalPrice = calculateCartTotal(updatedItems);
+  const itemCount = calculateItemCount(updatedItems);
+  return {success: true, cartItems: updatedItems, totalPrice, itemCount};
+}
+
+// --------------------------------------------------------
 export async function getCart() {
   try {
-    // Check if user is logged in with NextAuth
     const session = await getServerSession(authOptions);
     const user = session?.user;
 
     let cart;
-
     if (user) {
-      // If logged in, try to find user's cart
       const cartData = await db
         .select()
         .from(cartsTable)
         .where(eq(cartsTable.user_id, user.id))
         .limit(1);
-
       cart = cartData[0] || null;
     } else {
-      // If not logged in, check if there is a session_id
       const sessionId = await getSessionId();
-
-      // If no session_id, return an empty cart
       if (!sessionId) {
-        return {cart: null, cartItems: []};
+        return {cart: null, cartItems: [], totalPrice: 0, itemCount: 0};
       }
-
-      // Otherwise get the cart associated with session_id
       const cartData = await db
         .select()
         .from(cartsTable)
@@ -48,53 +82,45 @@ export async function getCart() {
           and(eq(cartsTable.session_id, sessionId), isNull(cartsTable.user_id))
         )
         .limit(1);
-
       cart = cartData[0] || null;
     }
 
-    // If no cart found, return an empty cart without creating a new one
     if (!cart) {
-      return {cart: null, cartItems: []};
+      return {cart: null, cartItems: [], totalPrice: 0, itemCount: 0};
     }
+    const cartItems = (cart.items as CartItem[]) || [];
+    const totalPrice = calculateCartTotal(cartItems);
+    const itemCount = calculateItemCount(cartItems);
 
-    return {cart, cartItems: cart?.items || []};
+    return {cart, cartItems, totalPrice, itemCount};
   } catch (error) {
     console.error('Error fetching cart:', error);
-    return {cart: null, cartItems: [], error: 'Failed to fetch cart'};
+    return {cart: null, cartItems: [], totalPrice: 0, itemCount: 0};
   }
 }
 
-/* ------------------------------------------------- */
+// --------------------------------------------------------
 export async function addToCart(cartItem: CartItem) {
   try {
-    // Check if user is logged in with NextAuth
     const session = await getServerSession(authOptions);
     const user = session?.user;
-
-    // Get or create session_id (only if user is not logged in)
     const sessionId = user ? null : await getOrCreateSessionId();
-
-    // Get cart
     let {cart} = await getCart();
 
-    // If no cart exists, create a new one
     if (!cart) {
       const newCart: NewCart = {
         session_id: user ? null : sessionId,
         user_id: user?.id || null,
         items: [],
       };
-
       const createdCart = await db
         .insert(cartsTable)
         .values(newCart)
         .returning();
-
       if (!createdCart[0]) throw new Error('Failed to create cart');
       cart = createdCart[0];
     }
 
-    // Check if product already exists in cart
     const currentCartItems = (cart.items as CartItem[]) || [];
     const existingItemIndex = currentCartItems.findIndex(
       (item: CartItem) =>
@@ -102,97 +128,50 @@ export async function addToCart(cartItem: CartItem) {
     );
 
     let updatedCartItems: CartItem[];
-
     if (existingItemIndex >= 0) {
-      // Update quantity if product already exists
       updatedCartItems = [...currentCartItems];
       updatedCartItems[existingItemIndex].quantity += cartItem.quantity;
     } else {
-      // Add new product
       updatedCartItems = [...currentCartItems, cartItem];
     }
 
-    // Update cart
-    await db
-      .update(cartsTable)
-      .set({
-        items: updatedCartItems,
-        updated_at: new Date(),
-      })
-      .where(eq(cartsTable.id, cart.id));
-
-    return {
-      success: true,
-      cartItems: updatedCartItems,
-      cart: cart,
-    };
+    return await updateCartInDbAndReturnState(cart.id, updatedCartItems);
   } catch (error) {
     console.error('Error adding to cart:', error);
     return {success: false, error: 'Failed to add item to cart'};
   }
 }
 
-/* ------------------------------------------------- */
+// --------------------------------------------------------
 export async function removeFromCart(itemId: string) {
   try {
-    // Get cart
     const {cart} = await getCart();
+    if (!cart)
+      return {success: true, cartItems: [], totalPrice: 0, itemCount: 0};
 
-    // If no cart exists, return success (nothing to remove)
-    if (!cart) {
-      return {success: true, cartItems: []};
-    }
-
-    const currentCartItems = (cart.items as CartItem[]) || [];
-    const updatedCartItems = currentCartItems.filter(
+    const updatedCartItems = (cart.items as CartItem[]).filter(
       (item: CartItem) => item.id !== itemId
     );
 
-    // If cart becomes empty after removal, delete the entire cart from the database
-    if (updatedCartItems.length === 0) {
-      await db.delete(cartsTable).where(eq(cartsTable.id, cart.id));
-      const cookieStore = await cookies();
-      cookieStore.delete(CART_SESSION_COOKIE);
-      return {success: true, cartItems: []};
-    }
-
-    // Otherwise update cart with the remaining products
-    await db
-      .update(cartsTable)
-      .set({
-        items: updatedCartItems,
-        updated_at: new Date(),
-      })
-      .where(eq(cartsTable.id, cart.id));
-
-    return {success: true, cartItems: updatedCartItems};
+    return await updateCartInDbAndReturnState(cart.id, updatedCartItems);
   } catch (error) {
     console.error('Error removing from cart:', error);
     return {success: false, error: 'Failed to remove item from cart'};
   }
 }
 
-/* ------------------------------------------------- */
 export async function updateCartItemQuantity(itemId: string, quantity: number) {
   try {
-    // If quantity is 0 or less, remove product from cart
     if (quantity <= 0) {
       return removeFromCart(itemId);
     }
-
-    // Get cart
     const {cart} = await getCart();
-
-    // If no cart exists, return error
-    if (!cart) {
-      return {success: false, error: 'Cart not found'};
-    }
+    if (!cart) return {success: false, error: 'Cart not found'};
 
     const currentCartItems = (cart.items as CartItem[]) || [];
     const itemIndex = currentCartItems.findIndex(
       (item: CartItem) => item.id === itemId
     );
-
     if (itemIndex === -1) {
       return {success: false, error: 'Item not found in cart'};
     }
@@ -200,56 +179,33 @@ export async function updateCartItemQuantity(itemId: string, quantity: number) {
     const updatedCartItems: CartItem[] = [...currentCartItems];
     updatedCartItems[itemIndex].quantity = quantity;
 
-    // Update cart
-    await db
-      .update(cartsTable)
-      .set({
-        items: updatedCartItems,
-        updated_at: new Date(),
-      })
-      .where(eq(cartsTable.id, cart.id));
-
-    return {success: true, cartItems: updatedCartItems};
+    return await updateCartInDbAndReturnState(cart.id, updatedCartItems);
   } catch (error) {
     console.error('Error updating cart item quantity:', error);
     return {success: false, error: 'Failed to update item quantity'};
   }
 }
 
-/* ------------------------------------------------- */
+// --------------------------------------------------------
 export async function clearCart() {
   try {
     const {cart} = await getCart();
-    if (!cart) {
-      return {success: true, cartItems: []};
-    }
+    if (!cart)
+      return {success: true, cartItems: [], totalPrice: 0, itemCount: 0};
     await db.delete(cartsTable).where(eq(cartsTable.id, cart.id));
-    return {success: true, cartItems: []};
+    return {success: true, cartItems: [], totalPrice: 0, itemCount: 0};
   } catch (error) {
     console.error('Error clearing cart:', error);
     return {success: false, error: 'Failed to clear cart'};
   }
 }
-
-/* ------------------------------------------------- */
+// --------------------------------------------------------
 export async function transferCartOnLogin(userId: string) {
   try {
     const sessionId = await getSessionId();
-
-    // If no session_id, do nothing
     if (!sessionId) {
-      console.log('No session_id found, nothing to transfer');
       return {success: true, message: 'No session_id found'};
     }
-
-    console.log(
-      'Starting cart transfer with sessionId:',
-      sessionId,
-      'and userId:',
-      userId
-    );
-
-    // Find cart associated with current session_id
     const sessionCartData = await db
       .select()
       .from(cartsTable)
@@ -257,80 +213,42 @@ export async function transferCartOnLogin(userId: string) {
         and(eq(cartsTable.session_id, sessionId), isNull(cartsTable.user_id))
       )
       .limit(1);
-
     const sessionCart = sessionCartData[0] || null;
-
-    // If no anonymous cart found, do nothing
     if (!sessionCart) {
-      console.log('No session cart found');
       return {success: true, message: 'No session cart found'};
     }
-
-    // console.log('Found session cart:', sessionCart);
-
-    // Check if user already has a cart
     const userCartData = await db
       .select()
       .from(cartsTable)
       .where(eq(cartsTable.user_id, userId))
       .limit(1);
-
     const userCart = userCartData[0] || null;
-
     if (userCart) {
-      console.log('Found user cart, merging items');
-      // User already has a cart - merge contents
       const combinedItems = [...((userCart.items as CartItem[]) || [])];
-
-      // Add each item from sessionCart
       for (const item of (sessionCart.items as CartItem[]) || []) {
         const existingItemIndex = combinedItems.findIndex(
           (existingItem) =>
             existingItem.product_id === item.product_id &&
             existingItem.size === item.size
         );
-
         if (existingItemIndex >= 0) {
-          // If product already exists, update quantity
           combinedItems[existingItemIndex].quantity += item.quantity;
         } else {
-          // Otherwise add as new product
           combinedItems.push(item);
         }
       }
-
-      // Update user's cart with the merged contents
       await db
         .update(cartsTable)
-        .set({
-          items: combinedItems,
-          updated_at: new Date(),
-        })
+        .set({items: combinedItems, updated_at: new Date()})
         .where(eq(cartsTable.id, userCart.id));
-
-      // Delete the anonymous cart
       await db.delete(cartsTable).where(eq(cartsTable.id, sessionCart.id));
-
-      console.log('Cart merged successfully and session cart deleted');
     } else {
-      console.log('No user cart found, transferring session cart');
-      // User has no cart - transfer the anonymous cart
       await db
         .update(cartsTable)
-        .set({
-          user_id: userId,
-          session_id: null,
-          updated_at: new Date(),
-        })
+        .set({user_id: userId, session_id: null, updated_at: new Date()})
         .where(eq(cartsTable.id, sessionCart.id));
-
-      console.log('Session cart transferred to user');
     }
-
-    return {
-      success: true,
-      message: `Cart transferred successfully (${sessionCart.items.length} items)`,
-    };
+    return {success: true, message: `Cart transferred successfully`};
   } catch (error) {
     console.error('Unexpected error transferring cart on login:', error);
     return {success: false, error, message: 'Failed to transfer cart'};

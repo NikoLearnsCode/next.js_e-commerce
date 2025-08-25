@@ -7,10 +7,10 @@ import {
   useEffect,
   useRef,
   useCallback,
-  useMemo,
 } from 'react';
 import {
   getCart,
+  addToCart,
   removeFromCart,
   updateCartItemQuantity,
   clearCart,
@@ -22,39 +22,26 @@ interface CartContextType {
   cartItems: CartItem[];
   itemCount: number;
   loading: boolean;
-  refreshCart: () => Promise<void>;
   totalPrice: number;
-  removeItem: (itemId: string) => Promise<void>;
-  updateItemQuantity: (itemId: string, quantity: number) => Promise<void>;
-  updateCartItems: (updatedCartItems: CartItem[]) => Promise<void>;
   isCartOpen: boolean;
-  openCart: () => void;
-  closeCart: () => void;
-  clearCartAction: () => Promise<void>;
   updatingItems: Record<string, boolean>;
   removingItems: Record<string, boolean>;
+  refreshCart: () => Promise<void>;
+  addItem: (item: CartItem) => Promise<void>;
+  removeItem: (itemId: string) => Promise<void>;
+  updateItemQuantity: (itemId: string, quantity: number) => Promise<void>;
+  clearCart: () => Promise<void>;
+  openCart: () => void;
+  closeCart: () => void;
 }
 
-const CartContext = createContext<CartContextType>({
-  cartItems: [],
-  itemCount: 0,
-  loading: true,
-  totalPrice: 0,
-  refreshCart: async () => {},
-  removeItem: async () => {},
-  updateItemQuantity: async () => {},
-  isCartOpen: false,
-  openCart: () => {},
-  closeCart: () => {},
-  updateCartItems: async () => {},
-  clearCartAction: async () => {},
-  updatingItems: {},
-  removingItems: {},
-});
+const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({children}: {children: React.ReactNode}) {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [totalPrice, setTotalPrice] = useState(0);
+  const [itemCount, setItemCount] = useState(0);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [updatingItems, setUpdatingItems] = useState<Record<string, boolean>>(
     {}
@@ -64,37 +51,19 @@ export function CartProvider({children}: {children: React.ReactNode}) {
   );
 
   const {user} = useAuth();
-
   const userIdRef = useRef<string | undefined>(user?.id);
-
   const isRefreshing = useRef(false);
-
-  const itemCount = useMemo(
-    () =>
-      cartItems.reduce(
-        (total: number, item: CartItem) => total + item.quantity,
-        0
-      ),
-    [cartItems]
-  );
-
-  const totalPrice = useMemo(
-    () =>
-      cartItems.reduce(
-        (total: number, item: CartItem) =>
-          total + Number(item.price) * item.quantity,
-        0
-      ),
-    [cartItems]
-  );
 
   const refreshCart = useCallback(async () => {
     if (isRefreshing.current) return;
-
     try {
       isRefreshing.current = true;
-      const {cartItems: freshCartItems} = await getCart();
-      setCartItems(freshCartItems);
+      const result = await getCart();
+      if (result.cartItems) {
+        setCartItems(result.cartItems);
+        setTotalPrice(result.totalPrice || 0);
+        setItemCount(result.itemCount || 0);
+      }
     } catch (error) {
       console.error('Error fetching cart:', error);
     } finally {
@@ -103,38 +72,63 @@ export function CartProvider({children}: {children: React.ReactNode}) {
     }
   }, []);
 
-  const removeItem = useCallback(async (itemId: string) => {
-    try {
-      setRemovingItems((prev) => ({...prev, [itemId]: true}));
-      const result = await removeFromCart(itemId);
-      if (result.success) {
+  // Hjälpfunktion för att hantera alla state-uppdateringar
+  const handleActionResult = useCallback(
+    (result: any) => {
+      if (result?.success) {
         setCartItems(result.cartItems || []);
+        setTotalPrice(result.totalPrice || 0);
+        setItemCount(result.itemCount || 0);
       } else {
-        console.error('Error removing item via backend:', result.error);
-        await refreshCart();
+        console.error(
+          'Cart action failed, refreshing from server',
+          result?.error
+        );
+        refreshCart(); // Fallback 
       }
-    } catch (error) {
-      console.error('Error removing item from cart:', error);
-      await refreshCart();
-    } finally {
-      setRemovingItems((prev) => ({...prev, [itemId]: false}));
-    }
-  }, []);
+    },
+    [refreshCart]
+  );
+
+  const addItem = useCallback(
+    async (item: CartItem) => {
+      try {
+        setUpdatingItems((prev) => ({...prev, [item.product_id]: true}));
+        const result = await addToCart(item);
+        handleActionResult(result);
+      } catch (error) {
+        console.error('Error adding item to cart:', error);
+        await refreshCart();
+      } finally {
+        setUpdatingItems((prev) => ({...prev, [item.product_id]: false}));
+      }
+    },
+    [handleActionResult, refreshCart]
+  );
+
+  const removeItem = useCallback(
+    async (itemId: string) => {
+      try {
+        setRemovingItems((prev) => ({...prev, [itemId]: true}));
+        const result = await removeFromCart(itemId);
+        handleActionResult(result);
+      } catch (error) {
+        console.error('Error removing item from cart:', error);
+        await refreshCart();
+      } finally {
+        setRemovingItems((prev) => ({...prev, [itemId]: false}));
+      }
+    },
+    [handleActionResult, refreshCart]
+  );
 
   const updateItemQuantity = useCallback(
     async (itemId: string, quantity: number) => {
       if (quantity < 1) return;
-
       try {
         setUpdatingItems((prev) => ({...prev, [itemId]: true}));
-
         const result = await updateCartItemQuantity(itemId, quantity);
-        if (result.success) {
-          setCartItems(result.cartItems || []);
-        } else {
-          console.error('Error updating quantity via backend:', result.error);
-          await refreshCart();
-        }
+        handleActionResult(result);
       } catch (error) {
         console.error('Error updating item quantity:', error);
         await refreshCart();
@@ -142,15 +136,31 @@ export function CartProvider({children}: {children: React.ReactNode}) {
         setUpdatingItems((prev) => ({...prev, [itemId]: false}));
       }
     },
-    []
+    [handleActionResult, refreshCart]
   );
 
-  // Hämta varukorgen vid första rendering
+  const clearCartAction = useCallback(async () => {
+    try {
+      const result = await clearCart();
+      if (result.success) {
+        setCartItems([]);
+        setTotalPrice(0);
+        setItemCount(0);
+      } else {
+        console.error('Error clearing cart:', result.error);
+      }
+    } catch (error) {
+      console.error('Error clearing cart:', error);
+    }
+  }, []);
+
+  const openCart = () => setIsCartOpen(true);
+  const closeCart = () => setIsCartOpen(false);
+
   useEffect(() => {
     refreshCart();
   }, [refreshCart]);
 
-  // När användaren loggar in eller ut
   useEffect(() => {
     if (userIdRef.current !== user?.id) {
       userIdRef.current = user?.id;
@@ -158,48 +168,23 @@ export function CartProvider({children}: {children: React.ReactNode}) {
     }
   }, [user?.id, refreshCart]);
 
-  const updateCartItems = useCallback(async (updatedCartItems: CartItem[]) => {
-    setCartItems(updatedCartItems);
-  }, []);
-
-  const openCart = () => {
-    setIsCartOpen(true);
-  };
-
-  const closeCart = () => {
-    setIsCartOpen(false);
-  };
-
-  const clearCartAction = async () => {
-    try {
-      const result = await clearCart();
-      if (result.success) {
-        setCartItems([]);
-      } else {
-        console.error('Error clearing cart:', result.error);
-      }
-    } catch (error) {
-      console.error('Error clearing cart:', error);
-    }
-  };
-
   return (
     <CartContext.Provider
       value={{
-        clearCartAction,
         cartItems,
-        updateCartItems,
         itemCount,
         loading,
         totalPrice,
-        refreshCart,
-        removeItem,
-        updateItemQuantity,
         isCartOpen,
-        openCart,
-        closeCart,
         updatingItems,
         removingItems,
+        refreshCart,
+        addItem,
+        removeItem,
+        updateItemQuantity,
+        clearCart: clearCartAction,
+        openCart,
+        closeCart,
       }}
     >
       {children}
@@ -208,5 +193,9 @@ export function CartProvider({children}: {children: React.ReactNode}) {
 }
 
 export function useCart() {
-  return useContext(CartContext);
+  const context = useContext(CartContext);
+  if (context === undefined) {
+    throw new Error('useCart must be used within a CartProvider');
+  }
+  return context;
 }

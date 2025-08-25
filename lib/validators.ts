@@ -12,7 +12,7 @@ export const cartItemSchema = z.object({
   id: z.string().uuid(),
   product_id: z.string().uuid(),
   quantity: z.number().int().min(1),
-  price: z.number().positive().min(0.01),
+  price: z.string().min(1, 'Pris måste vara minst 1 kr'),
   color: z.string(),
   brand: z.string(),
   name: z.string(),

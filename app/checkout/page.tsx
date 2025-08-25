@@ -4,7 +4,7 @@ import {redirect} from 'next/navigation';
 import {getServerSession} from 'next-auth';
 import {authOptions} from '@/lib/auth';
 import {getSessionId} from '@/utils/cookies';
-import {getCart} from '@/actions/cart';
+
 import {validateStep, getCheckoutUrl} from '@/lib/checkoutSteps';
 
 export const metadata: Metadata = {
@@ -27,10 +27,10 @@ export default async function Checkout({
   const user = session?.user;
 
   // Check if cart has items - redirect if empty
-  const {cartItems} = await getCart();
+  /*   const {cartItems} = await getCart();
   if (cartItems.length === 0) {
     redirect('/cart');
-  }
+  } */
 
   // Validate step (utan completed steps på server-side)
   const validatedStep = validateStep(stepParam || null, []);

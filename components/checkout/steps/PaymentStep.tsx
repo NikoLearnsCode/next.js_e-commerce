@@ -26,7 +26,7 @@ interface PaymentStepProps {
 
 export default function PaymentStep({onNext, deliveryData}: PaymentStepProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const {cartItems, totalPrice} = useCart();
+  const {cartItems, totalPrice, clearCart} = useCart();
 
   const form = useForm<PaymentFormData>({
     resolver: zodResolver(paymentSchema),
@@ -52,10 +52,16 @@ export default function PaymentStep({onNext, deliveryData}: PaymentStepProps) {
       if (!deliveryData) {
         throw new Error('Delivery data is required');
       }
-      const result = await createOrder(cartItems, deliveryData, paymentInfo);
+      const result = await createOrder(
+        cartItems,
+        deliveryData,
+        paymentInfo,
+        totalPrice
+      );
       if (!result.success || !result.orderId) {
         throw new Error(result.error || 'Failed to create order');
       }
+      await clearCart();
       onNext();
     } catch (error) {
       console.error('Error processing payment:', error);

@@ -14,6 +14,7 @@ import {useNavigatedHistory} from '@/context/NavigatedHistoryProvider';
 
 import FavoriteButton from '@/components/favorites/FavoriteButton';
 import NewBadge from '@/components/shared/NewBadge';
+import { formatPrice } from '@/utils/helpers';
 
 type ProductCardProps = {
   product: Product;
@@ -117,7 +118,7 @@ export default function ProductCard({
             </Link>
             {!showNewBadge && <FavoriteButton product={product} />}
           </div>
-          <p className='text-xs text-gray-700 sm:text-sm'>{product.price} kr</p>
+          <p className='text-xs text-gray-700 sm:text-sm'>{formatPrice(product.price)}</p>
         </div>
       </div>
     );
@@ -256,7 +257,7 @@ export default function ProductCard({
           </Link>
           {!showNewBadge && <FavoriteButton product={product} />}
         </div>
-        <p className='text-xs text-gray-700 sm:text-sm'>{product.price} kr</p>
+        <p className='text-xs text-gray-700 sm:text-sm'>{formatPrice(product.price)}</p>
       </div>
     </div>
   );
