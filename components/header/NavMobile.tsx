@@ -102,16 +102,16 @@ export default function MobileNav({navLinks}: MobileNavProps) {
       <AnimatePresence>
         {isMenuOpen && (
           <>
-            <MotionOverlay key='mobile-overlay' />
+            <MotionOverlay key='mobile-overlay' withDelay={true} />
 
             <MotionDropdown
-              position='left'
+              position='newLeft'
               key='mobile-dropdown'
               isMobile={true}
               className='overflow-y-auto'
             >
               {/* Huvudkategorier och stängningsknapp */}
-              <ul className='flex uppercase px-4 pr-6 text-sm  font-semibold font-syne py-5 items-center '>
+              <ul className='flex uppercase px-2  text-sm  font-semibold font-syne py-5 items-center '>
                 {navLinks.map((link, index) => (
                   <li
                     key={link.title}
@@ -137,14 +137,14 @@ export default function MobileNav({navLinks}: MobileNavProps) {
               </div>
 
               {/* Undermeny för aktiv kategori */}
-              <ul className='p-4 pt-5 space-y-4 text-sm'>
+              <ul className='p-2 pt-5 space-y-4 text-sm'>
                 {navLinks[activeCategory]?.subLinks?.map((subLink) => (
                   <li key={subLink.title} className='not-first:pt-2'>
                     <Link
                       href={subLink.href}
-                      className={`block mx-4   border-b border-transparent active:border-b active:border-black w-fit transition ${
+                      className={`block mx-4 font-medium border-b border-transparent active:border-b active:border-black w-fit transition ${
                         subLink.title === 'ERBJUDANDEN'
-                          ? 'text-red-600 active:border-red-600'
+                          ? 'text-red-800 active:border-red-800'
                           : ''
                       } `}
                       onClick={closeMenu}

@@ -24,9 +24,9 @@ export const MotionCloseX = ({
       onClick={onClick}
       className={`cursor-pointer z-50 ${className}`}
       aria-label='Stäng meny'
-      initial={withTranslate ? {opacity: 0, rotate: -45, translateX: -2} : {}}
+      initial={withTranslate ? {opacity: 0, rotate: 0, translateX: -200} : {}}
       animate={withTranslate ? {opacity: 1, rotate: 0, translateX: 0} : {}}
-      transition={{delay: 0.2, duration: 0.3}}
+      transition={{delay: 0.1, duration: 0.4}}
     >
       <X size={size} strokeWidth={strokeWidth} />
     </motion.button>
@@ -40,7 +40,7 @@ interface MotionDropdownProps {
   className?: string;
   id?: string;
   isMobile?: boolean;
-  position?: 'left' | 'right' | 'top';
+  position?: 'left' | 'right' | 'top' | 'newLeft';
 }
 
 export const MotionDropdown = ({
@@ -112,6 +112,35 @@ export const MotionDropdown = ({
     },
   };
 
+  const newLeftVariants: Variants = {
+    hidden: {
+      clipPath: 'inset(0% 100% 0% 0%)',
+      opacity: 1,
+    },
+
+    visible: {
+      clipPath: 'inset(0% 0% 0% 0%)',
+      opacity: 1,
+      transition: {
+        type: 'tween',
+        ease: 'easeOut',
+        duration: 0.4,
+        delay: 0.1,
+      },
+    },
+
+    exit: {
+      clipPath: 'inset(0% 100% 0% 0%)',
+      opacity: 1,
+      transition: {
+        type: 'tween',
+        ease: 'easeIn',
+        duration: 0.2,
+        delay: 0.2,
+      },
+    },
+  };
+
   // Funktion för att dynamiskt välja animationsvarianter baserat på 'position'-prop.
   const getVariants = () => {
     switch (position) {
@@ -121,6 +150,8 @@ export const MotionDropdown = ({
         return rightVariants;
       case 'top':
         return topVariants;
+      case 'newLeft':
+        return newLeftVariants;
       default:
         return leftVariants;
     }
@@ -135,6 +166,8 @@ export const MotionDropdown = ({
         return `right-0 top-0 h-full`;
       case 'top':
         return 'w-full';
+      case 'newLeft':
+        return `left-0 top-0 h-full ${isMobile ? 'w-full' : ''}`;
       default:
         return 'left-0 top-0 h-full';
     }

@@ -142,7 +142,7 @@ export default function DesktopNav({navLinks}: DesktopNavProps) {
         {hoveredIndex !== null && (
           <>
             <MotionDropdown
-              position='left'
+              position='newLeft'
               key='desktop-dropdown'
               onMouseLeave={closeDropdown}
               className='pt-19 pl-8 min-w-[430px] '
@@ -163,9 +163,9 @@ export default function DesktopNav({navLinks}: DesktopNavProps) {
                       key={subLink.title}
                       href={subLink.href}
                       onClick={closeDropdown}
-                      className={`transition focus:border-black outline-none block not-first:pt-2 text-sm  border-b border-transparent hover:border-b hover:border-black w-fit ${
+                      className={`transition focus:border-black outline-none block not-first:pt-2 text-sm font-medium border-b border-transparent hover:border-b hover:border-black w-fit ${
                         subLink.title === 'ERBJUDANDEN'
-                          ? 'text-red-600 hover:border-red-600 focus:border-red-600'
+                          ? 'text-red-800 hover:border-red-800 focus:border-red-800'
                           : ''
                       } `}
                     >
@@ -176,7 +176,7 @@ export default function DesktopNav({navLinks}: DesktopNavProps) {
               </ul>
             </MotionDropdown>
 
-            <MotionOverlay key='desktop-overlay' />
+            <MotionOverlay key='desktop-overlay' withDelay={true} />
           </>
         )}
       </AnimatePresence>
