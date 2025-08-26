@@ -108,9 +108,9 @@ export default function DesktopNav({navLinks}: DesktopNavProps) {
           >
             <Link href={link.href} onClick={handleClick}>
               <span
-                className={`transition-all duration-150 delay-150 pb-0.5 ${
+                className={` pb-0.5 ${
                   hoveredIndex === null && isActivePath(link.href)
-                    ? 'text-black border-b border-black '
+                    ? 'text-black border-b delay-150 border-black '
                     : hoveredIndex === index
                       ? 'text-black border-b border-black hover:border-black'
                       : hoveredIndex !== null
@@ -147,7 +147,6 @@ export default function DesktopNav({navLinks}: DesktopNavProps) {
             >
               <div className='absolute top-1 right-1'>
                 <MotionCloseX
-
                   size={14}
                   strokeWidth={1.5}
                   className='p-5'
