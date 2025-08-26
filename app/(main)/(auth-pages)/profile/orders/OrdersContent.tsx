@@ -7,6 +7,7 @@ import type {OrderWithItems} from '@/lib/validators';
 import AnimatedAuthContainer from '@/components/shared/AnimatedContainer';
 import {Link} from '@/components/shared/ui/link';
 import Carousel from '@/components/shared/Carousel';
+import {useMediaQuery} from '@/hooks/useMediaQuery';
 
 interface OrdersClientContentProps {
   orders: OrderWithItems[];
@@ -15,13 +16,15 @@ interface OrdersClientContentProps {
 export default function OrdersClientContent({
   orders,
 }: OrdersClientContentProps) {
+  const isDesktop = useMediaQuery('(min-width: 768px)');
+
   return (
     <AnimatedAuthContainer
       direction='left'
       className={`${orders.length === 0 ? 'max-w-lg' : 'max-w-5xl'} w-full`}
     >
       {/* Header */}
-      <div className=' flex justify-between items-center mb-8 pl-4 sm:px-0'>
+      <div className=' flex justify-between items-center mb-8 pl-4 lg:px-0'>
         <h1 className='text-lg uppercase font-medium'>Mina beställningar</h1>
         <Link
           className='text-xs text-primary font-medium hover:underline flex gap-2 group tracking-wider'
@@ -59,7 +62,7 @@ export default function OrdersClientContent({
                 <Carousel
                   items={order.order_items}
                   title={formattedDate}
-                  titleClassName='text-sm  text-gray-600 px-3 sm:px-0 sm:text-base'
+                  titleClassName='text-sm  text-gray-600 px-3 lg:px-0 sm:text-base'
                   renderItem={(item, _index) => (
                     <div className='aspect-[7/9]'>
                       <Link
@@ -87,7 +90,7 @@ export default function OrdersClientContent({
                     640: {slidesPerView: 2, spaceBetween: 3},
                     768: {slidesPerView: 3, spaceBetween: 3},
                   }}
-                  showNavigation={order.order_items.length > 3}
+                  showNavigation={isDesktop ? order.order_items.length > 3 : order.order_items.length > 2}
                   id={`order-${order.id}`}
                 />
               </div>

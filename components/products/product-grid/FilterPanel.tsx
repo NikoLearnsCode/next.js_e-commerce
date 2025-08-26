@@ -9,7 +9,7 @@ import {
   MotionCloseX,
   MotionOverlay,
   MotionDropdown,
-} from '@/components/shared/AnimatedDropdown';
+} from '@/components/shared/AnimatedSidebar';
 import {Button} from '@/components/shared/ui/button';
 
 interface FilterPanelProps {

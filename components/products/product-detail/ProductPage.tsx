@@ -7,7 +7,7 @@ import {Product} from '@/lib/validators';
 import {useState} from 'react';
 import Newsletter from '@/components/shared/Newsletter';
 import FavoriteButton from '@/components/favorites/FavoriteButton';
-
+import {useMediaQuery} from '@/hooks/useMediaQuery';
 import MobileImageSwiper from './MobileImageSwiper';
 import dynamic from 'next/dynamic';
 import Carousel from '@/components/shared/Carousel';
@@ -37,6 +37,8 @@ export default function ProductPage({
   const handleAddToCartSuccess = () => {
     setSelectedSize(null);
   };
+
+  const isDesktop = useMediaQuery('(min-width: 1024px)');
 
   return (
     <>
@@ -169,7 +171,8 @@ export default function ProductPage({
         <div className='mx-auto pt-24 lg:pt-40 pb-8'>
           <Carousel
             items={categoryProducts}
-            titelDivClassName='px-4'
+            slidesOffsetBefore={isDesktop ? 30 : 20}
+            titelDivClassName='sm:px-4 px-0'
             title='Liknande produkter'
             renderItem={(product) => (
               <ProductCard
@@ -189,7 +192,8 @@ export default function ProductPage({
           <Carousel
             items={genderProducts}
             title='Du kanske också gillar'
-            titelDivClassName='px-4'
+            titelDivClassName='sm:px-4 px-0'
+            slidesOffsetBefore={isDesktop ? 30 : 20}
             renderItem={(product) => (
               <ProductCard
                 product={product}

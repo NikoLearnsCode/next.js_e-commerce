@@ -9,7 +9,7 @@ import {useEffect, useState, useRef} from 'react';
 // import SpinningLogo from '../shared/SpinningLogo';
 import {motion} from 'framer-motion';
 import {AnimatePresence} from 'framer-motion';
-import {MotionCloseX} from '../shared/AnimatedDropdown';
+import {MotionCloseX} from '../shared/AnimatedSidebar';
 import {useSaveCurrentUrl} from '@/hooks/useLoginRedirect';
 import {useRouter} from 'next/navigation';
 import {signOut} from 'next-auth/react';

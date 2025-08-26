@@ -9,7 +9,7 @@ import {
   MotionDropdown,
   MotionOverlay,
   MotionCloseX,
-} from '@/components/shared/AnimatedDropdown';
+} from '@/components/shared/AnimatedSidebar';
 
 interface MobileNavProps {
   navLinks: NavLink[];

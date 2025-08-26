@@ -4,7 +4,7 @@ import React, {useRef, useEffect, useState} from 'react';
 import {ArrowLeft, Search} from 'lucide-react';
 import {motion} from 'framer-motion';
 import {useRouter} from 'next/navigation';
-import {MotionCloseX} from '../shared/AnimatedDropdown';
+import {MotionCloseX} from '../shared/AnimatedSidebar';
 import {useNavigatedHistory} from '@/context/NavigatedHistoryProvider';
 
 export default function SearchBar({

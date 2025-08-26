@@ -136,7 +136,7 @@ const Carousel = <T,>({
         className='w-full'
       >
         {items.map((item, index) => (
-          <SwiperSlide className='w-full' key={index}>
+            <SwiperSlide className='w-full' key={index}>
             {renderItem(item, index)}
           </SwiperSlide>
         ))}

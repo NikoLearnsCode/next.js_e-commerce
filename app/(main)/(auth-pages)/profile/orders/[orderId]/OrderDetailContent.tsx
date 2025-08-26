@@ -135,11 +135,11 @@ export default function OrderDetailContent({order}: OrderDetailContentProps) {
 
         {/* Bottom Section - Order Summary */}
 
-        <div className='float-right pb-10 border-t border-gray-200 px-5 md:px-0 w-full md:w-[510px] p-3 mt-7'>
+        <div className='float-right pb-10 border-t border-gray-200 px-5 lg:px-0  w-full md:w-[50%] p-3 mt-7'>
           <h3 className='text-base pt-5  font-medium mb-4 text-gray-900'>
             SAMMANFATTNING AV BESTÄLLNING
           </h3>
-          <div className='space-y-3'>
+          <div className='space-y-2'>
             <div className='flex justify-between'>
               <span className='text-gray-700'>Delsumma</span>
               <span className='text-gray-900'>

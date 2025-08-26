@@ -8,7 +8,7 @@ import {
   MotionCloseX,
   MotionDropdown,
   MotionOverlay,
-} from '@/components/shared/AnimatedDropdown';
+} from '@/components/shared/AnimatedSidebar';
 
 interface DesktopNavProps {
   navLinks: NavLink[];

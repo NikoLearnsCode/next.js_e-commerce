@@ -4,12 +4,20 @@ import {useNavigatedHistory} from '@/context/NavigatedHistoryProvider';
 import {AnimatePresence} from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-import {MotionDropdown, MotionOverlay} from '../shared/AnimatedDropdown';
+import {MotionDropdown, MotionOverlay} from '../shared/AnimatedSidebar';
 
 import {Button} from '@/components/shared/ui/button';
 import {useMediaQuery} from '@/hooks/useMediaQuery';
 
-const popularSearches = ['T-shirts', 'Overshirt', 'Dam', 'Jackor', 'Byxor', 'Toppar', 'Herr',];
+const popularSearches = [
+  'T-shirts',
+  'Overshirt',
+  'Dam',
+  'Jackor',
+  'Byxor',
+  'Toppar',
+  'Herr',
+];
 
 type SearchDropdownProps = {
   isSearchExpanded: boolean;

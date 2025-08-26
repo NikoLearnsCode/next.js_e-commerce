@@ -7,7 +7,7 @@ import {
   MotionOverlay,
   MotionDropdown,
   MotionCloseX,
-} from '@/components/shared/AnimatedDropdown';
+} from '@/components/shared/AnimatedSidebar';
 import Image from 'next/image';
 import {formatPrice} from '@/utils/helpers';
 import {AnimatePresence} from 'framer-motion';

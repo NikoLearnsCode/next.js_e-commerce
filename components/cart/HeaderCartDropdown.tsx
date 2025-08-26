@@ -9,7 +9,7 @@ import EmptyCart from './EmptyCart';
 import SpinningLogo from '../shared/ui/SpinningLogo';
 import {PiBagSimpleThin} from 'react-icons/pi';
 
-import {MotionCloseX} from '../shared/AnimatedDropdown';
+import {MotionCloseX} from '../shared/AnimatedSidebar';
 
 export default function CartDropdown({
   setIsSearchExpanded,
