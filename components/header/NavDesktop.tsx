@@ -18,8 +18,13 @@ export default function DesktopNav({navLinks}: DesktopNavProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const pathname = usePathname();
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  // candidateRef lagrar vilket index för att trigga hover
   const candidateRef = useRef<number | null>(null);
+
+  // Säkra att navLinks inte är undefined innan du använder det
+  if (!navLinks || navLinks.length === 0) {
+    return null; // Renderar inget om det inte finns några länkar
+  }
+
   const isActivePath = (href: string) => {
     if (href === '/' && pathname === '/') {
       return true;
@@ -45,26 +50,21 @@ export default function DesktopNav({navLinks}: DesktopNavProps) {
     }
   };
 
-  // När musen går in på en main-länk
   const handleHover = (index: number): void => {
     candidateRef.current = index;
-    // Om dropdownen inte redan är öppen, starta timeouten
     if (hoveredIndex === null) {
       if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
       hoverTimeoutRef.current = setTimeout(() => {
-        // Kontrollera att användaren fortfarande är kvar på samma länk
         if (candidateRef.current === index) {
           setHoveredIndex(index);
         }
-      }, 500);
+      }, 300);
     } else {
       setHoveredIndex(index);
     }
   };
 
-  // När musen lämnar main-länken
   const handleMouseLeave = () => {
-    // Endast rensa timeout och candidate om dropdownen inte redan är öppen
     if (hoveredIndex === null) {
       candidateRef.current = null;
       if (hoverTimeoutRef.current) {
@@ -98,7 +98,6 @@ export default function DesktopNav({navLinks}: DesktopNavProps) {
 
   return (
     <nav className='uppercase'>
-      {/* Huvudnavigering */}
       <ul className='flex items-center gap-2 justify-center relative z-50 '>
         {navLinks.map((link, index) => (
           <li
@@ -109,7 +108,7 @@ export default function DesktopNav({navLinks}: DesktopNavProps) {
           >
             <Link href={link.href} onClick={handleClick}>
               <span
-                className={` pb-0.5 ${
+                className={`transition-all duration-150 delay-150 pb-0.5 ${
                   hoveredIndex === null && isActivePath(link.href)
                     ? 'text-black border-b border-black '
                     : hoveredIndex === index
@@ -123,7 +122,6 @@ export default function DesktopNav({navLinks}: DesktopNavProps) {
               </span>
             </Link>
 
-            {/* Keyboard navigation for dropdown */}
             <span
               key={link.title}
               onKeyDown={(e: React.KeyboardEvent<HTMLSpanElement>) =>
@@ -149,7 +147,7 @@ export default function DesktopNav({navLinks}: DesktopNavProps) {
             >
               <div className='absolute top-1 right-1'>
                 <MotionCloseX
-                  withTranslate={true}
+
                   size={14}
                   strokeWidth={1.5}
                   className='p-5'

@@ -26,7 +26,7 @@ export const MotionCloseX = ({
       aria-label='Stäng meny'
       initial={withTranslate ? {opacity: 0, rotate: 0, translateX: -200} : {}}
       animate={withTranslate ? {opacity: 1, rotate: 0, translateX: 0} : {}}
-      transition={{delay: 0.1, duration: 0.4}}
+      transition={{delay: 0.15, duration: 0.3}}
     >
       <X size={size} strokeWidth={strokeWidth} />
     </motion.button>
@@ -96,7 +96,7 @@ export const MotionDropdown = ({
         type: 'tween',
         ease: 'easeOut',
         duration: 0.2,
-        delay: 0.1,
+
       },
     },
 
@@ -124,7 +124,7 @@ export const MotionDropdown = ({
       transition: {
         type: 'tween',
         ease: 'easeOut',
-        duration: 0.4,
+        duration: 0.3,
         delay: 0.1,
       },
     },
@@ -136,7 +136,7 @@ export const MotionDropdown = ({
         type: 'tween',
         ease: 'easeIn',
         duration: 0.2,
-        delay: 0.2,
+        delay: 0.1,
       },
     },
   };

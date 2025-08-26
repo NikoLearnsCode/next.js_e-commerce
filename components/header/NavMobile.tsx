@@ -15,24 +15,33 @@ interface MobileNavProps {
   navLinks: NavLink[];
 }
 
+// Helper-funktion som säkert hanterar undefined navLinks
+const findInitialCategory = (navLinks: NavLink[], pathname: string): number => {
+  if (!navLinks) {
+    return 0;
+  }
+  for (let i = 0; i < navLinks.length; i++) {
+    if (
+      (navLinks[i].href === '/' && pathname === '/') ||
+      (navLinks[i].href !== '/' && pathname.startsWith(navLinks[i].href))
+    ) {
+      return i;
+    }
+  }
+  return 0;
+};
+
 export default function MobileNav({navLinks}: MobileNavProps) {
   const pathname = usePathname();
 
-  // Hitta index för den kategori som matchar nuvarande URL
-  const findInitialCategory = () => {
-    for (let i = 0; i < navLinks.length; i++) {
-      if (
-        (navLinks[i].href === '/' && pathname === '/') ||
-        (navLinks[i].href !== '/' && pathname.startsWith(navLinks[i].href))
-      ) {
-        return i;
-      }
-    }
-    return 0;
-  };
-
+  // Initialisera med ett säkert standardvärde
+  const [activeCategory, setActiveCategory] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [activeCategory, setActiveCategory] = useState(findInitialCategory);
+
+  // Använd useEffect för att uppdatera state när navLinks eller pathname ändras
+  useEffect(() => {
+    setActiveCategory(findInitialCategory(navLinks, pathname));
+  }, [navLinks, pathname]);
 
   const toggleMenu = () => {
     const newMenuState = !isMenuOpen;
@@ -44,7 +53,6 @@ export default function MobileNav({navLinks}: MobileNavProps) {
     }
   };
 
-  // Stäng hela menyn
   const closeMenu = () => {
     setIsMenuOpen(false);
     document.body.style.overflow = '';
@@ -56,15 +64,9 @@ export default function MobileNav({navLinks}: MobileNavProps) {
     }
   };
 
-  // Ändra aktiv kategori
   const changeCategory = (index: number) => {
     setActiveCategory(index);
   };
-
-  // Uppdatera aktiv kategori när URL ändras
-  useEffect(() => {
-    setActiveCategory(findInitialCategory());
-  }, [pathname]);
 
   useEffect(() => {
     document.addEventListener('keydown', handleEscape);
@@ -86,6 +88,10 @@ export default function MobileNav({navLinks}: MobileNavProps) {
       window.removeEventListener('resize', checkScreenSize);
     };
   }, []);
+
+  if (!navLinks || navLinks.length === 0) {
+    return null; // Renderar inget om det inte finns några länkar
+  }
 
   return (
     <nav className='relative uppercase '>
@@ -110,7 +116,6 @@ export default function MobileNav({navLinks}: MobileNavProps) {
               isMobile={true}
               className='overflow-y-auto'
             >
-              {/* Huvudkategorier och stängningsknapp */}
               <ul className='flex uppercase px-2  text-sm  font-semibold font-syne py-5 items-center '>
                 {navLinks.map((link, index) => (
                   <li
@@ -130,13 +135,11 @@ export default function MobileNav({navLinks}: MobileNavProps) {
                 <MotionCloseX
                   onClick={closeMenu}
                   size={14}
-                  withTranslate={true}
                   className='p-5'
                   strokeWidth={1.5}
                 />
               </div>
 
-              {/* Undermeny för aktiv kategori */}
               <ul className='p-2 pt-5 space-y-4 text-sm'>
                 {navLinks[activeCategory]?.subLinks?.map((subLink) => (
                   <li key={subLink.title} className='not-first:pt-2'>

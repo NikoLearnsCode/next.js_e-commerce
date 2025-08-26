@@ -4,7 +4,6 @@ import {
   cartsTable,
   ordersTable,
   orderItemsTable,
-  categoriesTable,
   favoritesTable,
 } from '@/drizzle/db/schema';
 
@@ -79,9 +78,6 @@ export type NewOrderItem = typeof orderItemsTable.$inferInsert;
 export type OrderWithItems = Order & {
   order_items: OrderItem[];
 };
-
-export type Category = typeof categoriesTable.$inferSelect;
-export type NewCategory = typeof categoriesTable.$inferInsert;
 
 // Favorite types using normalized approach with joins
 export type Favorite = {

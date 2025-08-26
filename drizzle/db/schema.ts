@@ -10,9 +10,12 @@ import {
   varchar,
   primaryKey,
 } from 'drizzle-orm/pg-core';
-
+import {relations} from 'drizzle-orm';
 import type {CartItem} from '@/lib/validators';
 import type {AdapterAccount} from '@/lib/types/auth-types';
+
+
+// ----------------------------------------------------------------
 
 // LAGRAR INFO OM ANVÄNDARE
 export const usersTable = pgTable('users', {
@@ -44,6 +47,7 @@ export const accountsTable = pgTable(
   },
   (table) => [primaryKey({columns: [table.provider, table.providerAccountId]})]
 );
+
 // LAGRAR SESSIONER FÖR usersTable
 export const sessionsTable = pgTable('sessions', {
   sessionToken: text('sessionToken').notNull().primaryKey(),
@@ -101,8 +105,12 @@ export const ordersTable = pgTable('orders', {
 // ORDER ITEMS
 export const orderItemsTable = pgTable('order_items', {
   id: uuid('id').primaryKey().defaultRandom(),
-  order_id: uuid('order_id').references(() => ordersTable.id),
-  product_id: uuid('product_id').references(() => productsTable.id),
+  order_id: uuid('order_id')
+    .notNull()
+    .references(() => ordersTable.id, {onDelete: 'cascade'}),
+  product_id: uuid('product_id').references(() => productsTable.id, {
+    onDelete: 'set null',
+  }),
   quantity: integer('quantity').notNull(),
   price: numeric('price', {precision: 10, scale: 2}).notNull(),
   name: varchar('name', {length: 255}).notNull(),
@@ -113,19 +121,7 @@ export const orderItemsTable = pgTable('order_items', {
   image: varchar('image', {length: 255}).notNull(),
 });
 
-// CATEGORIES LINKS
-export const categoriesTable = pgTable('categories', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  name: varchar('name', {length: 255}).notNull().unique(),
-  slug: varchar('slug', {length: 255}).notNull().unique(),
-  gender: varchar('gender', {length: 255}).notNull(),
-  display_order: integer('display_order').default(0),
-  is_active: boolean('is_active').default(true),
-  created_at: timestamp('created_at').defaultNow(),
-  updated_at: timestamp('updated_at').defaultNow(),
-});
-
-// FAVORITES - Normalized approach (no data duplication)
+// FAVORITES
 export const favoritesTable = pgTable('favorites', {
   id: uuid('id').primaryKey().defaultRandom(),
   user_id: uuid('user_id').references(() => usersTable.id, {
@@ -139,3 +135,108 @@ export const favoritesTable = pgTable('favorites', {
     .notNull(),
   created_at: timestamp('created_at').defaultNow(),
 });
+
+// Tabell för huvudkategorier (herr, dam, m.m)
+export const mainCategories = pgTable('main_categories', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  name: text('name').notNull(),
+  slug: text('slug').notNull().unique(),
+  displayOrder: integer('display_order').notNull().default(0),
+  isActive: boolean('is_active').notNull().default(true),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+// Tabell för underkategorier (byxor, tröjor, m.m)
+export const subCategories = pgTable('sub_categories', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  name: text('name').notNull(),
+  slug: text('slug').notNull(),
+  // ----> FIX: Lade till foreign key-koppling här
+  mainCategoryId: uuid('main_category_id')
+    .notNull()
+    .references(() => mainCategories.id, {onDelete: 'cascade'}),
+  displayOrder: integer('display_order').notNull().default(0),
+  isActive: boolean('is_active').notNull().default(true),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+
+// ----------------------------------------------------------------
+export const mainCategoryRelations = relations(mainCategories, ({many}) => ({
+  subCategories: many(subCategories),
+}));
+
+export const subCategoryRelations = relations(subCategories, ({one}) => ({
+  mainCategory: one(mainCategories, {
+    fields: [subCategories.mainCategoryId],
+    references: [mainCategories.id],
+  }),
+}));
+
+
+/* export const usersRelations = relations(usersTable, ({many}) => ({
+  accounts: many(accountsTable),
+  sessions: many(sessionsTable),
+  orders: many(ordersTable),
+  carts: many(cartsTable),
+  favorites: many(favoritesTable),
+}));
+
+export const accountsRelations = relations(accountsTable, ({one}) => ({
+  user: one(usersTable, {
+    fields: [accountsTable.userId],
+    references: [usersTable.id],
+  }),
+}));
+
+export const sessionsRelations = relations(sessionsTable, ({one}) => ({
+  user: one(usersTable, {
+    fields: [sessionsTable.userId],
+    references: [usersTable.id],
+  }),
+}));
+
+export const productsRelations = relations(productsTable, ({many}) => ({
+  orderItems: many(orderItemsTable),
+  favorites: many(favoritesTable),
+}));
+
+export const cartsRelations = relations(cartsTable, ({one}) => ({
+  user: one(usersTable, {
+    fields: [cartsTable.user_id],
+    references: [usersTable.id],
+  }),
+}));
+
+export const ordersRelations = relations(ordersTable, ({one, many}) => ({
+  user: one(usersTable, {
+    fields: [ordersTable.user_id],
+    references: [usersTable.id],
+  }),
+  orderItems: many(orderItemsTable),
+}));
+
+export const orderItemsRelations = relations(orderItemsTable, ({one}) => ({
+  order: one(ordersTable, {
+    fields: [orderItemsTable.order_id],
+    references: [ordersTable.id],
+  }),
+  product: one(productsTable, {
+    fields: [orderItemsTable.product_id],
+    references: [productsTable.id],
+  }),
+}));
+
+export const favoritesRelations = relations(favoritesTable, ({one}) => ({
+  user: one(usersTable, {
+    fields: [favoritesTable.user_id],
+    references: [usersTable.id],
+  }),
+  product: one(productsTable, {
+    fields: [favoritesTable.product_id],
+    references: [productsTable.id],
+  }),
+})); */
+
