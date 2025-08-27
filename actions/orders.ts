@@ -93,6 +93,7 @@ export async function getOrder(orderId: string) {
 }
 
 /* ------------------------------------------------- */
+// TODO - relations api
 export async function getUserOrders() {
   try {
     // Check if user is logged in with NextAuth

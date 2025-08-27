@@ -1,7 +1,7 @@
 import {notFound} from 'next/navigation';
 import {getProductSlugAndRelatedProducts} from '@/actions/product';
 import type {Metadata} from 'next';
-import ProductPage from '@/components/products/product-detail/ProductPage';
+import ProductPage from '@/components/products/product-detail/ProductDetailPage';
 
 interface PageProps {
   params: Promise<{slug: string}>;

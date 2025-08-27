@@ -1,8 +1,9 @@
 import AdminTable from '@/components/admin/shared/AdminTable';
 import {getAllProducts} from '@/actions/admin';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
-import { redirect } from 'next/navigation';
+import {getServerSession} from 'next-auth';
+import {authOptions} from '@/lib/auth';
+import {redirect} from 'next/navigation';
+import NoResults from '@/components/admin/shared/NoResults';
 
 export default async function ProductsPage() {
   const session = await getServerSession(authOptions);
@@ -14,27 +15,36 @@ export default async function ProductsPage() {
   const products = await getAllProducts();
 
   if (!products || products.length === 0) {
-    return <div>Inga produkter hittades.</div>;
+    return <NoResults message='Inga produkter hittades.' />;
   }
 
-  // 1. Definiera exakt vilka kolumner du vill visa
-  const desiredKeys = ['description', 'price', 'brand', 'category', 'slug', 'created_at', 'updated_at'];
+  /*   const desiredKeys = [
+    'name',
+    'price',
+    'brand',
+    'gender',
+    'category',
+    'slug',
+    'created_at',
+    'updated_at',
+  ];
 
-  // 2. Extrahera och filtrera nycklarna
   const filteredKeys = Object.keys(products[0]).filter((key) =>
     desiredKeys.includes(key)
   );
+ */
 
-  // 3. Transformera den filtrerade listan till tabell-formatet
+  const filteredKeys = Object.keys(products[0]);
+
+  console.log('filteredKeys', filteredKeys);
+
   const columns = filteredKeys.map((header) => ({
-    header: header,
-    cell: (product: any) => (
-      <div className='text-sm text-gray-900'>{String(product[header])}</div>
-    ),
+    header: header.replace('_', ' '),
+
+    cell: (product: any) => <div>{String(product[header])}</div>,
   }));
 
-  // Logga den färdiga kolumn-arrayen för att se att det blev rätt
-  console.log(columns);
+  // console.log(columns);
 
   return <AdminTable data={products} columns={columns} />;
 }

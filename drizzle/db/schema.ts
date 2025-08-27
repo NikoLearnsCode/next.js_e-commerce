@@ -11,9 +11,8 @@ import {
   primaryKey,
 } from 'drizzle-orm/pg-core';
 import {relations} from 'drizzle-orm';
-import type {CartItem} from '@/lib/validators';
+import type {CartItem, DeliveryFormData} from '@/lib/validators';
 import type {AdapterAccount} from '@/lib/types/auth-types';
-
 
 // ----------------------------------------------------------------
 
@@ -60,19 +59,19 @@ export const sessionsTable = pgTable('sessions', {
 // PRODUCTS
 export const productsTable = pgTable('products', {
   id: uuid('id').primaryKey().defaultRandom(),
-  created_at: timestamp('created_at').defaultNow(),
-  updated_at: timestamp('updated_at').defaultNow(),
   name: varchar('name', {length: 255}).notNull(),
+  slug: varchar('slug', {length: 255}).notNull().unique(),
   description: varchar('description', {length: 255}).notNull(),
   price: numeric('price', {precision: 10, scale: 2}).notNull(),
   brand: varchar('brand', {length: 255}).notNull(),
   gender: varchar('gender', {length: 255}).notNull(),
   category: varchar('category', {length: 255}).notNull(),
   color: varchar('color', {length: 255}).notNull(),
-  slug: varchar('slug', {length: 255}).notNull().unique(),
   specs: jsonb('specs').$type<string[]>().notNull(),
   images: jsonb('images').$type<string[]>().notNull(),
   sizes: jsonb('sizes').$type<string[]>().notNull(),
+  created_at: timestamp('created_at').defaultNow(),
+  updated_at: timestamp('updated_at').defaultNow(),
 });
 
 // CARTS
@@ -94,10 +93,10 @@ export const ordersTable = pgTable('orders', {
     onDelete: 'cascade',
   }),
   session_id: varchar('session_id', {length: 255}),
-  status: varchar('status', {length: 255}).notNull(),
   total_amount: numeric('total_amount', {precision: 10, scale: 2}).notNull(),
-  delivery_info: jsonb('delivery_info').notNull(),
   payment_info: varchar('payment_info', {length: 255}).notNull(),
+  status: varchar('status', {length: 255}).notNull(),
+  delivery_info: jsonb('delivery_info').$type<DeliveryFormData>().notNull(),
   created_at: timestamp('created_at').defaultNow(),
   updated_at: timestamp('updated_at').defaultNow(),
 });
@@ -141,10 +140,10 @@ export const mainCategories = pgTable('main_categories', {
   id: uuid('id').primaryKey().defaultRandom(),
   name: text('name').notNull(),
   slug: text('slug').notNull().unique(),
-  displayOrder: integer('display_order').notNull().default(0),
+  display_order: integer('display_order').notNull().default(0),
   isActive: boolean('is_active').notNull().default(true),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  created_at: timestamp('created_at').notNull().defaultNow(),
+  updated_at: timestamp('updated_at').notNull().defaultNow(),
 });
 
 // Tabell för underkategorier (byxor, tröjor, m.m)
@@ -158,10 +157,9 @@ export const subCategories = pgTable('sub_categories', {
     .references(() => mainCategories.id, {onDelete: 'cascade'}),
   displayOrder: integer('display_order').notNull().default(0),
   isActive: boolean('is_active').notNull().default(true),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  created_at: timestamp('created_at').notNull().defaultNow(),
+  updated_at: timestamp('updated_at').notNull().defaultNow(),
 });
-
 
 // ----------------------------------------------------------------
 export const mainCategoryRelations = relations(mainCategories, ({many}) => ({
@@ -175,40 +173,39 @@ export const subCategoryRelations = relations(subCategories, ({one}) => ({
   }),
 }));
 
+//  export const usersRelations = relations(usersTable, ({many}) => ({
+//   accounts: many(accountsTable),
+//   sessions: many(sessionsTable),
+//   orders: many(ordersTable),
+//   carts: many(cartsTable),
+//   favorites: many(favoritesTable),
+// }));
 
-/* export const usersRelations = relations(usersTable, ({many}) => ({
-  accounts: many(accountsTable),
-  sessions: many(sessionsTable),
-  orders: many(ordersTable),
-  carts: many(cartsTable),
-  favorites: many(favoritesTable),
-}));
+// export const accountsRelations = relations(accountsTable, ({one}) => ({
+//   user: one(usersTable, {
+//     fields: [accountsTable.userId],
+//     references: [usersTable.id],
+//   }),
+// }));
 
-export const accountsRelations = relations(accountsTable, ({one}) => ({
-  user: one(usersTable, {
-    fields: [accountsTable.userId],
-    references: [usersTable.id],
-  }),
-}));
+// export const sessionsRelations = relations(sessionsTable, ({one}) => ({
+//   user: one(usersTable, {
+//     fields: [sessionsTable.userId],
+//     references: [usersTable.id],
+//   }),
+// }));
 
-export const sessionsRelations = relations(sessionsTable, ({one}) => ({
-  user: one(usersTable, {
-    fields: [sessionsTable.userId],
-    references: [usersTable.id],
-  }),
-}));
+// export const productsRelations = relations(productsTable, ({many}) => ({
+//   orderItems: many(orderItemsTable),
+//   favorites: many(favoritesTable),
+// }));
 
-export const productsRelations = relations(productsTable, ({many}) => ({
-  orderItems: many(orderItemsTable),
-  favorites: many(favoritesTable),
-}));
-
-export const cartsRelations = relations(cartsTable, ({one}) => ({
-  user: one(usersTable, {
-    fields: [cartsTable.user_id],
-    references: [usersTable.id],
-  }),
-}));
+// export const cartsRelations = relations(cartsTable, ({one}) => ({
+//   user: one(usersTable, {
+//     fields: [cartsTable.user_id],
+//     references: [usersTable.id],
+//   }),
+// }));
 
 export const ordersRelations = relations(ordersTable, ({one, many}) => ({
   user: one(usersTable, {
@@ -229,14 +226,13 @@ export const orderItemsRelations = relations(orderItemsTable, ({one}) => ({
   }),
 }));
 
-export const favoritesRelations = relations(favoritesTable, ({one}) => ({
-  user: one(usersTable, {
-    fields: [favoritesTable.user_id],
-    references: [usersTable.id],
-  }),
-  product: one(productsTable, {
-    fields: [favoritesTable.product_id],
-    references: [productsTable.id],
-  }),
-})); */
-
+// export const favoritesRelations = relations(favoritesTable, ({one}) => ({
+//   user: one(usersTable, {
+//     fields: [favoritesTable.user_id],
+//     references: [usersTable.id],
+//   }),
+//   product: one(productsTable, {
+//     fields: [favoritesTable.product_id],
+//     references: [productsTable.id],
+//   }),
+// })); 
