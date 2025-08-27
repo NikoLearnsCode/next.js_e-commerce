@@ -1,3 +1,4 @@
+
 import {Metadata} from 'next';
 import CheckoutPage from '@/components/checkout/CheckoutPage';
 import {redirect} from 'next/navigation';
@@ -7,9 +8,11 @@ import {getSessionId} from '@/utils/cookies';
 
 import {validateStep, getCheckoutUrl} from '@/lib/checkoutSteps';
 
-export const metadata: Metadata = {
-  title: 'Checkout',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: 'Checkout',
+  };
+}
 
 export default async function Checkout({
   searchParams,

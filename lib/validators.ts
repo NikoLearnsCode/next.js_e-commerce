@@ -5,6 +5,7 @@ import {
   ordersTable,
   orderItemsTable,
   favoritesTable,
+  mainCategories,
 } from '@/drizzle/db/schema';
 
 export const cartItemSchema = z.object({
@@ -60,7 +61,7 @@ export const paymentSchema = z.object({
 export type PaymentFormData = z.infer<typeof paymentSchema>;
 
 export type Product = typeof productsTable.$inferSelect & {
-  isNew: boolean;
+  isNew?: boolean;
 };
 
 export type NewProduct = typeof productsTable.$inferInsert;
@@ -90,3 +91,7 @@ export type Favorite = {
 };
 
 export type NewFavorite = typeof favoritesTable.$inferInsert;
+
+// Main Category types
+export type MainCategory = typeof mainCategories.$inferSelect;
+export type NewMainCategory = typeof mainCategories.$inferInsert;

@@ -6,9 +6,11 @@ import {authOptions} from '@/lib/auth';
 import LogoutButton from '@/app/(main)/(auth-pages)/profile/LogoutButton';
 import { ArrowRight } from 'lucide-react';
 
-export const metadata: Metadata = {
-  title: 'Mitt konto',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: 'Mitt konto',
+  };
+}
 
 export default async function ProfilePage() {
   const session = await getServerSession(authOptions);

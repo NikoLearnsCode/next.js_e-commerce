@@ -22,7 +22,7 @@ export async function getNavigationData() {
 
   try {
     const categoriesWithSubs = await db.query.mainCategories.findMany({
-      orderBy: [asc(mainCategories.displayOrder)],
+      orderBy: [asc(mainCategories.display_order)],
       with: {
         subCategories: {
           orderBy: (subCategories, {asc}) => [asc(subCategories.displayOrder)],
