@@ -14,7 +14,7 @@ type FavoriteButtonProps = {
 
 // Ny 'overlay' variant för hjärtat på bilden
 export default function FavoriteButton({
-  size = 18,
+  size = 16,
   strokeWidth = 1.5,
   className = '',
   product,

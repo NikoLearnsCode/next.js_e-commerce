@@ -14,7 +14,7 @@ import {useNavigatedHistory} from '@/context/NavigatedHistoryProvider';
 
 import FavoriteButton from '@/components/favorites/FavoriteButton';
 import NewBadge from '@/components/shared/NewBadge';
-import { formatPrice } from '@/utils/helpers';
+import {formatPrice} from '@/utils/helpers';
 
 type ProductCardProps = {
   product: Product;
@@ -78,7 +78,7 @@ export default function ProductCard({
   if (interactionMode === 'carouselItem') {
     return (
       <div className='flex flex-col relative w-full h-full pb-6 group'>
-        <div className='w-full relative h-full bg-white '>
+        <div className='w-full relative bg-white '>
           <Link
             href={`/${product.slug}`}
             className='block relative aspect-[7/9] h-full w-full '
@@ -118,7 +118,9 @@ export default function ProductCard({
             </Link>
             {!showNewBadge && <FavoriteButton product={product} />}
           </div>
-          <p className='text-xs text-gray-700 sm:text-sm'>{formatPrice(product.price)}</p>
+          <p className='text-xs text-gray-700 sm:text-sm'>
+            {formatPrice(product.price)}
+          </p>
         </div>
       </div>
     );
@@ -146,7 +148,7 @@ export default function ProductCard({
   // Default: Grid mode - Full product card with navigation options
   return (
     <div className='flex relative flex-col w-full h-full pb-6 group'>
-      <div className='w-full relative h-full bg-white'>
+      <div className='w-full relative bg-white'>
         {hasMultipleImages ? (
           // Multiple images: Swiper with touch (mobile) or button navigation (desktop)
           <>
@@ -257,7 +259,9 @@ export default function ProductCard({
           </Link>
           {!showNewBadge && <FavoriteButton product={product} />}
         </div>
-        <p className='text-xs text-gray-700 sm:text-sm'>{formatPrice(product.price)}</p>
+        <p className='text-xs text-gray-700 sm:text-sm'>
+          {formatPrice(product.price)}
+        </p>
       </div>
     </div>
   );

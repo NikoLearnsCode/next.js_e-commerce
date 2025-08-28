@@ -356,12 +356,12 @@ export default function CategoryManager({categories}: CategoryManagerProps) {
     if (category.level === 1) {
       return `bg-white text-[13px] border-b  hover:bg-gray-100 ${
         expandedCategories.has(category.id)
-          ? 'bg-gray-100 hover:bg-gray-200 border-gray-300'
+          ? 'bg-gray-100 hover:bg-gray-200/70 border-gray-300'
           : 'bg-white border-gray-100'
       }`;
     }
     // Ge subSubCategories en ljusare bakgrund för att skilja dem från subCategories.
-    return `bg-gray-100 text-[12px] border-b border-gray-300 hover:bg-gray-300/80`;
+    return `bg-gray-100 text-[12px] border-b border-gray-300 hover:bg-gray-200/70`;
   };
 
   // Funktion för att expandera alla kategorier.
