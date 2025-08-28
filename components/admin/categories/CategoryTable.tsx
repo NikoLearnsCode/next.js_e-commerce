@@ -282,8 +282,8 @@ export default function CategoryManager({categories}: CategoryManagerProps) {
   const getRowClassName = (category: FlattenedCategory) => {
     // Ge huvudkategorier en annorlunda, mörkare bakgrund.
     if (category.level === 0) {
-      return `bg-gray-50 text-sm border-b  border-gray-300  transition-colors ${
-        expandedCategories.has(category.id) ? 'bg-gray-200' : 'bg-gray-50'
+      return `bg-gray-50 text-sm border-b  border-gray-200  transition-colors ${
+        expandedCategories.has(category.id) ? 'bg-gray-200' : 'bg-white hover:bg-gray-50'
       }`;
     }
     // Ge underkategorier en vit bakgrund.
