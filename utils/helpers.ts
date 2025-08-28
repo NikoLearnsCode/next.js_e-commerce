@@ -56,8 +56,8 @@ export function formatDateForAdmin(date: Date | null | undefined): string {
 // Header-mappningar för alla admin-tabeller
 export const adminHeaderMapping: Record<string, string> = {
   // Gemensamma fält
-  name: 'Namn',
-  slug: 'Slug',
+  name: 'Produktnamn',
+  slug: 'URL',
   created_at: 'Skapad',
   updated_at: 'Uppdaterad',
 
@@ -68,7 +68,7 @@ export const adminHeaderMapping: Record<string, string> = {
   // Produkt-specifika
   price: 'Pris',
   brand: 'Märke',
-  gender: 'Kön',
+  gender: 'Gender',
   category: 'Kategori',
   sizes: 'Storlekar',
   color: 'Färg',

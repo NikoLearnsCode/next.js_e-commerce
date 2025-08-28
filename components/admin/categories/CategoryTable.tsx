@@ -14,32 +14,40 @@ import AdminTable from '../shared/AdminTable';
 import {MainCategoryWithSub} from '@/lib/validators';
 import {formatDateForAdmin, getAdminHeader} from '@/utils/helpers';
 
-
 type CategoryManagerProps = {
   categories: MainCategoryWithSub[];
 };
-
 
 type FlattenedCategory = MainCategoryWithSub & {
   level: number;
   parentName?: string;
 };
 
-
-
+/**
+ * @param cats - Arrayen av kategorier att platta ut.
+ * @param level - Den nuvarande nästlingsnivån (startar på 0).
+ * @param expandedCategories - Ett Set med IDn för de kategorier som användaren har expanderat.
+ * @param parentName - Namnet på föräldrakategorin, skickas med i rekursiva anrop.
+ * @returns En platt array av kategorier, redo att renderas i en tabell.
+ */
 const flattenCategoriesRecursively = (
   cats: MainCategoryWithSub[],
   level: number,
   expandedCategories: Set<string>,
   parentName: string | null
 ): FlattenedCategory[] => {
-
   const flattened: FlattenedCategory[] = [];
 
+  // Loopar igenom varje kategori på den nuvarande nivån.
   cats.forEach((cat) => {
+    // 1. Lägger till den nuvarande kategorin i listan, tillsammans med dess nivå och förälderns namn.
     flattened.push({...cat, level, parentName: parentName || undefined});
 
+    // 2. Kontrollerar om kategorin är expanderad OCH om den faktiskt har underkategorier.
     if (expandedCategories.has(cat.id) && cat.subCategories?.length) {
+      // 3. Om ja, anropa samma funktion igen (rekursion) för underkategorierna.
+      //    - Öka nivån med 1.
+      //    - Skicka med den *nuvarande* kategorins namn som förälder.
       flattened.push(
         ...flattenCategoriesRecursively(
           cat.subCategories,
@@ -51,11 +59,16 @@ const flattenCategoriesRecursively = (
     }
   });
 
-
+  // Returnerar den färdiga, platta listan.
   return flattened;
 };
 
-
+/**
+ * Hämtar rekursivt alla IDn från en hierarkisk kategori-array.
+ * Används för "Expand All"-knappen.
+ * @param cats - Arrayen av kategorier att söka igenom.
+ * @returns En array med alla funna kategori-IDn.
+ */
 const getAllCategoryIds = (cats: MainCategoryWithSub[]): string[] => {
   const ids: string[] = [];
   cats.forEach((cat) => {
@@ -68,45 +81,70 @@ const getAllCategoryIds = (cats: MainCategoryWithSub[]): string[] => {
 };
 
 // =================================================================
+// HUVUDKOMPONENT: CategoryManager
+// =================================================================
 
 export default function CategoryManager({categories}: CategoryManagerProps) {
-
+  // State-variabel som håller reda på vilka kategorier som är expanderade.
+  // Vi använder ett 'Set' eftersom det är väldigt snabbt att kolla om ett ID finns (med .has()).
+  // Initialt är alla huvudkategorier expanderade för en bra användarupplevelse.
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
-    new Set(categories.map((cat) => cat.id))
+    () => {
+      // Vi använder en funktion här för att kunna ha lite logik för startvärdet.
+      // Denna funktion körs bara EN GÅNG när komponenten skapas.
+
+      // 1. Säkerställ att 'categories'-arrayen faktiskt innehåller något.
+      if (categories && categories.length > 0) {
+        // 2. Om den gör det, skapa ett nytt Set som BARA innehåller ID:t
+        //    från det allra första objektet i arrayen.
+        return new Set([categories[0].id]);
+      }
+
+      // 3. Om 'categories' är tom, returnera ett tomt Set.
+      return new Set();
+    }
   );
 
-
+  /**
+   * Funktion för att växla (expandera/kollapsa) en specifik kategori.
+   * @param categoryId - ID på kategorin som ska växlas.
+   */
   const toggleCategory = (categoryId: string) => {
-
+    // Använder en callback-funktion i setState för att säkert kunna jobba med föregående state.
     setExpandedCategories((prev) => {
-      const newSet = new Set(prev); 
+      const newSet = new Set(prev); // Skapa en kopia för att undvika att mutera state direkt.
       if (newSet.has(categoryId)) {
-        newSet.delete(categoryId); 
+        newSet.delete(categoryId); // Om ID:t redan finns, ta bort det.
       } else {
-        newSet.add(categoryId); 
+        newSet.add(categoryId); // Annars, lägg till det.
       }
       return newSet;
     });
   };
 
-
+  // Använder 'useMemo' för att beräkna den platta listan.
+  // Denna beräkning körs endast om 'categories' (grund-datan) eller 'expandedCategories' ändras.
+  // Detta förhindrar onödiga och potentiellt tunga beräkningar vid varje rendering.
   const flattenedCategories = useMemo(
     () => flattenCategoriesRecursively(categories, 0, expandedCategories, null),
     [categories, expandedCategories]
   );
 
-
+  // Använder 'useMemo' för att definiera kolumnerna.
+  // Detta görs för att inte skapa om hela denna (potentiellt stora) array vid varje rendering.
+  // Beroende av `expandedCategories` eftersom `cell`-renderaren behöver veta om en rad är expanderad.
   const columns = useMemo(
     () => [
-
+      // Definition för "Namn"-kolumnen.
       {
-        header: getAdminHeader('name'),
+        header: 'Kategorier',
+        headerClassName: 'pl-12',
         cell: (category: FlattenedCategory) => {
           const isExpanded = expandedCategories.has(category.id);
           const hasChildren =
             category.subCategories && category.subCategories.length > 0;
 
-
+          // Om det är en huvudkategori (nivå 0), rendera en enklare variant.
           if (category.level === 0) {
             return (
               <div className='flex  items-center group transition-all duration-100'>
@@ -144,17 +182,17 @@ export default function CategoryManager({categories}: CategoryManagerProps) {
             );
           }
 
-
+          // Om det är en underkategori (nivå > 0), rendera den med en L-formad koppling.
           return (
             <div className='flex  items-center relative'>
-
+              {/* 1. Tom div som skapar indraget för djupare nivåer. */}
               <div
                 style={{width: `${(category.level - 1) * 24}px`}}
                 className='flex-shrink-0 h-1 ml-10'
               />
-
+              {/* 2. Div som skapar den L-formade kopplingen med CSS-borders. */}
               <div className='w-3 absolute -top-0.5 left-10 h-3 border-l border-b border-gray-400 rounded-bl-lg  flex-shrink-0' />
-
+              {/* 3. Det faktiska innehållet för raden. */}
               <div className='flex items-center text-gray-900'>
                 <div
                   className='flex items-center cursor-pointer hover:text-black'
@@ -190,26 +228,26 @@ export default function CategoryManager({categories}: CategoryManagerProps) {
           );
         },
       },
-
+      // Definition för "Slug"-kolumnen.
       {
         header: getAdminHeader('slug'),
         cell: (category: FlattenedCategory) => <div>{category.slug}</div>,
       },
-
+      // Definition för "Status"-kolumnen.
       {
         header: getAdminHeader('isActive'),
         cell: (category: FlattenedCategory) => (
           <div>{category.isActive ? 'Aktiv' : 'Inaktiv'}</div>
         ),
       },
-
+      // Definition för "Skapad"-kolumnen.
       {
         header: getAdminHeader('created_at'),
         cell: (category: FlattenedCategory) => (
           <div>{formatDateForAdmin(category.created_at)}</div>
         ),
       },
-
+      // Definition för "Uppdaterad"-kolumnen.
       {
         header: getAdminHeader('updated_at'),
         cell: (category: FlattenedCategory) => (
@@ -220,13 +258,13 @@ export default function CategoryManager({categories}: CategoryManagerProps) {
     [expandedCategories]
   );
 
-
+  // Definition av "Åtgärder" (knappar) som ska visas för varje rad.
   const actions = [
     {
-      label: <FiEdit size={16} />, 
-      key: 'edit', 
+      label: <FiEdit size={16} />, // Ikonen som visas.
+      key: 'edit', // En unik nyckel för React.
       onClick: (category: FlattenedCategory) =>
-        console.log('Redigera kategori:', category), 
+        console.log('Redigera kategori:', category), // Funktion som körs vid klick.
     },
     {
       label: <FiTrash size={16} />,
@@ -236,45 +274,49 @@ export default function CategoryManager({categories}: CategoryManagerProps) {
     },
   ];
 
-
+  /**
+   * Funktion som returnerar ett CSS-klassnamn för en tabellrad baserat på dess data.
+   * @param category - Objektet för den aktuella raden.
+   * @returns En sträng med Tailwind CSS-klasser.
+   */
   const getRowClassName = (category: FlattenedCategory) => {
-
+    // Ge huvudkategorier en annorlunda, mörkare bakgrund.
     if (category.level === 0) {
-      return `bg-gray-100 text-sm border-b border-gray-300 hover:bg-blue-50 transition-colors`;
+      return `bg-gray-50 text-sm border-b  border-gray-300  transition-colors ${
+        expandedCategories.has(category.id) ? 'bg-gray-200' : 'bg-gray-50'
+      }`;
     }
-
-    return `bg-white text-[13px] border-b border-gray-200 hover:bg-gray-50`;
+    // Ge underkategorier en vit bakgrund.
+    return `bg-white text-[13px] border-b border-gray-200 hover:bg-gray-50 `;
   };
 
-
+  // Funktion för att expandera alla kategorier.
   const expandAll = () =>
     setExpandedCategories(new Set(getAllCategoryIds(categories)));
-
+  // Funktion för att kollapsa alla kategorier.
   const collapseAll = () => setExpandedCategories(new Set());
 
-
+  // Returnerar JSX som renderar komponenten.
   return (
-    <div>
-
-      <div className='mb-4 flex items-center gap-2'>
+    <div className=''>
+      {/* Header-sektionen med knappar och information. */}
+      <div className=' pb-1 flex items-center gap-2'>
         <button
           onClick={expandAll}
-          className='px-3 py-1 text-sm bg-blue-100 hover:bg-blue-200 text-gray-700 rounded transition-colors'
+          className='p-2 text-sm cursor-pointer hover:underline text-gray-600 font-medium  font-syne  '
         >
-          Expand All
+          Expandera
         </button>
         <button
           onClick={collapseAll}
-          className='px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded transition-colors'
+          className='p-2 text-sm cursor-pointer hover:underline text-gray-600 font-medium font-syne rounded transition-colors'
         >
-          Collapse All
+          Kollapsa
         </button>
-        <div className='text-sm text-gray-500 self-center ml-auto'>
-          {expandedCategories.size} expanderade
-        </div>
       </div>
 
-
+      {/* Den återanvändbara tabellkomponenten. */}
+      {/* Vi skickar med all data och konfiguration som props. */}
       <AdminTable
         data={flattenedCategories}
         columns={columns}

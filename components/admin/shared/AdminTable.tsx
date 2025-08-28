@@ -26,7 +26,7 @@ export default function ReusableTable<T extends {id: string | number}>({
   getRowClassName,
 }: ReusableTableProps<T>) {
   return (
-    <div className='bg-white rounded-lg py-14 text-sm px-10 '>
+    <div className='bg-white rounded-lg  text-sm  '>
       <div className='overflow-x-auto  shadow-sm border'>
         <table className='min-w-full divide-y divide-gray-00'>
           <thead className='bg-gray-50'>
@@ -34,7 +34,7 @@ export default function ReusableTable<T extends {id: string | number}>({
               {columns.map((column) => (
                 <th
                   key={column.header}
-                  className={`px-6 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${
+                  className={`px-6 py-2.5 text-left text-[13px] font-medium text-gray-500 uppercase tracking-wider ${
                     column.headerClassName || ''
                   }`}
                 >
@@ -42,7 +42,7 @@ export default function ReusableTable<T extends {id: string | number}>({
                 </th>
               ))}
               {actions && (
-                <th className='px-6 py-2.5 flex justify-center  font-medium text-gray-500 uppercase tracking-wider'>
+                <th className='px-6 py-2.5 text-[13px] flex justify-end font-medium text-gray-500 uppercase tracking-wider'>
                   Åtgärder
                 </th>
               )}
@@ -65,7 +65,7 @@ export default function ReusableTable<T extends {id: string | number}>({
                   </td>
                 ))}
                 {actions && (
-                  <td className='px-6 py-2.5 flex justify-center whitespace-nowrap'>
+                  <td className='px-6 py-2.5 flex justify-end whitespace-nowrap'>
                     {actions.map((action) => (
                       <button
                         key={action.key}

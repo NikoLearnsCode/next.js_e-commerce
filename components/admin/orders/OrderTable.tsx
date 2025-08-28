@@ -21,7 +21,9 @@ export default function OrderTable({orders}: OrderTableProps) {
       cell: (order: Order) => (
         <div>
           <p>{order.delivery_info.email}</p>
-          <p className='text-xs text-gray-500'>{order.delivery_info.phone}</p>
+          <p className='text-xs text-gray-700'>
+            tel: {order.delivery_info.phone}
+          </p>
         </div>
       ),
     },

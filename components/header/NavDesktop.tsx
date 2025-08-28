@@ -110,10 +110,10 @@ export default function DesktopNav({navLinks}: DesktopNavProps) {
               <span
                 className={` pb-0.5 ${
                   hoveredIndex === null && isActivePath(link.href)
-                    ? 'text-black border-b delay-150 border-black '
+                    ? 'text-black border-b delay-300 border-black '
                     : hoveredIndex === index
                       ? 'text-black border-b border-black hover:border-black'
-                      : hoveredIndex !== null
+                      : hoveredIndex !== null 
                         ? 'text-gray-500'
                         : ''
                 }`}

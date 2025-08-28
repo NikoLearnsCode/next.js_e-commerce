@@ -1,9 +1,10 @@
 import Link from "next/link";
+import AdminHeader from './shared/AdminHeader';
 
 export default function AdminDashboard() {
   return (
-    <div className='py-6 px-10'>
-      <h1 className='text-xl uppercase font-semibold mb-8'>Admin Dashboard</h1>
+    <div className=''>
+      <AdminHeader title='Admin Dashboard' />
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 '>
         <Link
           className='bg-white p-5 hover:border-gray-300 rounded-sm border border-gray-200'

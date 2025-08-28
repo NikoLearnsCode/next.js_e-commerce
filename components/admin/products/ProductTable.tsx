@@ -3,7 +3,7 @@
 import {Product} from '@/lib/validators';
 import AdminTable from '../shared/AdminTable';
 import {FiEdit, FiTrash} from 'react-icons/fi';
-import {formatDateForAdmin, getAdminHeader} from '@/utils/helpers';
+import {formatDateForAdmin, formatPrice, getAdminHeader} from '@/utils/helpers';
 
 type ProductManagerProps = {
   products: Product[];
@@ -33,6 +33,10 @@ export default function ProductManager({products}: ProductManagerProps) {
       // Formatera datum-fält
       if (header === 'created_at' || header === 'updated_at') {
         return <div>{formatDateForAdmin(value as Date)}</div>;
+      }
+
+      if (header === 'price') {
+        return <div>{formatPrice(value as string | number)}</div>;
       }
 
       return <div>{String(value)}</div>;
