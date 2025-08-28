@@ -10,10 +10,11 @@ export async function getNavigationData() {
     {
       title: 'Hem',
       href: '/',
+      displayOrder: 3,
       subLinks: [
-        {title: 'Kontakta oss', href: '/kontakt'},
-        {title: 'Returer', href: '/retur'},
-        {title: 'Frakt', href: '/frakt'},
+        {title: 'Kontakta oss', href: '/kontakt', displayOrder: 0},
+        {title: 'Returer', href: '/retur', displayOrder: 2},
+        {title: 'Frakt', href: '/frakt', displayOrder: 3},
       ],
     },
   ];
@@ -41,20 +42,23 @@ export async function getNavigationData() {
       const subLinksForMain = mainCat.subCategories.map((subCat) => ({
         title: subCat.name,
         href: `/c/${mainCat.slug}/${subCat.slug}`,
+        displayOrder: subCat.displayOrder,
       }));
 
       const subSubLinksForMain = mainCat.subCategories.flatMap((subCat) =>
         subCat.subSubCategories.map((subSubCat) => ({
           title: subSubCat.name,
           href: `/c/${mainCat.slug}/${subSubCat.slug}`,
+          displayOrder: subSubCat.displayOrder,
         }))
       );
 
-           console.log('SUBSUBLINKS', subSubLinksForMain);
-      console.log('SUBLINKS', subLinksForMain);
+      // console.log('SUBSUBLINKS', subSubLinksForMain);
+      // console.log('SUBLINKS', subLinksForMain);
       return {
         title: mainCat.name,
         href: `/c/${mainCat.slug}`,
+        displayOrder: mainCat.displayOrder,
         subLinks: subLinksForMain.length > 0 ? subLinksForMain : undefined,
         subSubLinks:
           subSubLinksForMain.length > 0 ? subSubLinksForMain : undefined,
@@ -66,6 +70,7 @@ export async function getNavigationData() {
 
   const navLinks = [...dynamicLinks, ...staticLinks];
 
+  // console.log('NAVLINKS', navLinks);
   // console.log('SLUT', navLinks);
   return navLinks;
 }

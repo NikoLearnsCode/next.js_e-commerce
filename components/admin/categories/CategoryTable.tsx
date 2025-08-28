@@ -346,22 +346,22 @@ export default function CategoryManager({categories}: CategoryManagerProps) {
   const getRowClassName = (category: FlattenedCategory) => {
     // Ge huvudkategorier en annorlunda, mörkare bakgrund.
     if (category.level === 0) {
-      return `bg-gray-50 text-sm border-b   transition-colors ${
+      return `bg-gray-100 text-sm border-b   transition-colors ${
         expandedCategories.has(category.id)
-          ? 'bg-gray-300 hover:bg-gray-300/80 border-gray-300'
-          : 'bg-white hover:bg-gray-50 border-gray-200'
+          ? 'bg-gray-200  border-gray-300'
+          : 'bg-white hover:bg-gray-100 border-gray-200'
       }`;
     }
     // Ge subCategories en vit bakgrund.
     if (category.level === 1) {
-      return `bg-white text-[13px] border-b  hover:bg-gray-50 ${
+      return `bg-white text-[13px] border-b  hover:bg-gray-100 ${
         expandedCategories.has(category.id)
-          ? 'bg-gray-200 hover:bg-gray-200/80 border-gray-300'
+          ? 'bg-gray-100 hover:bg-gray-200 border-gray-300'
           : 'bg-white border-gray-100'
       }`;
     }
     // Ge subSubCategories en ljusare bakgrund för att skilja dem från subCategories.
-    return `bg-gray-200 text-[12px] border-b border-gray-300 hover:bg-gray-200/80`;
+    return `bg-gray-100 text-[12px] border-b border-gray-300 hover:bg-gray-300/80`;
   };
 
   // Funktion för att expandera alla kategorier.

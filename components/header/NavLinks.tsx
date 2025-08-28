@@ -6,12 +6,15 @@ import MobileNav from './NavMobile';
 export interface SubLink {
   title: string;
   href: string;
+  displayOrder: number;
 }
 
 export interface NavLink {
   title: string;
   href: string;
   subLinks?: SubLink[];
+  subSubLinks?: SubLink[];
+  displayOrder: number;
 }
 
 export default function NavLinks({navLinks}: {navLinks: NavLink[]}) {
