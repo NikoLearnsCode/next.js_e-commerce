@@ -41,6 +41,7 @@ interface MotionDropdownProps {
   id?: string;
   isMobile?: boolean;
   position?: 'left' | 'right' | 'top' | 'newLeft';
+  style?: React.CSSProperties;
 }
 
 export const MotionDropdown = ({
@@ -50,6 +51,7 @@ export const MotionDropdown = ({
   isMobile = false,
   id = 'dropdown',
   position = 'left',
+  style,
 }: MotionDropdownProps) => {
   const leftVariants: Variants = {
     hidden: {x: -100, opacity: 0, width: 0},
@@ -96,7 +98,6 @@ export const MotionDropdown = ({
         type: 'tween',
         ease: 'easeOut',
         duration: 0.2,
-
       },
     },
 
@@ -182,6 +183,7 @@ export const MotionDropdown = ({
       exit='exit'
       key={id}
       onMouseLeave={onMouseLeave}
+      style={style}
     >
       {children}
     </motion.div>

@@ -37,6 +37,8 @@ export default function MobileNav({navLinks}: MobileNavProps) {
   // Initialisera med ett säkert standardvärde
   const [activeCategory, setActiveCategory] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showingSubSub, setShowingSubSub] = useState(false);
+  const [activeSubIndex, setActiveSubIndex] = useState<number | null>(null);
 
   // Använd useEffect för att uppdatera state när navLinks eller pathname ändras
   useEffect(() => {
@@ -55,6 +57,8 @@ export default function MobileNav({navLinks}: MobileNavProps) {
 
   const closeMenu = () => {
     setIsMenuOpen(false);
+    setShowingSubSub(false);
+    setActiveSubIndex(null);
     document.body.style.overflow = '';
   };
 
@@ -66,6 +70,26 @@ export default function MobileNav({navLinks}: MobileNavProps) {
 
   const changeCategory = (index: number) => {
     setActiveCategory(index);
+    setShowingSubSub(false);
+    setActiveSubIndex(null);
+  };
+
+  const openSubSub = (subIndex: number) => {
+    setActiveSubIndex(subIndex);
+    setShowingSubSub(true);
+  };
+
+  const backToSub = () => {
+    setShowingSubSub(false);
+    setActiveSubIndex(null);
+  };
+
+  const handleSubClick = (subLink: any, subIndex: number) => {
+    if (subLink.subSubLinks && subLink.subSubLinks.length > 0) {
+      openSubSub(subIndex);
+    } else {
+      closeMenu();
+    }
   };
 
   useEffect(() => {
@@ -140,23 +164,77 @@ export default function MobileNav({navLinks}: MobileNavProps) {
                 />
               </div>
 
-              <ul className='p-2 pt-5 space-y-4 text-sm'>
-                {navLinks[activeCategory]?.subLinks?.map((subLink) => (
-                  <li key={subLink.title} className='not-first:pt-2'>
-                    <Link
-                      href={subLink.href}
-                      className={`block mx-4 font-medium border-b border-transparent active:border-b active:border-black w-fit transition ${
-                        subLink.title === 'Nyheter'
-                          ? 'text-red-800 active:border-red-800'
-                          : ''
-                      } `}
-                      onClick={closeMenu}
-                    >
-                      {subLink.title}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+              <div className='p-2 pt-5'>
+                {showingSubSub && activeSubIndex !== null ? (
+                  // SubSub View
+                  <div>
+                    <div className='flex items-center mb-4'>
+                      <button
+                        onClick={backToSub}
+                        className='text-sm font-medium mr-2 border-b border-transparent hover:border-black transition'
+                      >
+                        ← Tillbaka
+                      </button>
+                      <span className='text-sm font-semibold text-gray-600'>
+                        {
+                          navLinks[activeCategory]?.subLinks?.[activeSubIndex]
+                            ?.title
+                        }
+                      </span>
+                    </div>
+                    <ul className='space-y-4 text-sm'>
+                      {navLinks[activeCategory]?.subLinks?.[
+                        activeSubIndex
+                      ]?.subSubLinks?.map((subSubLink) => (
+                        <li key={subSubLink.title} className='not-first:pt-2'>
+                          <Link
+                            href={subSubLink.href}
+                            className='block mx-4 font-medium border-b border-transparent active:border-b active:border-black w-fit transition'
+                            onClick={closeMenu}
+                          >
+                            {subSubLink.title}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : (
+                  // Sub View
+                  <ul className='space-y-4 text-sm'>
+                    {navLinks[activeCategory]?.subLinks?.map(
+                      (subLink, subIndex) => (
+                        <li key={subLink.title} className='not-first:pt-2'>
+                          {subLink.subSubLinks &&
+                          subLink.subSubLinks.length > 0 ? (
+                            <button
+                              onClick={() => handleSubClick(subLink, subIndex)}
+                              className={`block mx-4 font-medium border-b border-transparent active:border-b active:border-black w-fit transition text-left ${
+                                subLink.title === 'Nyheter'
+                                  ? 'text-red-800 active:border-red-800'
+                                  : ''
+                              }`}
+                            >
+                              {subLink.title} →
+                            </button>
+                          ) : (
+                            <Link
+                              href={subLink.href}
+                              className={`block mx-4 font-medium border-b border-transparent active:border-b active:border-black w-fit transition ${
+                                subLink.title === 'Nyheter'
+                                  ? 'text-red-800 active:border-red-800'
+                                  : ''
+                              }`}
+                              onClick={() => handleSubClick(subLink, subIndex)}
+                            >
+                              {subLink.title}
+                            </Link>
+                          )}
+                        </li>
+                      )
+                    )}
+                  </ul>
+                )}
+              </div>
             </MotionDropdown>
           </>
         )}

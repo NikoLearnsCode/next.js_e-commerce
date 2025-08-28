@@ -39,29 +39,28 @@ export async function getNavigationData() {
     });
 
     dynamicLinks = categoriesWithSubs.map((mainCat) => {
-      const subLinksForMain = mainCat.subCategories.map((subCat) => ({
-        title: subCat.name,
-        href: `/c/${mainCat.slug}/${subCat.slug}`,
-        displayOrder: subCat.displayOrder,
-      }));
-
-      const subSubLinksForMain = mainCat.subCategories.flatMap((subCat) =>
-        subCat.subSubCategories.map((subSubCat) => ({
+      const subLinksForMain = mainCat.subCategories.map((subCat) => {
+        const subSubLinksForSub = subCat.subSubCategories.map((subSubCat) => ({
           title: subSubCat.name,
           href: `/c/${mainCat.slug}/${subSubCat.slug}`,
           displayOrder: subSubCat.displayOrder,
-        }))
-      );
+        }));
 
-      // console.log('SUBSUBLINKS', subSubLinksForMain);
+        return {
+          title: subCat.name,
+          href: `/c/${mainCat.slug}/${subCat.slug}`,
+          displayOrder: subCat.displayOrder,
+          subSubLinks:
+            subSubLinksForSub.length > 0 ? subSubLinksForSub : undefined,
+        };
+      });
+
       // console.log('SUBLINKS', subLinksForMain);
       return {
         title: mainCat.name,
         href: `/c/${mainCat.slug}`,
         displayOrder: mainCat.displayOrder,
         subLinks: subLinksForMain.length > 0 ? subLinksForMain : undefined,
-        subSubLinks:
-          subSubLinksForMain.length > 0 ? subSubLinksForMain : undefined,
       };
     });
   } catch (error) {
@@ -71,6 +70,6 @@ export async function getNavigationData() {
   const navLinks = [...dynamicLinks, ...staticLinks];
 
   // console.log('NAVLINKS', navLinks);
-  // console.log('SLUT', navLinks);
+  console.log('SLUT', navLinks);
   return navLinks;
 }

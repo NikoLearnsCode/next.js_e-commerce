@@ -7,6 +7,7 @@ export interface SubLink {
   title: string;
   href: string;
   displayOrder: number;
+  subSubLinks?: SubLink[];
 }
 
 export interface NavLink {
