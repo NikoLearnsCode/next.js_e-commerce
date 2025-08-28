@@ -1,8 +1,9 @@
 import CategoryTable from '@/components/admin/categories/CategoryTable';
-import {MainCategory} from '@/lib/validators';
+import {MainCategoryWithSub} from '@/lib/validators';
 
 type CategoryManagerProps = {
-  categories: MainCategory[];
+  categories: MainCategoryWithSub[];
+  
 };
 
 export default function CategoryManager({categories}: CategoryManagerProps) {

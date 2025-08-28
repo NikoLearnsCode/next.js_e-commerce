@@ -140,7 +140,7 @@ export const mainCategories = pgTable('main_categories', {
   id: uuid('id').primaryKey().defaultRandom(),
   name: text('name').notNull(),
   slug: text('slug').notNull().unique(),
-  display_order: integer('display_order').notNull().default(0),
+  displayOrder: integer('display_order').notNull().default(0),
   isActive: boolean('is_active').notNull().default(true),
   created_at: timestamp('created_at').notNull().defaultNow(),
   updated_at: timestamp('updated_at').notNull().defaultNow(),
@@ -151,7 +151,6 @@ export const subCategories = pgTable('sub_categories', {
   id: uuid('id').primaryKey().defaultRandom(),
   name: text('name').notNull(),
   slug: text('slug').notNull(),
-  // ----> FIX: Lade till foreign key-koppling här
   mainCategoryId: uuid('main_category_id')
     .notNull()
     .references(() => mainCategories.id, {onDelete: 'cascade'}),

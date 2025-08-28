@@ -17,6 +17,18 @@ export async function getMainCategories() {
 
 // --------------------------------------------------------------
 
+export async function getMainCategoriesWithSub() {
+  const categoriesWithSub = await db.query.mainCategories.findMany({
+    with: {
+      subCategories: true,
+    },
+    orderBy: (mainCategories, {asc}) => [asc(mainCategories.displayOrder)],
+  });
+  return categoriesWithSub;
+}
+
+// --------------------------------------------------------------
+
 // relations api order + order_items
 export async function getAllOrdersWithItems() {
   const orderWithItems = await db.query.ordersTable.findMany({

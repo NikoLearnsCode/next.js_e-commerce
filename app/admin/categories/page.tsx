@@ -1,12 +1,16 @@
+// app/admin/categories/page.tsx
+
 'use server';
 
-import {getMainCategories} from '@/actions/admin';
+import {getMainCategoriesWithSub} from '@/actions/admin';
 import CategoryManager from '@/components/admin/categories/CategoryManager';
 import {getServerSession} from 'next-auth';
 import {authOptions} from '@/lib/auth';
 import {redirect} from 'next/navigation';
 import NoResults from '@/components/admin/shared/NoResults';
-import { Metadata } from 'next';
+import {Metadata} from 'next';
+// Importera den nya, centrala UI-typen
+
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
@@ -20,11 +24,14 @@ export default async function CategoriesPage() {
   if (session?.user.role !== 1) {
     return redirect('/denied');
   }
-  const categories = await getMainCategories();
 
-  if (!categories || categories.length === 0) {
+  const rawCategories = await getMainCategoriesWithSub();
+
+
+
+  if (!rawCategories || rawCategories.length === 0) {
     return <NoResults message='Inga kategorier hittades.' />;
   }
 
-  return <CategoryManager categories={categories} />;
+  return <CategoryManager categories={rawCategories} />;
 }

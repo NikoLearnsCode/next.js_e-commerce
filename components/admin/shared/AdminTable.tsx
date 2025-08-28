@@ -1,5 +1,6 @@
 'use client';
 
+import {twMerge} from 'tailwind-merge';
 
 type ColumnDef<T> = {
   header: string;
@@ -15,15 +16,14 @@ interface ReusableTableProps<T extends {id: string | number}> {
     onClick: (item: T) => void;
     key: string;
   }[];
+  getRowClassName?: (item: T) => string;
 }
-
-
-  
 
 export default function ReusableTable<T extends {id: string | number}>({
   data,
   columns,
   actions,
+  getRowClassName,
 }: ReusableTableProps<T>) {
   return (
     <div className='bg-white rounded-lg py-14 text-sm px-10 '>
@@ -34,7 +34,7 @@ export default function ReusableTable<T extends {id: string | number}>({
               {columns.map((column) => (
                 <th
                   key={column.header}
-                  className={`px-6 py-2.5 text-left  font-medium text-gray-500 uppercase tracking-wider ${
+                  className={`px-6 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${
                     column.headerClassName || ''
                   }`}
                 >
@@ -50,7 +50,12 @@ export default function ReusableTable<T extends {id: string | number}>({
           </thead>
           <tbody className='bg-white divide-y divide-gray-100'>
             {data.map((item) => (
-              <tr key={item.id} className='hover:bg-gray-50'>
+              <tr
+                key={item.id}
+                className={twMerge(
+                  getRowClassName ? getRowClassName(item) : 'hover:bg-gray-50'
+                )}
+              >
                 {columns.map((column) => (
                   <td
                     key={column.header}
