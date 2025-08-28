@@ -150,10 +150,24 @@ export const mainCategories = pgTable('main_categories', {
 export const subCategories = pgTable('sub_categories', {
   id: uuid('id').primaryKey().defaultRandom(),
   name: text('name').notNull(),
-  slug: text('slug').notNull(),
+  slug: text('slug'),
   mainCategoryId: uuid('main_category_id')
     .notNull()
     .references(() => mainCategories.id, {onDelete: 'cascade'}),
+  displayOrder: integer('display_order').notNull().default(0),
+  isActive: boolean('is_active').notNull().default(true),
+  created_at: timestamp('created_at').notNull().defaultNow(),
+  updated_at: timestamp('updated_at').notNull().defaultNow(),
+});
+
+// Tabell för under-underkategorier (byxor, tröjor, m.m)
+export const subSubCategories = pgTable('sub_sub_categories', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  name: text('name').notNull(),
+  slug: text('slug').notNull(),
+  subCategoryId: uuid('sub_category_id')
+    .notNull()
+    .references(() => subCategories.id, {onDelete: 'cascade'}),
   displayOrder: integer('display_order').notNull().default(0),
   isActive: boolean('is_active').notNull().default(true),
   created_at: timestamp('created_at').notNull().defaultNow(),
@@ -165,10 +179,18 @@ export const mainCategoryRelations = relations(mainCategories, ({many}) => ({
   subCategories: many(subCategories),
 }));
 
-export const subCategoryRelations = relations(subCategories, ({one}) => ({
+export const subCategoryRelations = relations(subCategories, ({one, many}) => ({
   mainCategory: one(mainCategories, {
     fields: [subCategories.mainCategoryId],
     references: [mainCategories.id],
+  }),
+  subSubCategories: many(subSubCategories),
+}));
+
+export const subSubCategoryRelations = relations(subSubCategories, ({one}) => ({
+  subCategory: one(subCategories, {
+    fields: [subSubCategories.subCategoryId],
+    references: [subCategories.id],
   }),
 }));
 

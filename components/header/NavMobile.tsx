@@ -146,7 +146,7 @@ export default function MobileNav({navLinks}: MobileNavProps) {
                     <Link
                       href={subLink.href}
                       className={`block mx-4 font-medium border-b border-transparent active:border-b active:border-black w-fit transition ${
-                        subLink.title === 'ERBJUDANDEN'
+                        subLink.title === 'Nyheter'
                           ? 'text-red-800 active:border-red-800'
                           : ''
                       } `}

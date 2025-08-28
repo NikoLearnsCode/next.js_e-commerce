@@ -113,7 +113,7 @@ export default function DesktopNav({navLinks}: DesktopNavProps) {
                     ? 'text-black border-b delay-300 border-black '
                     : hoveredIndex === index
                       ? 'text-black border-b border-black hover:border-black'
-                      : hoveredIndex !== null 
+                      : hoveredIndex !== null
                         ? 'text-gray-500'
                         : ''
                 }`}
@@ -161,7 +161,7 @@ export default function DesktopNav({navLinks}: DesktopNavProps) {
                       href={subLink.href}
                       onClick={closeDropdown}
                       className={`transition focus:border-black outline-none block not-first:pt-2 text-sm font-medium border-b border-transparent hover:border-b hover:border-black w-fit ${
-                        subLink.title === 'ERBJUDANDEN'
+                        subLink.title === 'Nyheter'
                           ? 'text-red-800 hover:border-red-800 focus:border-red-800'
                           : ''
                       } `}

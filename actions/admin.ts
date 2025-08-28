@@ -20,10 +20,19 @@ export async function getMainCategories() {
 export async function getMainCategoriesWithSub() {
   const categoriesWithSub = await db.query.mainCategories.findMany({
     with: {
-      subCategories: true,
+      subCategories: {
+        with: {
+          subSubCategories: {
+            orderBy: (subSubCategories, {asc}) =>
+              asc(subSubCategories.displayOrder),
+          },
+        },
+        orderBy: (subCategories, {asc}) => asc(subCategories.displayOrder),
+      },
     },
     orderBy: (mainCategories, {asc}) => [asc(mainCategories.displayOrder)],
   });
+
   return categoriesWithSub;
 }
 

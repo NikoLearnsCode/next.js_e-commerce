@@ -16,6 +16,8 @@ interface HeaderInteractiveProps {
 export default function HeaderInteractive({navLinks}: HeaderInteractiveProps) {
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
 
+
+
   useEffect(() => {
     document.body.style.overflow = isSearchExpanded ? 'hidden' : 'auto';
   }, [isSearchExpanded]);

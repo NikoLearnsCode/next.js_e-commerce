@@ -7,76 +7,97 @@ import {
   FiTrash,
   FiChevronDown,
   FiChevronRight,
-  FiArrowRight,
+  FiCornerLeftUp,
+  FiChevronUp,
 } from 'react-icons/fi';
 
 import AdminTable from '../shared/AdminTable';
-import {MainCategoryWithSub} from '@/lib/validators';
+import {
+  MainCategoryWithSub,
+  SubCategory,
+  SubSubCategory,
+} from '@/lib/validators';
 import {formatDateForAdmin, getAdminHeader} from '@/utils/helpers';
 
 type CategoryManagerProps = {
   categories: MainCategoryWithSub[];
 };
 
-type FlattenedCategory = MainCategoryWithSub & {
+type FlattenedCategory = (
+  | MainCategoryWithSub
+  | (SubCategory & {subSubCategories?: SubSubCategory[]})
+  | SubSubCategory
+) & {
   level: number;
   parentName?: string;
 };
 
 /**
- * @param cats - Arrayen av kategorier att platta ut.
- * @param level - Den nuvarande nästlingsnivån (startar på 0).
+ * Plattar ut den hierarkiska kategoristrukturen till en plan lista för tabellrendering.
+ * Använder manuell iteration istället för rekursion för bättre prestanda och enkelhet.
+ * @param cats - Arrayen av huvudkategorier att platta ut.
  * @param expandedCategories - Ett Set med IDn för de kategorier som användaren har expanderat.
- * @param parentName - Namnet på föräldrakategorin, skickas med i rekursiva anrop.
  * @returns En platt array av kategorier, redo att renderas i en tabell.
  */
-const flattenCategoriesRecursively = (
+const flattenCategoriesForTable = (
   cats: MainCategoryWithSub[],
-  level: number,
-  expandedCategories: Set<string>,
-  parentName: string | null
+  expandedCategories: Set<string>
 ): FlattenedCategory[] => {
   const flattened: FlattenedCategory[] = [];
 
-  // Loopar igenom varje kategori på den nuvarande nivån.
+  // Nivå 0: Huvudkategorier (Main Categories)
   cats.forEach((cat) => {
-    // 1. Lägger till den nuvarande kategorin i listan, tillsammans med dess nivå och förälderns namn.
-    flattened.push({...cat, level, parentName: parentName || undefined});
+    flattened.push({...cat, level: 0, parentName: undefined});
 
-    // 2. Kontrollerar om kategorin är expanderad OCH om den faktiskt har underkategorier.
+    // Nivå 1: Underkategorier (Sub Categories) - bara om huvudkategori är expanderad
     if (expandedCategories.has(cat.id) && cat.subCategories?.length) {
-      // 3. Om ja, anropa samma funktion igen (rekursion) för underkategorierna.
-      //    - Öka nivån med 1.
-      //    - Skicka med den *nuvarande* kategorins namn som förälder.
-      flattened.push(
-        ...flattenCategoriesRecursively(
-          cat.subCategories,
-          level + 1,
-          expandedCategories,
-          cat.name
-        )
-      );
+      cat.subCategories.forEach((subCat) => {
+        flattened.push({...subCat, level: 1, parentName: cat.name});
+
+        // Nivå 2: Under-underkategorier (SubSub Categories) - bara om underkategori är expanderad
+        if (
+          expandedCategories.has(subCat.id) &&
+          subCat.subSubCategories?.length
+        ) {
+          subCat.subSubCategories.forEach((subSubCat) => {
+            flattened.push({...subSubCat, level: 2, parentName: subCat.name});
+          });
+        }
+      });
     }
   });
 
-  // Returnerar den färdiga, platta listan.
   return flattened;
 };
 
 /**
- * Hämtar rekursivt alla IDn från en hierarkisk kategori-array.
+ * Hämtar alla IDn från den hierarkiska kategori-arrayen med manuell iteration.
  * Används för "Expand All"-knappen.
  * @param cats - Arrayen av kategorier att söka igenom.
  * @returns En array med alla funna kategori-IDn.
  */
 const getAllCategoryIds = (cats: MainCategoryWithSub[]): string[] => {
   const ids: string[] = [];
+
+  // Nivå 0: Huvudkategorier
   cats.forEach((cat) => {
     ids.push(cat.id);
+
+    // Nivå 1: Underkategorier
     if (cat.subCategories?.length) {
-      ids.push(...getAllCategoryIds(cat.subCategories));
+      cat.subCategories.forEach((subCat) => {
+        ids.push(subCat.id);
+
+        // Nivå 2: Under-underkategorier
+        if (subCat.subSubCategories?.length) {
+          subCat.subSubCategories.forEach((subSubCat) => {
+            ids.push(subSubCat.id);
+          });
+        }
+      });
     }
   });
+
   return ids;
 };
 
@@ -87,7 +108,7 @@ const getAllCategoryIds = (cats: MainCategoryWithSub[]): string[] => {
 export default function CategoryManager({categories}: CategoryManagerProps) {
   // State-variabel som håller reda på vilka kategorier som är expanderade.
   // Vi använder ett 'Set' eftersom det är väldigt snabbt att kolla om ett ID finns (med .has()).
-  // Initialt är alla huvudkategorier expanderade för en bra användarupplevelse.
+
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
     () => {
       // Vi använder en funktion här för att kunna ha lite logik för startvärdet.
@@ -97,7 +118,14 @@ export default function CategoryManager({categories}: CategoryManagerProps) {
       if (categories && categories.length > 0) {
         // 2. Om den gör det, skapa ett nytt Set som BARA innehåller ID:t
         //    från det allra första objektet i arrayen.
-        return new Set([categories[0].id]);
+        return new Set([
+          categories[0].id,
+          categories[0].subCategories![2].id,
+          categories[0].subCategories![2].subSubCategories![0].id, 
+          /* categories[0].id,
+          categories[0].subCategories![0].id,
+          categories[0].subCategories![0].subSubCategories![0].id, */
+        ]);
       }
 
       // 3. Om 'categories' är tom, returnera ett tomt Set.
@@ -126,7 +154,7 @@ export default function CategoryManager({categories}: CategoryManagerProps) {
   // Denna beräkning körs endast om 'categories' (grund-datan) eller 'expandedCategories' ändras.
   // Detta förhindrar onödiga och potentiellt tunga beräkningar vid varje rendering.
   const flattenedCategories = useMemo(
-    () => flattenCategoriesRecursively(categories, 0, expandedCategories, null),
+    () => flattenCategoriesForTable(categories, expandedCategories),
     [categories, expandedCategories]
   );
 
@@ -142,7 +170,21 @@ export default function CategoryManager({categories}: CategoryManagerProps) {
         cell: (category: FlattenedCategory) => {
           const isExpanded = expandedCategories.has(category.id);
           const hasChildren =
-            category.subCategories && category.subCategories.length > 0;
+            category.level === 0
+              ? (category as MainCategoryWithSub).subCategories &&
+                (category as MainCategoryWithSub).subCategories!.length > 0
+              : category.level === 1
+                ? (
+                    category as SubCategory & {
+                      subSubCategories?: SubSubCategory[];
+                    }
+                  ).subSubCategories &&
+                  (
+                    category as SubCategory & {
+                      subSubCategories?: SubSubCategory[];
+                    }
+                  ).subSubCategories!.length > 0
+                : false; // subSubCategories har inga barn
 
           // Om det är en huvudkategori (nivå 0), rendera en enklare variant.
           if (category.level === 0) {
@@ -167,15 +209,18 @@ export default function CategoryManager({categories}: CategoryManagerProps) {
                       />
                     )
                   ) : (
-                    <div className='w-4 mr-2 flex-shrink-0' />
+                    <div className='w-5 mr-2 flex-shrink-0' />
                   )}
                   <span className='font-semibold uppercase'>
                     {category.name}
                   </span>
                 </div>
-                {hasChildren && (
-                  <span className='ml-2 text-xs text-gray-500'>
-                    ({category.subCategories?.length || 0})
+                {hasChildren && category.level === 0 && (
+                  <span className='ml-2 text-xs text-gray-700'>
+                    (
+                    {(category as MainCategoryWithSub).subCategories?.length ||
+                      0}
+                    )
                   </span>
                 )}
               </div>
@@ -184,18 +229,24 @@ export default function CategoryManager({categories}: CategoryManagerProps) {
 
           // Om det är en underkategori (nivå > 0), rendera den med en L-formad koppling.
           return (
-            <div className='flex  items-center relative'>
+            <div className='flex relative '>
               {/* 1. Tom div som skapar indraget för djupare nivåer. */}
               <div
-                style={{width: `${(category.level - 1) * 24}px`}}
-                className='flex-shrink-0 h-1 ml-10'
+                style={{width: `${(category.level - 1) * 45}px`}}
+                className='flex-shrink-0 h-1 ml-8'
               />
               {/* 2. Div som skapar den L-formade kopplingen med CSS-borders. */}
-              <div className='w-3 absolute -top-0.5 left-10 h-3 border-l border-b border-gray-400 rounded-bl-lg  flex-shrink-0' />
+              {category.level === 2 && category.parentName && (
+                <FiCornerLeftUp
+                  size={14}
+                  strokeWidth={1.5}
+                  className='text-gray-500 flex-shrink-0 ml-2'
+                />
+              )}
               {/* 3. Det faktiska innehållet för raden. */}
-              <div className='flex items-center text-gray-900'>
+              <div className='flex items-center  text-gray-900'>
                 <div
-                  className='flex items-center cursor-pointer hover:text-black'
+                  className={`flex items-center  ${hasChildren ? 'cursor-pointer hover:text-black' : ''}`}
                   onClick={() => hasChildren && toggleCategory(category.id)}
                 >
                   {hasChildren ? (
@@ -203,24 +254,31 @@ export default function CategoryManager({categories}: CategoryManagerProps) {
                       <FiChevronDown
                         size={20}
                         strokeWidth={1}
-                        className='mr-1 text-gray-500  flex-shrink-0'
+                        className='mr-4  text-black  flex-shrink-0'
                       />
                     ) : (
-                      <FiChevronRight
+                      <FiChevronUp
                         size={20}
                         strokeWidth={1}
-                        className='mr-1 text-gray-500 flex-shrink-0'
+                        className='mr-4  text-gray-500  flex-shrink-0'
                       />
                     )
                   ) : (
-                    <div className='w-4 mr-1 flex-shrink-0' />
+                    <div className='w-5 mr-4 flex-shrink-0' />
                   )}
                   <span className='normal-case'>{category.name}</span>
                 </div>
-                {category.parentName && (
-                  <div className='ml-2 flex items-center text-xs text-gray-400 '>
-                    <FiArrowRight size={12} className='inline mr-1.5' />
-                    <span className='italic'>{category.parentName}</span>
+                {category.level === 1 && category.parentName && (
+                  <div className='ml-2 flex items-center text-xs text-gray-500'>
+                    <span className='italic'>({category.parentName})</span>
+                  </div>
+                )}
+                {/* Visa föräldrakategori för subSubCategories (nivå 2) */}
+                {category.level === 2 && category.parentName && (
+                  <div className='ml-2 flex items-center text-xs text-gray-500'>
+                    <span className='italic lowercase'>
+                      ({category.parentName})
+                    </span>
                   </div>
                 )}
               </div>
@@ -234,6 +292,12 @@ export default function CategoryManager({categories}: CategoryManagerProps) {
         cell: (category: FlattenedCategory) => <div>{category.slug}</div>,
       },
       // Definition för "Status"-kolumnen.
+      {
+        header: 'Sortering',
+        cell: (category: FlattenedCategory) => (
+          <div>{category.displayOrder}</div>
+        ),
+      },
       {
         header: getAdminHeader('isActive'),
         cell: (category: FlattenedCategory) => (
@@ -261,13 +325,13 @@ export default function CategoryManager({categories}: CategoryManagerProps) {
   // Definition av "Åtgärder" (knappar) som ska visas för varje rad.
   const actions = [
     {
-      label: <FiEdit size={16} />, // Ikonen som visas.
+      label: <FiEdit size={16} className='text-gray-600 hover:text-gray-900' />, // Ikonen som visas.
       key: 'edit', // En unik nyckel för React.
       onClick: (category: FlattenedCategory) =>
         console.log('Redigera kategori:', category), // Funktion som körs vid klick.
     },
     {
-      label: <FiTrash size={16} />,
+      label: <FiTrash size={16} className='text-gray-600 hover:text-gray-900' />,
       key: 'delete',
       onClick: (category: FlattenedCategory) =>
         console.log('Ta bort kategori:', category),
@@ -282,12 +346,22 @@ export default function CategoryManager({categories}: CategoryManagerProps) {
   const getRowClassName = (category: FlattenedCategory) => {
     // Ge huvudkategorier en annorlunda, mörkare bakgrund.
     if (category.level === 0) {
-      return `bg-gray-50 text-sm border-b  border-gray-200  transition-colors ${
-        expandedCategories.has(category.id) ? 'bg-gray-200' : 'bg-white hover:bg-gray-50'
+      return `bg-gray-50 text-sm border-b   transition-colors ${
+        expandedCategories.has(category.id)
+          ? 'bg-gray-300 hover:bg-gray-300/80 border-gray-300'
+          : 'bg-white hover:bg-gray-50 border-gray-200'
       }`;
     }
-    // Ge underkategorier en vit bakgrund.
-    return `bg-white text-[13px] border-b border-gray-200 hover:bg-gray-50 `;
+    // Ge subCategories en vit bakgrund.
+    if (category.level === 1) {
+      return `bg-white text-[13px] border-b  hover:bg-gray-50 ${
+        expandedCategories.has(category.id)
+          ? 'bg-gray-200 hover:bg-gray-200/80 border-gray-300'
+          : 'bg-white border-gray-100'
+      }`;
+    }
+    // Ge subSubCategories en ljusare bakgrund för att skilja dem från subCategories.
+    return `bg-gray-200 text-[12px] border-b border-gray-300 hover:bg-gray-200/80`;
   };
 
   // Funktion för att expandera alla kategorier.

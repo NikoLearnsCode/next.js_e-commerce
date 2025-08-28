@@ -26,6 +26,13 @@ export async function getNavigationData() {
       with: {
         subCategories: {
           orderBy: (subCategories, {asc}) => [asc(subCategories.displayOrder)],
+          with: {
+            subSubCategories: {
+              orderBy: (subSubCategories, {asc}) => [
+                asc(subSubCategories.displayOrder),
+              ],
+            },
+          },
         },
       },
     });
@@ -36,10 +43,21 @@ export async function getNavigationData() {
         href: `/c/${mainCat.slug}/${subCat.slug}`,
       }));
 
+      const subSubLinksForMain = mainCat.subCategories.flatMap((subCat) =>
+        subCat.subSubCategories.map((subSubCat) => ({
+          title: subSubCat.name,
+          href: `/c/${mainCat.slug}/${subSubCat.slug}`,
+        }))
+      );
+
+           console.log('SUBSUBLINKS', subSubLinksForMain);
+      console.log('SUBLINKS', subLinksForMain);
       return {
         title: mainCat.name,
         href: `/c/${mainCat.slug}`,
         subLinks: subLinksForMain.length > 0 ? subLinksForMain : undefined,
+        subSubLinks:
+          subSubLinksForMain.length > 0 ? subSubLinksForMain : undefined,
       };
     });
   } catch (error) {
