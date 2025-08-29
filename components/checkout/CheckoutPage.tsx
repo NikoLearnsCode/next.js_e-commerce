@@ -12,7 +12,11 @@ import CheckoutLayoutDesktop from './desktop/CheckoutLayoutDesktop';
 import CheckoutLayoutMobile from './mobile/CheckoutLayoutMobile';
 import {useMediaQuery} from '@/hooks/useMediaQuery';
 import {DeliveryFormData} from '@/lib/validators';
-import {CheckoutStep, validateStep, getCheckoutUrl} from '@/lib/checkoutSteps';
+import {
+  CheckoutStep,
+  validateStep,
+  getCheckoutUrl,
+} from '@/utils/checkout-steps';
 import SpinningLoader from '@/components/shared/ui/SpinningLogo';
 
 export default function CheckoutPage() {

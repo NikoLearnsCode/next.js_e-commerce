@@ -123,6 +123,7 @@ export default function ProductFilterWrapper({
     if (metadata?.availableCategories) {
       return metadata.availableCategories;
     }
+
     const categoriesSet = new Set<string>();
     initialProducts.forEach((p) => p.category && categoriesSet.add(p.category));
     return Array.from(categoriesSet).sort();

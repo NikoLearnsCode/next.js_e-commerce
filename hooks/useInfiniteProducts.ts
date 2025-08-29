@@ -26,6 +26,11 @@ export function useInfiniteProducts({
 }) {
   // Parse sort parameter using the common utility function
   const {sort: sortField, order} = parseSortParam(sort);
+
+  // Handle "nyheter" as special category
+  const isNewOnly = category === 'nyheter';
+  const actualCategory = isNewOnly ? null : category;
+
   return useInfiniteQuery({
     queryKey: ['products', {query, category, gender, color, sizes, sort}],
     queryFn: async ({
@@ -38,12 +43,13 @@ export function useInfiniteProducts({
         lastId: pageParam?.lastId || null,
         lastValue: pageParam?.lastValue || null,
         limit: 8,
-        category: category || null,
+        category: actualCategory,
         gender: gender || null,
         color: color || [],
         sizes: sizes || [],
         sort: sortField,
         order,
+        isNewOnly,
       });
       console.log('lastId', pageParam?.lastId);
       console.log('lastValue', pageParam?.lastValue);

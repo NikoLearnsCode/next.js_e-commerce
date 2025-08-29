@@ -1,4 +1,3 @@
-
 import {Metadata} from 'next';
 import CheckoutPage from '@/components/checkout/CheckoutPage';
 import {redirect} from 'next/navigation';
@@ -6,7 +5,7 @@ import {getServerSession} from 'next-auth';
 import {authOptions} from '@/lib/auth';
 import {getSessionId} from '@/utils/cookies';
 
-import {validateStep, getCheckoutUrl} from '@/lib/checkoutSteps';
+import {validateStep, getCheckoutUrl} from '@/utils/checkout-steps';
 
 export async function generateMetadata(): Promise<Metadata> {
   return {

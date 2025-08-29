@@ -2,7 +2,7 @@
 
 'use server';
 
-import {getMainCategoriesWithSub} from '@/actions/admin';
+import {getCategoriesWithChildren} from '@/actions/admin';
 import CategoryManager from '@/components/admin/categories/CategoryManager';
 import {getServerSession} from 'next-auth';
 import {authOptions} from '@/lib/auth';
@@ -25,7 +25,7 @@ export default async function CategoriesPage() {
     return redirect('/denied');
   }
 
-  const rawCategories = await getMainCategoriesWithSub();
+  const rawCategories = await getCategoriesWithChildren();
 
 
 

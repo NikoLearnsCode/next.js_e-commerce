@@ -39,16 +39,21 @@ async function getCategoryProducts(
     typeof sortParam === 'string' ? sortParam : undefined
   );
 
+  // Handle "nyheter" as special category - show new products from all categories
+  const isNewOnly = category === 'nyheter';
+  const actualCategory = isNewOnly ? null : category;
+
   const result = await getInitialProducts({
     limit: 8,
     lastId: null,
-    category,
+    category: actualCategory,
     gender,
     color,
     sizes,
     sort,
     order,
     metadata: true,
+    isNewOnly,
   });
   if (!result.products || result.products.length === 0) {
     notFound();
@@ -63,11 +68,20 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const {gender, category} = await params;
   const capitalizedGender = gender.charAt(0).toUpperCase() + gender.slice(1);
+
+  // Handle "nyheter" as special case
+  if (category === 'nyheter') {
+    return {
+      title: `${capitalizedGender} - Nyheter`,
+      description: `Upptäck de senaste nyheterna inom ${gender}mode - nya produkter och stilar.`,
+    };
+  }
+
   const capitalizedCategory =
     category.charAt(0).toUpperCase() + category.slice(1);
 
   return {
-    title: `${capitalizedGender} - ${capitalizedCategory} `,
+    title: `${capitalizedGender} - ${capitalizedCategory}`,
     description: `Utforska senaste ${category} stilar och trender för ${gender}.`,
   };
 }

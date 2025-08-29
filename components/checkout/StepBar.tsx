@@ -1,6 +1,6 @@
 'use client';
 import Logo from '@/components/shared/Logo';
-import {getStepsArray, CheckoutStep} from '@/lib/checkoutSteps';
+import {getStepsArray, CheckoutStep} from '@/utils/checkout-steps';
 
 export default function Steps({currentStep}: {currentStep: CheckoutStep}) {
   const steps = getStepsArray();

@@ -25,6 +25,7 @@ export type Params = {
   color?: string[];
   sizes?: string[];
   metadata?: boolean;
+  isNewOnly?: boolean;
 };
 
 export type Result = {

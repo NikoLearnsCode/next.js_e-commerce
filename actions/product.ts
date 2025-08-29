@@ -151,6 +151,15 @@ function buildSizeColorFilters(sizes: string[], color: string[]) {
   return conditions;
 }
 
+// Creates WHERE condition for filtering only new products
+function buildIsNewFilter(isNewOnly: boolean) {
+  if (!isNewOnly) return [];
+
+  return [
+    sql`${productsTable.created_at} > NOW() - INTERVAL '${sql.raw(NEW_PRODUCT_DAYS.toString())} days'`,
+  ];
+}
+
 // Converts lastValue to the appropriate type for the sort field
 function convertLastValueToFieldType(
   sort: string,
@@ -316,12 +325,14 @@ export async function getInitialProducts({
   color = [],
   sizes = [],
   metadata = false,
+  isNewOnly = false,
 }: Params): Promise<Result> {
   try {
     // Build all WHERE conditions
     const searchConditions = createTextSearchFilters(query);
     const basicFilters = buildCategoryGenderFilters(category, gender);
     const arrayFilters = buildSizeColorFilters(sizes, color);
+    const isNewFilters = buildIsNewFilter(isNewOnly);
     const paginationConditions = buildCursorPaginationWhereClause(
       sort,
       order,
@@ -333,6 +344,7 @@ export async function getInitialProducts({
       ...searchConditions,
       ...basicFilters,
       ...arrayFilters,
+      ...isNewFilters,
       ...paginationConditions,
     ];
 

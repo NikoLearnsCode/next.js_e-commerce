@@ -4,10 +4,7 @@ import {
   NavLink,
 } from '@/lib/types/category-types';
 
-/**
- * Tar en platt lista av kategorier och bygger en rekursiv trädstruktur.
- * Detta är den primära funktionen för att skapa det kompletta trädet för t.ex. admin.
- */
+
 export function buildCategoryTree(
   items: Category[],
   parentId: number | null = null
@@ -18,7 +15,6 @@ export function buildCategoryTree(
       const children = buildCategoryTree(items, item.id);
       return {
         ...item,
-        // Lägg bara till children-arrayen om den inte är tom
         ...(children.length > 0 && {children}),
       };
     });
@@ -47,7 +43,7 @@ export function transformTreeToNavLinks(
       title: category.name,
       href: href,
       displayOrder: category.displayOrder,
-      isFolder: hasChildren, // <-- DEN ENDA NYA RADEN
+      isFolder: hasChildren,
     };
 
     if (hasChildren) {

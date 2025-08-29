@@ -5,8 +5,6 @@ import {
   ordersTable,
   orderItemsTable,
   favoritesTable,
-
-
 } from '@/drizzle/db/schema';
 
 export const cartItemSchema = z.object({
@@ -64,9 +62,6 @@ export type PaymentFormData = z.infer<typeof paymentSchema>;
 export type Product = typeof productsTable.$inferSelect & {
   isNew?: boolean;
 };
-
-
-
 export type NewProduct = typeof productsTable.$inferInsert;
 
 export type Cart = typeof cartsTable.$inferSelect;
@@ -78,12 +73,10 @@ export type NewOrder = typeof ordersTable.$inferInsert;
 export type OrderItem = typeof orderItemsTable.$inferSelect;
 export type NewOrderItem = typeof orderItemsTable.$inferInsert;
 
-// Order with items relation for displaying orders with their items
 export type OrderWithItems = Order & {
   order_items: OrderItem[];
 };
 
-// Favorite types using normalized approach with joins
 export type Favorite = {
   id: string;
   user_id: string | null;
@@ -94,4 +87,3 @@ export type Favorite = {
 };
 
 export type NewFavorite = typeof favoritesTable.$inferInsert;
-

@@ -138,7 +138,7 @@ export default function DesktopNav({navLinks}: {navLinks: NavLink[]}) {
               <span
                 className={`pb-0.5 ${
                   activePath.length === 0 && isActivePath(link.href)
-                    ? 'text-black border-b delay-300 border-black'
+                    ? 'text-black border-b delay-50 border-black'
                     : activePath[0] === index
                       ? 'text-black border-b border-black hover:border-black'
                       : activePath.length > 0
@@ -207,9 +207,9 @@ export default function DesktopNav({navLinks}: {navLinks: NavLink[]}) {
                               <span
                                 className={`cursor-pointer transition focus:border-black outline-none block not-first:pt-2 text-sm font-medium border-b border-transparent hover:border-b hover:border-black w-fit ${
                                   isActive
-                                    ? 'text-black !border-b !border-black'
+                                    ? 'text-black !border-b opacity-70 !border-black'
                                     : columnsToRender.length > columnIndex + 1
-                                      ? 'opacity-60'
+                                      ? 'opacity-50'
                                       : ''
                                 }`}
                               >
@@ -221,9 +221,13 @@ export default function DesktopNav({navLinks}: {navLinks: NavLink[]}) {
                                 onClick={handleClick}
                                 className={`transition focus:border-black outline-none block text-sm font-medium border-b border-transparent hover:border-b hover:border-black w-fit ${
                                   columnsToRender.length > columnIndex + 1
-                                    ? 'opacity-60'
+                                    ? 'opacity-50'
                                     : ''
-                                }`}
+                                  } ${
+                                    item.title === 'Nyheter'
+                                      ? 'text-red-800 hover:border-red-800'
+                                      : ''
+                                  }`}
                               >
                                 {item.title}
                               </Link>

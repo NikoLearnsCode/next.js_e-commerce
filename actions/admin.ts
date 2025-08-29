@@ -1,7 +1,7 @@
 import {db} from '@/drizzle/index';
 import {productsTable, ordersTable, categories} from '@/drizzle/db/schema';
 import {asc} from 'drizzle-orm';
-import {buildCategoryTree} from '@/utils/category-helpers';
+import {buildCategoryTree} from '@/utils/category-builder';
 
 // --------------------------------------------------------------
 
@@ -12,7 +12,7 @@ export async function getAllProducts() {
 
 // --------------------------------------------------------------
 
-export async function getAllCategoriesAsTree() {
+export async function getCategoriesWithChildren() {
   const flatCategories = await db
     .select()
     .from(categories)
