@@ -2,21 +2,7 @@
 
 import DesktopNav from './NavDesktop';
 import MobileNav from './NavMobile';
-
-export interface SubLink {
-  title: string;
-  href: string;
-  displayOrder: number;
-  subSubLinks?: SubLink[];
-}
-
-export interface NavLink {
-  title: string;
-  href: string;
-  subLinks?: SubLink[];
-  subSubLinks?: SubLink[];
-  displayOrder: number;
-}
+import {NavLink} from '@/lib/types/category-types';
 
 export default function NavLinks({navLinks}: {navLinks: NavLink[]}) {
   return (

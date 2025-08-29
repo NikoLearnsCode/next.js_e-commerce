@@ -1,17 +1,22 @@
 'use server';
 
 import {db} from '@/drizzle/index';
-import {mainCategories} from '@/drizzle/db/schema';
-import {asc} from 'drizzle-orm';
-import {NavLink} from '@/components/header/NavLinks';
+import {categories} from '@/drizzle/db/schema';
+import {asc, eq} from 'drizzle-orm';
+import {NavLink} from '@/lib/types/category-types';
 
-export async function getNavigationData() {
+import {
+  buildCategoryTree,
+  transformTreeToNavLinks,
+} from '@/utils/category-helpers';
+
+export async function getNavigationData(): Promise<NavLink[]> {
   const staticLinks: NavLink[] = [
     {
       title: 'Hem',
       href: '/',
-      displayOrder: 3,
-      subLinks: [
+      displayOrder: 99,
+      children: [
         {title: 'Kontakta oss', href: '/kontakt', displayOrder: 0},
         {title: 'Returer', href: '/retur', displayOrder: 2},
         {title: 'Frakt', href: '/frakt', displayOrder: 3},
@@ -22,54 +27,26 @@ export async function getNavigationData() {
   let dynamicLinks: NavLink[] = [];
 
   try {
-    const categoriesWithSubs = await db.query.mainCategories.findMany({
-      orderBy: [asc(mainCategories.displayOrder)],
-      with: {
-        subCategories: {
-          orderBy: (subCategories, {asc}) => [asc(subCategories.displayOrder)],
-          with: {
-            subSubCategories: {
-              orderBy: (subSubCategories, {asc}) => [
-                asc(subSubCategories.displayOrder),
-              ],
-            },
-          },
-        },
-      },
-    });
+    // Steg 1: Hämta den platta listan med aktiva kategorier
+    const flatCategories = await db
+      .select()
+      .from(categories)
+      .where(eq(categories.isActive, true))
+      .orderBy(asc(categories.displayOrder));
 
-    dynamicLinks = categoriesWithSubs.map((mainCat) => {
-      const subLinksForMain = mainCat.subCategories.map((subCat) => {
-        const subSubLinksForSub = subCat.subSubCategories.map((subSubCat) => ({
-          title: subSubCat.name,
-          href: `/c/${mainCat.slug}/${subSubCat.slug}`,
-          displayOrder: subSubCat.displayOrder,
-        }));
+    // Steg 2: Bygg det fullständiga kategoriträdet
+    const categoryTree = buildCategoryTree(flatCategories);
 
-        return {
-          title: subCat.name,
-          href: `/c/${mainCat.slug}/${subCat.slug}`,
-          displayOrder: subCat.displayOrder,
-          subSubLinks:
-            subSubLinksForSub.length > 0 ? subSubLinksForSub : undefined,
-        };
-      });
-
-      // console.log('SUBLINKS', subLinksForMain);
-      return {
-        title: mainCat.name,
-        href: `/c/${mainCat.slug}`,
-        displayOrder: mainCat.displayOrder,
-        subLinks: subLinksForMain.length > 0 ? subLinksForMain : undefined,
-      };
-    });
+    // Steg 3: Transformera det fullständiga trädet till det slimmade NavLink-formatet
+    dynamicLinks = transformTreeToNavLinks(categoryTree);
   } catch (error) {
     console.error('Fel vid hämtning av navigation:', error);
+    // Returnera bara statiska länkar om något går fel
+    return staticLinks;
   }
 
   const navLinks = [...dynamicLinks, ...staticLinks];
+  navLinks.sort((a, b) => a.displayOrder - b.displayOrder);
 
-  // console.log('NAVLINKS', navLinks);
-  console.log('SLUT', navLinks);
   return navLinks;
 }

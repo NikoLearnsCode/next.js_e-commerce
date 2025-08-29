@@ -9,8 +9,12 @@ import {
   uuid,
   varchar,
   primaryKey,
+  AnyPgColumn,
+  unique,
+  serial,
 } from 'drizzle-orm/pg-core';
 import {relations} from 'drizzle-orm';
+
 import type {CartItem, DeliveryFormData} from '@/lib/validators';
 import type {AdapterAccount} from '@/lib/types/auth-types';
 
@@ -135,64 +139,27 @@ export const favoritesTable = pgTable('favorites', {
   created_at: timestamp('created_at').defaultNow(),
 });
 
-// Tabell för huvudkategorier (herr, dam, m.m)
-export const mainCategories = pgTable('main_categories', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  name: text('name').notNull(),
-  slug: text('slug').notNull().unique(),
-  displayOrder: integer('display_order').notNull().default(0),
-  isActive: boolean('is_active').notNull().default(true),
-  created_at: timestamp('created_at').notNull().defaultNow(),
-  updated_at: timestamp('updated_at').notNull().defaultNow(),
-});
-
-// Tabell för underkategorier (byxor, tröjor, m.m)
-export const subCategories = pgTable('sub_categories', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  name: text('name').notNull(),
-  slug: text('slug'),
-  mainCategoryId: uuid('main_category_id')
-    .notNull()
-    .references(() => mainCategories.id, {onDelete: 'cascade'}),
-  displayOrder: integer('display_order').notNull().default(0),
-  isActive: boolean('is_active').notNull().default(true),
-  created_at: timestamp('created_at').notNull().defaultNow(),
-  updated_at: timestamp('updated_at').notNull().defaultNow(),
-});
-
-// Tabell för under-underkategorier (byxor, tröjor, m.m)
-export const subSubCategories = pgTable('sub_sub_categories', {
-  id: uuid('id').primaryKey().defaultRandom(),
+// CATEGORIES
+export const categories = pgTable('categories', {
+  id: serial('id').primaryKey(),
   name: text('name').notNull(),
   slug: text('slug').notNull(),
-  subCategoryId: uuid('sub_category_id')
-    .notNull()
-    .references(() => subCategories.id, {onDelete: 'cascade'}),
   displayOrder: integer('display_order').notNull().default(0),
   isActive: boolean('is_active').notNull().default(true),
   created_at: timestamp('created_at').notNull().defaultNow(),
   updated_at: timestamp('updated_at').notNull().defaultNow(),
+
+  // HÄR ÄR DEN MAGISKA FIXEN: `(): AnyPgColumn => ...`
+  // Vi ger TypeScript en ledtråd om vad funktionen returnerar.
+  parentId: integer('parent_id').references((): AnyPgColumn => categories.id, {
+    onDelete: 'cascade',
+  }),
 });
 
-// ----------------------------------------------------------------
-export const mainCategoryRelations = relations(mainCategories, ({many}) => ({
-  subCategories: many(subCategories),
-}));
-
-export const subCategoryRelations = relations(subCategories, ({one, many}) => ({
-  mainCategory: one(mainCategories, {
-    fields: [subCategories.mainCategoryId],
-    references: [mainCategories.id],
-  }),
-  subSubCategories: many(subSubCategories),
-}));
-
-export const subSubCategoryRelations = relations(subSubCategories, ({one}) => ({
-  subCategory: one(subCategories, {
-    fields: [subSubCategories.subCategoryId],
-    references: [subCategories.id],
-  }),
-}));
+// Unika slug bara för enskilda kategorier - main - sub - subsub
+export const categoriesSlugParentUniqueIndex = unique(
+  'slug_parent_unique_idx'
+).on(categories.slug, categories.parentId);
 
 //  export const usersRelations = relations(usersTable, ({many}) => ({
 //   accounts: many(accountsTable),
@@ -256,4 +223,4 @@ export const orderItemsRelations = relations(orderItemsTable, ({one}) => ({
 //     fields: [favoritesTable.product_id],
 //     references: [productsTable.id],
 //   }),
-// })); 
+// }));

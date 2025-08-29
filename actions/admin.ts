@@ -1,5 +1,7 @@
 import {db} from '@/drizzle/index';
-import {productsTable, mainCategories, ordersTable} from '@/drizzle/db/schema';
+import {productsTable, ordersTable, categories} from '@/drizzle/db/schema';
+import {asc} from 'drizzle-orm';
+import {buildCategoryTree} from '@/utils/category-helpers';
 
 // --------------------------------------------------------------
 
@@ -10,30 +12,15 @@ export async function getAllProducts() {
 
 // --------------------------------------------------------------
 
-export async function getMainCategories() {
-  const categories = await db.select().from(mainCategories);
-  return categories;
-}
+export async function getAllCategoriesAsTree() {
+  const flatCategories = await db
+    .select()
+    .from(categories)
+    .orderBy(asc(categories.displayOrder));
 
-// --------------------------------------------------------------
+  const categoryTree = buildCategoryTree(flatCategories);
 
-export async function getMainCategoriesWithSub() {
-  const categoriesWithSub = await db.query.mainCategories.findMany({
-    with: {
-      subCategories: {
-        with: {
-          subSubCategories: {
-            orderBy: (subSubCategories, {asc}) =>
-              asc(subSubCategories.displayOrder),
-          },
-        },
-        orderBy: (subCategories, {asc}) => asc(subCategories.displayOrder),
-      },
-    },
-    orderBy: (mainCategories, {asc}) => [asc(mainCategories.displayOrder)],
-  });
-
-  return categoriesWithSub;
+  return categoryTree;
 }
 
 // --------------------------------------------------------------

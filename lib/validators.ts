@@ -5,9 +5,8 @@ import {
   ordersTable,
   orderItemsTable,
   favoritesTable,
-  mainCategories,
-  subCategories,
-  subSubCategories,
+
+
 } from '@/drizzle/db/schema';
 
 export const cartItemSchema = z.object({
@@ -66,6 +65,8 @@ export type Product = typeof productsTable.$inferSelect & {
   isNew?: boolean;
 };
 
+
+
 export type NewProduct = typeof productsTable.$inferInsert;
 
 export type Cart = typeof cartsTable.$inferSelect;
@@ -94,21 +95,3 @@ export type Favorite = {
 
 export type NewFavorite = typeof favoritesTable.$inferInsert;
 
-// Main Category types
-export type MainCategory = typeof mainCategories.$inferSelect;
-export type NewMainCategory = typeof mainCategories.$inferInsert;
-
-// Sub Category types
-export type SubCategory = typeof subCategories.$inferSelect;
-export type NewSubCategory = typeof subCategories.$inferInsert;
-
-// Sub Sub Category types
-export type SubSubCategory = typeof subSubCategories.$inferSelect;
-export type NewSubSubCategory = typeof subSubCategories.$inferInsert;
-
-// Main Category with Sub Categories and Sub Sub Categories for admin display
-export type MainCategoryWithSub = MainCategory & {
-  subCategories?: (SubCategory & {
-    subSubCategories?: SubSubCategory[];
-  })[];
-};

@@ -13,7 +13,7 @@ const baseProducts = [
     price: 899,
     brand: 'Herjano',
     gender: 'herr',
-    color: 'black',
+    color: 'Black',
     slug: 'klassiska-chinos',
     category: 'byxor',
     specs: [
@@ -38,7 +38,7 @@ const baseProducts = [
     price: 2199,
     brand: 'Manjano',
     gender: 'herr',
-    color: 'navy',
+    color: 'Navy',
     slug: 'elegant-rock',
     category: 'jackor',
     specs: [
@@ -63,7 +63,7 @@ const baseProducts = [
     price: 1799,
     brand: 'Trekano',
     gender: 'herr',
-    color: 'brown',
+    color: 'Brown',
     slug: 'linen-overshirt',
     category: 'overshirt',
     specs: [
@@ -88,7 +88,7 @@ const baseProducts = [
     price: 599,
     brand: 'Waikiki',
     gender: 'herr',
-    color: 'navy',
+    color: 'Navy',
     slug: 'essential-tshirt',
     category: 't-shirts',
     specs: [
@@ -116,7 +116,7 @@ const baseProducts = [
     price: 1999,
     brand: 'Saiki',
     gender: 'dam',
-    color: 'navy',
+    color: 'Navy',
     slug: 'high-waist-pants',
     category: 'byxor',
     specs: [
@@ -143,7 +143,7 @@ const baseProducts = [
     price: 2499,
     brand: 'Frano',
     gender: 'dam',
-    color: 'navy',
+    color: 'Navy',
     slug: 'oversized-rock',
     category: 'jackor',
     specs: [
@@ -169,7 +169,7 @@ const baseProducts = [
     price: 1899,
     brand: 'Hermano',
     gender: 'dam',
-    color: 'blue',
+    color: 'Blue',
     slug: 'demin-playsuit',
     category: 'klanningar',
     specs: [
@@ -194,9 +194,9 @@ const baseProducts = [
     price: 899,
     brand: 'Hermana',
     gender: 'dam',
-    color: 'midnight blue',
+    color: 'Midnight Blue',
     slug: 'silkesblus',
-    category: 'Toppar',
+    category: 'toppar',
     specs: [
       'Normal passform',
       'Material: 100% bomull',
@@ -254,16 +254,16 @@ const createDuplicateWithUniqueIds = (
   existingSlugs: string[]
 ) => {
   const colorVariants = [
-    'black',
-    'white',
-    'navy',
-    'beige',
-    'blue',
-    'green',
-    'red',
-    'gray',
-    'brown',
-    'cream',
+    'Black',
+    'White',
+    'Navy',
+    'Beige',
+    'Blue',
+    'Green',
+    'Red',
+    'Gray',
+    'Brown',
+    'Cream',
   ];
 
   // Välj en slumpmässig färg som är annorlunda från originalets

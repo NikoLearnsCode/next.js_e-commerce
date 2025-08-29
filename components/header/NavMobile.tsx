@@ -2,18 +2,14 @@
 import {useState, useEffect} from 'react';
 import Link from 'next/link';
 import {usePathname} from 'next/navigation';
-import {NavLink} from './NavLinks';
-
+import {NavLink} from '@/lib/types/category-types';
+import {ArrowLeft} from 'lucide-react';
 import {AnimatePresence} from 'framer-motion';
 import {
   MotionDropdown,
   MotionOverlay,
   MotionCloseX,
 } from '@/components/shared/AnimatedSidebar';
-
-interface MobileNavProps {
-  navLinks: NavLink[];
-}
 
 // Helper-funktion som säkert hanterar undefined navLinks
 const findInitialCategory = (navLinks: NavLink[], pathname: string): number => {
@@ -31,7 +27,7 @@ const findInitialCategory = (navLinks: NavLink[], pathname: string): number => {
   return 0;
 };
 
-export default function MobileNav({navLinks}: MobileNavProps) {
+export default function MobileNav({navLinks}: {navLinks: NavLink[]}) {
   const pathname = usePathname();
 
   // Initialisera med ett säkert standardvärde
@@ -85,7 +81,7 @@ export default function MobileNav({navLinks}: MobileNavProps) {
   };
 
   const handleSubClick = (subLink: any, subIndex: number) => {
-    if (subLink.subSubLinks && subLink.subSubLinks.length > 0) {
+    if (subLink.children && subLink.children.length > 0) {
       openSubSub(subIndex);
     } else {
       closeMenu();
@@ -164,28 +160,28 @@ export default function MobileNav({navLinks}: MobileNavProps) {
                 />
               </div>
 
-              <div className='p-2 pt-5'>
+              <div className='p-2 pt-5 '>
                 {showingSubSub && activeSubIndex !== null ? (
                   // SubSub View
                   <div>
-                    <div className='flex items-center mb-4'>
+                    <div className='flex items-center mb-6'>
                       <button
                         onClick={backToSub}
-                        className='text-sm font-medium mr-2 border-b border-transparent hover:border-black transition'
+                        className='text-sm font-medium pl-3 pr-2 border-b border-transparent hover:border-black transition'
                       >
-                        ← Tillbaka
+                        <ArrowLeft strokeWidth={1} className='w-5 h-5 inline text-gray-600' />
                       </button>
-                      <span className='text-sm font-semibold text-gray-600'>
+                      <span className='text-[11px]  font-semibold text-gray-600'>
                         {
-                          navLinks[activeCategory]?.subLinks?.[activeSubIndex]
+                          navLinks[activeCategory]?.children?.[activeSubIndex]
                             ?.title
                         }
                       </span>
                     </div>
                     <ul className='space-y-4 text-sm'>
-                      {navLinks[activeCategory]?.subLinks?.[
+                      {navLinks[activeCategory]?.children?.[
                         activeSubIndex
-                      ]?.subSubLinks?.map((subSubLink) => (
+                      ]?.children?.map((subSubLink) => (
                         <li key={subSubLink.title} className='not-first:pt-2'>
                           <Link
                             href={subSubLink.href}
@@ -200,21 +196,20 @@ export default function MobileNav({navLinks}: MobileNavProps) {
                   </div>
                 ) : (
                   // Sub View
-                  <ul className='space-y-4 text-sm'>
-                    {navLinks[activeCategory]?.subLinks?.map(
+                  <ul className='space-y-4 text-sm '>
+                    {navLinks[activeCategory]?.children?.map(
                       (subLink, subIndex) => (
                         <li key={subLink.title} className='not-first:pt-2'>
-                          {subLink.subSubLinks &&
-                          subLink.subSubLinks.length > 0 ? (
+                          {subLink.children && subLink.children.length > 0 ? (
                             <button
                               onClick={() => handleSubClick(subLink, subIndex)}
-                              className={`block mx-4 font-medium border-b border-transparent active:border-b active:border-black w-fit transition text-left ${
+                              className={`block mx-4 font-medium border-b border-transparent active:border-b active:border-black uppercase w-fit transition text-left ${
                                 subLink.title === 'Nyheter'
                                   ? 'text-red-800 active:border-red-800'
                                   : ''
                               }`}
                             >
-                              {subLink.title} →
+                              {subLink.title} 
                             </button>
                           ) : (
                             <Link

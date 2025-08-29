@@ -6,17 +6,12 @@ import UserButton from './UserButton';
 import HeaderFavoritesButton from './FavoritesButton';
 import HeaderCartDropdown from '@/components/cart/HeaderCartDropdown';
 import SearchDropdown from './SearchDropdown';
-import NavLinks, {NavLink} from './NavLinks';
+import {NavLink} from '@/lib/types/category-types';
+import NavLinks from './NavLinks';
 import Logo from '../shared/Logo';
 
-interface HeaderInteractiveProps {
-  navLinks: NavLink[];
-}
-
-export default function HeaderInteractive({navLinks}: HeaderInteractiveProps) {
+export default function HeaderInteractive({navLinks}: {navLinks: NavLink[]}) {
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
-
-
 
   useEffect(() => {
     document.body.style.overflow = isSearchExpanded ? 'hidden' : 'auto';
