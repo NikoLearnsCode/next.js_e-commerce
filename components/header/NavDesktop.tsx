@@ -167,17 +167,18 @@ export default function DesktopNav({navLinks}: DesktopNavProps) {
               initial={{
                 clipPath: 'inset(0% 100% 0% 0%)', // Börjar helt dold (klippt från höger)
                 opacity: 1,
-                width: '250px',
+                // minWidth: '350px',
               }}
               animate={{
                 clipPath: 'inset(0% 0% 0% 0%)', // Slides in från höger
                 opacity: 1,
-                width: hoveredSubIndex !== null ? '450px' : '330px',
+                minWidth: hoveredSubIndex !== null ? '450px' : '330px',
+
               }}
               exit={{
                 clipPath: 'inset(0% 100% 0% 0%)', // Slides ut till höger
                 opacity: 1,
-                // width: '450px',
+                // width: hoveredSubIndex !== null ? '450px' : '330px',
               }}
               transition={{
                 type: 'tween',
@@ -198,8 +199,8 @@ export default function DesktopNav({navLinks}: DesktopNavProps) {
 
               <div className='flex h-full'>
                 {/* Vänster kolumn: Sub-länkar (PLAGG, YTTERPLAGG, NYHETER) */}
-                <div className='w-[180px] pr-8'>
-                  <ul className='flex flex-col overflow-y-auto space-y-6'>
+                <div className='min-w-[180px] pr-8'>
+                  <ul className='flex flex-col overflow-y-auto text-nowrap space-y-6'>
                     {navLinks[hoveredIndex]?.subLinks?.map(
                       (subLink, subIndex) => (
                         <li key={subLink.title}>
@@ -208,7 +209,7 @@ export default function DesktopNav({navLinks}: DesktopNavProps) {
                           subLink.subSubLinks.length > 0 ? (
                             <span
                               onMouseEnter={() => handleSubHover(subIndex)}
-                              className={`cursor-pointer transition focus:border-black outline-none block not-first:pt-2 text-sm font-medium border-b border-transparent hover:border-b hover:border-black w-fit ${
+                              className={`cursor-pointer transition focus:border-black outline-none block not-first:pt-2 text-sm font-medium border-b border-transparent hover:border-b hover:border-black w-fit  ${
                                 // Active state: behåller border när subsub är öppen
                                 hoveredSubIndex === subIndex
                                   ? 'text-black !border-b !border-black'
