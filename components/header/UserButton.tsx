@@ -213,11 +213,13 @@ const UserButton = ({
                 onClick={() => setIsOpen(false)}
               >
                 <span className='flex w-full font-medium  justify-between group relative items-center gap-2 '>
-                  <span className='font-bold '>Admin Dashboard</span>
+                  <span className='font-bold text-red-800 group-hover:text-red-900'>
+                    Admin Dashboard
+                  </span>
                   <ArrowRight
                     size={12}
                     strokeWidth={1.5}
-                    className='group-hover:translate-x-1  transition-transform duration-300'
+                    className='group-hover:translate-x-1   transition-transform duration-300'
                   />
                 </span>
               </Link>
