@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import {ArrowRight} from 'lucide-react';
 
-import type {OrderWithItems} from '@/lib/validators';
+import type {OrderWithItems} from '@/lib/types/db';
 import AnimatedAuthContainer from '@/components/shared/AnimatedContainer';
 import {Link} from '@/components/shared/ui/link';
 import Carousel from '@/components/shared/Carousel';

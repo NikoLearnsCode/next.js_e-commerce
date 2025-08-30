@@ -3,7 +3,7 @@
 import {useState, useEffect} from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import {Product} from '@/lib/validators';
+import {Product} from '@/lib/types/db';
 import {Swiper, SwiperSlide} from 'swiper/react';
 import {Navigation} from 'swiper/modules';
 import {ChevronLeft, ChevronRight} from 'lucide-react';

@@ -3,7 +3,8 @@
 import Image from 'next/image';
 import {ArrowLeft} from 'lucide-react';
 
-import type {OrderWithItems, DeliveryFormData} from '@/lib/validators';
+import type {OrderWithItems} from '@/lib/types/db';
+import type {DeliveryFormData} from '@/lib/validators';
 import AnimatedAuthContainer from '@/components/shared/AnimatedContainer';
 import Link from 'next/link';
 

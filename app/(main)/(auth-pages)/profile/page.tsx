@@ -2,9 +2,9 @@ import Link from 'next/link';
 import {getServerSession} from 'next-auth';
 import {redirect} from 'next/navigation';
 import {Metadata} from 'next';
-import {authOptions} from '@/lib/auth';
+import {authOptions} from '@/lib/auth.config';
 import LogoutButton from '@/app/(main)/(auth-pages)/profile/LogoutButton';
-import { ArrowRight } from 'lucide-react';
+import {ArrowRight} from 'lucide-react';
 
 export async function generateMetadata(): Promise<Metadata> {
   return {

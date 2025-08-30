@@ -1,4 +1,4 @@
-import type {SortParams} from '@/lib/types/query-types';
+import type {SortParams} from '@/lib/types/query';
 
 export function parseSortParam(sortParam?: string | null): SortParams {
   if (!sortParam) return {sort: 'id', order: 'asc'};

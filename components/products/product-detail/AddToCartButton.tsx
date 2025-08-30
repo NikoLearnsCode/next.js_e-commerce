@@ -2,7 +2,8 @@
 
 import {useState} from 'react';
 import {Button} from '@/components/shared/ui/button';
-import {Product, CartItem} from '@/lib/validators';
+import {Product} from '@/lib/types/db';
+import {CartItem} from '@/lib/validators';
 import {v4 as uuidv4} from 'uuid';
 import {useCart} from '@/context/CartProvider';
 

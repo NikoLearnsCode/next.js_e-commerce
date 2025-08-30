@@ -1,9 +1,4 @@
-import {
-  Category,
-  CategoryWithChildren,
-  NavLink,
-} from '@/lib/types/category-types';
-
+import {Category, CategoryWithChildren, NavLink} from '@/lib/types/category';
 
 export function buildCategoryTree(
   items: Category[],

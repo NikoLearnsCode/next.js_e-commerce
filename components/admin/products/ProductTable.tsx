@@ -1,9 +1,10 @@
 'use client';
 
-import {Product} from '@/lib/validators';
+import {Product} from '@/lib/types/db';
 import AdminTable from '../shared/AdminTable';
 import {FiEdit, FiTrash} from 'react-icons/fi';
-import {formatDateForAdmin, formatPrice, getAdminHeader} from '@/utils/helpers';
+import {formatDateForAdmin,  getAdminHeader} from '@/components/admin/utils/admin.helpers';
+import {formatPrice} from '@/utils/helpers';
 
 type ProductManagerProps = {
   products: Product[];

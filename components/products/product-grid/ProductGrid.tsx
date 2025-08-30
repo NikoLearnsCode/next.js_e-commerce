@@ -1,6 +1,6 @@
 'use client';
 
-import {Product} from '@/lib/validators';
+import {Product} from '@/lib/types/db';
 import Cards from '@/components/products/product-grid/ProductCard';
 
 type ProductGridProps = {

@@ -16,7 +16,7 @@ import {
   CheckoutStep,
   validateStep,
   getCheckoutUrl,
-} from '@/utils/checkout-steps';
+} from '@/components/checkout/utils/steps';
 import SpinningLoader from '@/components/shared/ui/SpinningLogo';
 
 export default function CheckoutPage() {

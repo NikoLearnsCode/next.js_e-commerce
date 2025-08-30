@@ -15,7 +15,7 @@ import {
   removeFromFavorites,
   toggleFavorite,
 } from '@/actions/favorites';
-import {Favorite, Product} from '@/lib/validators';
+import {Favorite, Product} from '@/lib/types/db';
 import {useAuth} from '@/hooks/useAuth';
 
 interface FavoritesContextType {

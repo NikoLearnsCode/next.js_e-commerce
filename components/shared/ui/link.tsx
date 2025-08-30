@@ -3,7 +3,7 @@
 import * as React from 'react';
 import NextLink from 'next/link';
 import {cva, type VariantProps} from 'class-variance-authority';
-import {cn} from '@/utils/helpers';
+import {cn} from '@/styles/style.utils';
 
 const linkVariants = cva(
   'inline-flex items-center justify-center whitespace-nowrap text-sm font-medium  disabled:pointer-events-none disabled:opacity-50 outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px] cursor-pointer transition-all duration-200',

@@ -1,5 +1,5 @@
 import {useFavorites} from '@/context/FavoritesProvider';
-import {Product} from '@/lib/validators';
+import {Product} from '@/lib/types/db';
 import {Heart} from 'lucide-react';
 import {twMerge} from 'tailwind-merge';
 

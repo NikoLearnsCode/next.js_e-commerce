@@ -1,7 +1,7 @@
 import type {Metadata} from 'next';
 import SignInForm from './sign-in-form';
 import {Suspense} from 'react';
-import {authOptions} from '@/lib/auth';
+import {authOptions} from '@/lib/auth.config';
 import {getServerSession} from 'next-auth';
 import {redirect} from 'next/navigation';
 

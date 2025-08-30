@@ -2,7 +2,7 @@
 
 import DesktopNav from './NavDesktop';
 import MobileNav from './NavMobile';
-import {NavLink} from '@/lib/types/category-types';
+import {NavLink} from '@/lib/types/category';
 
 export default function NavLinks({navLinks}: {navLinks: NavLink[]}) {
   return (

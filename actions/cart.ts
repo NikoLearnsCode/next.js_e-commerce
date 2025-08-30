@@ -1,13 +1,14 @@
 'use server';
 
 import {getServerSession} from 'next-auth';
-import {authOptions} from '@/lib/auth';
+import {authOptions} from '@/lib/auth.config';
 import {
   CART_SESSION_COOKIE,
   getOrCreateSessionId,
   getSessionId,
 } from '@/utils/cookies';
 import type {CartItem, NewCart} from '@/lib/validators';
+
 import {db} from '@/drizzle/index';
 import {cartsTable} from '@/drizzle/db/schema';
 import {eq, and, isNull} from 'drizzle-orm';

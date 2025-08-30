@@ -1,9 +1,9 @@
 'use server';
 
 import {getServerSession} from 'next-auth';
-import {authOptions} from '@/lib/auth';
+import {authOptions} from '@/lib/auth.config';
 import {getOrCreateSessionId, getSessionId} from '@/utils/cookies';
-import type {NewFavorite, Product} from '@/lib/validators';
+import type {NewFavorite, Product} from '@/lib/types/db';
 import {db} from '@/drizzle/index';
 import {favoritesTable, productsTable} from '@/drizzle/db/schema';
 import {eq, and, isNull} from 'drizzle-orm';

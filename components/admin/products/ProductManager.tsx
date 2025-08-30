@@ -1,5 +1,5 @@
 import ProductTable from '@/components/admin/products/ProductTable';
-import {Product} from '@/lib/validators';
+import {Product} from '@/lib/types/db';
 import AdminHeader from '../shared/AdminHeader';
 
 type ProductManagerProps = {

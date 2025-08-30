@@ -2,11 +2,11 @@
 
 import {getAllProducts} from '@/actions/admin';
 import {getServerSession} from 'next-auth';
-import {authOptions} from '@/lib/auth';
+import {authOptions} from '@/lib/auth.config';
 import {redirect} from 'next/navigation';
 import NoResults from '@/components/admin/shared/NoResults';
 import ProductManager from '@/components/admin/products/ProductManager';
-import { Metadata } from 'next';
+import {Metadata} from 'next';
 
 export async function generateMetadata(): Promise<Metadata> {
   return {

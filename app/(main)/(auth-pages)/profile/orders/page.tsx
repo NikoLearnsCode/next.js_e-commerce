@@ -2,8 +2,8 @@ import {getServerSession} from 'next-auth';
 import {redirect} from 'next/navigation';
 import {Metadata} from 'next';
 
-import {authOptions} from '@/lib/auth';
-import {OrderWithItems} from '@/lib/validators';
+import {authOptions} from '@/lib/auth.config';
+import {OrderWithItems} from '@/lib/types/db';
 import {getUserOrders} from '@/actions/orders';
 import OrdersClientContent from './OrdersContent';
 
@@ -31,8 +31,6 @@ export default async function ProfileOrdersPage() {
       </div>
     );
   }
-
-  
 
   return <OrdersClientContent orders={orders as OrderWithItems[]} />;
 }

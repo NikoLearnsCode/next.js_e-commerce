@@ -84,7 +84,7 @@ export function CartProvider({children}: {children: React.ReactNode}) {
           'Cart action failed, refreshing from server',
           result?.error
         );
-        refreshCart(); // Fallback 
+        refreshCart(); // Fallback
       }
     },
     [refreshCart]

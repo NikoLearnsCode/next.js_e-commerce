@@ -3,7 +3,7 @@
 import {useEffect, useState, useMemo} from 'react';
 import {useRouter, usePathname, useSearchParams} from 'next/navigation';
 
-import {Product} from '@/lib/validators';
+import {Product} from '@/lib/types/db';
 import Link from 'next/link';
 import {ChevronRight} from 'lucide-react';
 import FilterBar from '@/components/products/product-grid/FilterBar';

@@ -6,7 +6,7 @@ import UserButton from './UserButton';
 import HeaderFavoritesButton from './FavoritesButton';
 import HeaderCartDropdown from '@/components/cart/HeaderCartDropdown';
 import SearchDropdown from './SearchDropdown';
-import {NavLink} from '@/lib/types/category-types';
+import {NavLink} from '@/lib/types/category';
 import NavLinks from './NavLinks';
 import Logo from '../shared/Logo';
 

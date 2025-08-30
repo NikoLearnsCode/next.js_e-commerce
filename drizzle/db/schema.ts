@@ -16,7 +16,7 @@ import {
 import {relations} from 'drizzle-orm';
 
 import type {CartItem, DeliveryFormData} from '@/lib/validators';
-import type {AdapterAccount} from '@/lib/types/auth-types';
+import type {AdapterAccount} from '@/lib/types/auth';
 
 // ----------------------------------------------------------------
 

@@ -1,5 +1,5 @@
 import CategoryTable from '@/components/admin/categories/CategoryTable';
-import {CategoryWithChildren} from '@/lib/types/category-types';
+import {CategoryWithChildren} from '@/lib/types/category';
 import AdminHeader from '../shared/AdminHeader';
 type CategoryManagerProps = {
   categories: CategoryWithChildren[];

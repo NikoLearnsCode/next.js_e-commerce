@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import {cn} from '@/utils/helpers';
+import {cn} from '@/styles/style.utils';
 
 interface FloatingLabelInputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {

@@ -1,14 +1,14 @@
 'use server';
 
 import {getServerSession} from 'next-auth';
-import {authOptions} from '@/lib/auth';
+import {authOptions} from '@/lib/auth.config';
 import {getSessionId} from '@/utils/cookies';
 import {CartItem, DeliveryFormData} from '@/lib/validators';
 import {db} from '@/drizzle/index';
 import {ordersTable, orderItemsTable} from '@/drizzle/db/schema';
 import {eq, desc, inArray} from 'drizzle-orm';
 
-import {PaymentInfo} from '@/lib/types/query-types';
+import {PaymentInfo} from '@/lib/types/query';
 
 /* ------------------------------------------------- */
 export async function createOrder(

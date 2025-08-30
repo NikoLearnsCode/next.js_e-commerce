@@ -2,7 +2,7 @@
 
 import {Link} from '@/components/shared/ui/link';
 import {formatPrice} from '@/utils/helpers';
-import {getCheckoutUrl} from '@/utils/checkout-steps';
+import {getCheckoutUrl} from '@/components/checkout/utils/steps';
 
 type CartSummaryProps = {
   totalPrice: number;

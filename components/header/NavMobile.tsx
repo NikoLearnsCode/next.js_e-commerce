@@ -2,7 +2,7 @@
 import {useState, useEffect} from 'react';
 import Link from 'next/link';
 import {usePathname} from 'next/navigation';
-import {NavLink} from '@/lib/types/category-types';
+import {NavLink} from '@/lib/types/category';
 import {ArrowLeft} from 'lucide-react';
 import {AnimatePresence} from 'framer-motion';
 import {
@@ -169,7 +169,10 @@ export default function MobileNav({navLinks}: {navLinks: NavLink[]}) {
                         onClick={backToSub}
                         className='text-sm font-medium pl-3 pr-2 border-b border-transparent hover:border-black transition'
                       >
-                        <ArrowLeft strokeWidth={1} className='w-5 h-5 inline text-gray-600' />
+                        <ArrowLeft
+                          strokeWidth={1}
+                          className='w-5 h-5 inline text-gray-600'
+                        />
                       </button>
                       <span className='text-[11px]  font-semibold text-gray-600'>
                         {
@@ -209,7 +212,7 @@ export default function MobileNav({navLinks}: {navLinks: NavLink[]}) {
                                   : ''
                               }`}
                             >
-                              {subLink.title} 
+                              {subLink.title}
                             </button>
                           ) : (
                             <Link

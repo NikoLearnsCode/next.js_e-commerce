@@ -5,12 +5,11 @@
 import {getCategoriesWithChildren} from '@/actions/admin';
 import CategoryManager from '@/components/admin/categories/CategoryManager';
 import {getServerSession} from 'next-auth';
-import {authOptions} from '@/lib/auth';
+import {authOptions} from '@/lib/auth.config';
 import {redirect} from 'next/navigation';
 import NoResults from '@/components/admin/shared/NoResults';
 import {Metadata} from 'next';
 // Importera den nya, centrala UI-typen
-
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
@@ -26,8 +25,6 @@ export default async function CategoriesPage() {
   }
 
   const rawCategories = await getCategoriesWithChildren();
-
-
 
   if (!rawCategories || rawCategories.length === 0) {
     return <NoResults message='Inga kategorier hittades.' />;

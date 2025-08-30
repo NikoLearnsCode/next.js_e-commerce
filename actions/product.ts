@@ -15,8 +15,8 @@ import {
   getTableColumns,
 } from 'drizzle-orm';
 import {productsTable} from '@/drizzle/db/schema';
-import type {Params, Result} from '@/lib/types/query-types';
-import type {Product} from '@/lib/validators';
+import type {Params, Result} from '@/lib/types/query';
+import type {Product} from '@/lib/types/db';
 import {sortSizes} from '@/utils/filterSort';
 import {db} from '@/drizzle/index';
 import {NEW_PRODUCT_DAYS} from '@/lib/constants';

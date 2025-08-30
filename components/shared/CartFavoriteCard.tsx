@@ -6,7 +6,8 @@ import {X, Minus, Plus} from 'lucide-react';
 import {motion} from 'framer-motion';
 import {formatPrice} from '@/utils/helpers';
 import SpinningLogo from '@/components/shared/ui/SpinningLogo';
-import type {CartItem, Favorite} from '@/lib/validators';
+import type {CartItem} from '@/lib/validators';
+import type {Favorite} from '@/lib/types/db';
 
 type ProductListItemProps = {
   item: CartItem | Favorite;

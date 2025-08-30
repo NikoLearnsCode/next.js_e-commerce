@@ -11,8 +11,8 @@ import {
 } from 'react-icons/fi';
 
 import AdminTable from '../shared/AdminTable';
-import {CategoryWithChildren} from '@/lib/types/category-types';
-import {formatDateForAdmin, getAdminHeader} from '@/utils/helpers';
+import {CategoryWithChildren} from '@/lib/types/category';
+import {formatDateForAdmin, getAdminHeader} from '@/components/admin/utils/admin.helpers';
 
 type CategoryManagerProps = {
   categories: CategoryWithChildren[];

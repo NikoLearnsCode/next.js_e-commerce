@@ -1,5 +1,5 @@
 import OrderTable from '@/components/admin/orders/OrderTable';
-import {Order} from '@/lib/validators';
+import {Order} from '@/lib/types/db';
 import AdminHeader from '../shared/AdminHeader';
 
 type OrderManagerProps = {

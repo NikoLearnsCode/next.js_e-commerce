@@ -2,10 +2,10 @@ import {getServerSession} from 'next-auth';
 import {redirect} from 'next/navigation';
 import {notFound} from 'next/navigation';
 import {Metadata} from 'next';
-import {authOptions} from '@/lib/auth';
+import {authOptions} from '@/lib/auth.config';
 import {getOrder} from '@/actions/orders';
 import OrderDetailContent from './OrderDetailContent';
-import {OrderWithItems} from '@/lib/validators';
+import {OrderWithItems} from '@/lib/types/db';
 
 type Props = {
   params: Promise<{

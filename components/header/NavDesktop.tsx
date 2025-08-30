@@ -2,7 +2,7 @@
 import {useEffect, useRef, useState, useMemo} from 'react';
 import Link from 'next/link';
 import {usePathname} from 'next/navigation';
-import {NavLink} from '@/lib/types/category-types';
+import {NavLink} from '@/lib/types/category';
 import {AnimatePresence, motion} from 'framer-motion';
 import {MotionCloseX, MotionOverlay} from '@/components/shared/AnimatedSidebar';
 
@@ -223,11 +223,11 @@ export default function DesktopNav({navLinks}: {navLinks: NavLink[]}) {
                                   columnsToRender.length > columnIndex + 1
                                     ? 'opacity-50'
                                     : ''
-                                  } ${
-                                    item.title === 'Nyheter'
-                                      ? 'text-red-800 hover:border-red-800'
-                                      : ''
-                                  }`}
+                                } ${
+                                  item.title === 'Nyheter'
+                                    ? 'text-red-800 hover:border-red-800'
+                                    : ''
+                                }`}
                               >
                                 {item.title}
                               </Link>

@@ -1,4 +1,4 @@
-import type {Product} from '@/lib/validators';
+import type {Product} from '@/lib/types/db';
 
 export type SortField = 'id' | 'price' | 'name';
 
