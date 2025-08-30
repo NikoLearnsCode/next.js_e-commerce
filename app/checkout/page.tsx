@@ -2,7 +2,7 @@ import {Metadata} from 'next';
 import CheckoutPage from '@/components/checkout/CheckoutPage';
 import {redirect} from 'next/navigation';
 import {getServerSession} from 'next-auth';
-import {authOptions} from '@/lib/auth.config';
+import {authOptions} from '@/lib/auth';
 import {getSessionId} from '@/utils/cookies';
 
 import {validateStep, getCheckoutUrl} from '@/components/checkout/utils/steps';

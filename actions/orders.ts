@@ -1,7 +1,7 @@
 'use server';
 
 import {getServerSession} from 'next-auth';
-import {authOptions} from '@/lib/auth.config';
+import {authOptions} from '@/lib/auth';
 import {getSessionId} from '@/utils/cookies';
 import {CartItem, DeliveryFormData} from '@/lib/validators';
 import {db} from '@/drizzle/index';

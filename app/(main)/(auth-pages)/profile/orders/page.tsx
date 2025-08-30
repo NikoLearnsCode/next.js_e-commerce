@@ -2,7 +2,7 @@ import {getServerSession} from 'next-auth';
 import {redirect} from 'next/navigation';
 import {Metadata} from 'next';
 
-import {authOptions} from '@/lib/auth.config';
+import {authOptions} from '@/lib/auth';
 import {OrderWithItems} from '@/lib/types/db';
 import {getUserOrders} from '@/actions/orders';
 import OrdersClientContent from './OrdersContent';

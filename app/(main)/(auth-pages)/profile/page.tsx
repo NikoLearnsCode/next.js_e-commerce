@@ -2,7 +2,7 @@ import Link from 'next/link';
 import {getServerSession} from 'next-auth';
 import {redirect} from 'next/navigation';
 import {Metadata} from 'next';
-import {authOptions} from '@/lib/auth.config';
+import {authOptions} from '@/lib/auth';
 import LogoutButton from '@/app/(main)/(auth-pages)/profile/LogoutButton';
 import {ArrowRight} from 'lucide-react';
 

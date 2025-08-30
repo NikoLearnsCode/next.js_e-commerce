@@ -1,6 +1,5 @@
 import {
   productsTable,
-
   ordersTable,
   orderItemsTable,
   favoritesTable,
@@ -10,8 +9,6 @@ export type Product = typeof productsTable.$inferSelect & {
   isNew?: boolean;
 };
 export type NewProduct = typeof productsTable.$inferInsert;
-
-
 
 export type Order = typeof ordersTable.$inferSelect;
 export type NewOrder = typeof ordersTable.$inferInsert;

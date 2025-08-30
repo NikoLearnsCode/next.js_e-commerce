@@ -8,7 +8,7 @@ import {FavoritesProvider} from '@/context/FavoritesProvider';
 import {SpeedInsights} from '@vercel/speed-insights/next';
 import QueryProvider from '@/context/QueryProvider';
 import {getServerSession} from 'next-auth';
-import {authOptions} from '@/lib/auth.config';
+import {authOptions} from '@/lib/auth';
 
 import {NavigatedHistoryProvider} from '@/context/NavigatedHistoryProvider';
 

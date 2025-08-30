@@ -1,7 +1,7 @@
 'use server';
 
 import {getServerSession} from 'next-auth';
-import {authOptions} from '@/lib/auth.config';
+import {authOptions} from '@/lib/auth';
 import {
   CART_SESSION_COOKIE,
   getOrCreateSessionId,
