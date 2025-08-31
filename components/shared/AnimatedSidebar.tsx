@@ -70,7 +70,7 @@ export const MotionDropdown = ({
   };
 
   const rightVariants: Variants = {
-    hidden: {x: 100, opacity: 0, width: 0},
+    hidden: {x: 200, opacity: 0, width: 0},
     visible: {
       x: 0,
       opacity: 1,
@@ -82,7 +82,7 @@ export const MotionDropdown = ({
         duration: 0.3,
       },
     },
-    exit: {x: 100, opacity: 0, width: 0, transition: {duration: 0.2}},
+    exit: {x: 200, opacity: 0, width: 0, transition: {duration: 0.2}},
   };
 
   const topVariants: Variants = {

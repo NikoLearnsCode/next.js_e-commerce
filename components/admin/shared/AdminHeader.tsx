@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/shared/ui/button';
 import { PlusIcon } from 'lucide-react';
+import { useAdmin } from '@/app/admin/layout';
 
 type AdminHeaderProps = {
   title: string;
@@ -11,6 +12,7 @@ type AdminHeaderProps = {
 };
 
 export default function AdminHeader({title, count, buttonShow}: AdminHeaderProps) {
+  const {openForm} = useAdmin();
   return (
     <div className='pr-4 pb-6 flex items-center justify-between'>
       <h1 className='text-lg uppercase  font-semibold'>
@@ -18,8 +20,9 @@ export default function AdminHeader({title, count, buttonShow}: AdminHeaderProps
       </h1>
 
       {buttonShow && (
-        <Button variant='secondary' className='gap-1 m-0 rounded-full'>
+        <Button variant='secondary' className='gap-1 m-0 rounded-full' onClick={openForm}>
           <PlusIcon className='w-4 h-4 ' />
+
           Lägg till
         </Button>
       )}
