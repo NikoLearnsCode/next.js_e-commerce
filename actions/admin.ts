@@ -3,6 +3,7 @@ import {productsTable, ordersTable, categories} from '@/drizzle/db/schema';
 import {asc} from 'drizzle-orm';
 import {buildCategoryTree} from '@/utils/category-builder';
 
+// PRODUCTS
 // --------------------------------------------------------------
 
 export async function getAllProducts() {
@@ -10,6 +11,11 @@ export async function getAllProducts() {
   return products;
 }
 
+
+
+
+
+// CATEGORIES
 // --------------------------------------------------------------
 
 export async function getCategoriesWithChildren() {

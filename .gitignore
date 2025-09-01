@@ -33,6 +33,8 @@ txt
 .DS_Store
 *.pem
 
+keybinds.json
+
 # debug
 npm-debug.log*
 yarn-debug.log*

@@ -10,7 +10,12 @@ export default function CategoryManager({categories}: CategoryManagerProps) {
 
   return (
     <div>
-      <AdminHeader title='Kategorihantering' count={count} buttonShow />
+      <AdminHeader
+        title='Kategorihantering'
+        count={count}
+        buttonShow
+        formType='category'
+      />
       <CategoryTable categories={categories} />
     </div>
   );

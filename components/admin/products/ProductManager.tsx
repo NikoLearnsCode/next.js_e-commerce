@@ -13,6 +13,7 @@ export default function ProductManager({products}: ProductManagerProps) {
         title='Produkthantering'
         count={products.length}
         buttonShow
+        formType='product'
       />
       <ProductTable products={products} />
     </div>

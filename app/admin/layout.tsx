@@ -2,13 +2,19 @@
 
 import {createContext, useContext, useEffect, useState} from 'react';
 import FormWrapper from '@/components/admin/shared/FormWrapper';
+import {Category} from '@/lib/types/category';
+import {Product} from '@/lib/types/db';
 
 const AdminContext = createContext<AdminContextType | null>(null);
 
 type AdminContextType = {
-  isFormOpen: boolean;
-  openForm: () => void;
-  closeForm: () => void;
+  activeSidebar: 'category' | 'product' | null;
+  openSidebar: (
+    type: 'category' | 'product',
+    editDataParam?: Category | Product
+  ) => void;
+  closeSidebar: () => void;
+  editData: Category | Product | null;
 };
 
 export function useAdmin() {
@@ -24,41 +30,51 @@ export default function AdminContextProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [activeSidebar, setActiveSidebar] = useState<
+    'category' | 'product' | null
+  >(null);
+  const [editData, setEditData] = useState<Category | Product | null>(null);
 
-  const openForm = () => {
-    setIsFormOpen(true);
+  const openSidebar = (
+    type: 'category' | 'product',
+    editDataParam?: Category | Product
+  ) => {
+    setActiveSidebar(type);
+    setEditData(editDataParam || null);
   };
 
-  const closeForm = () => {
-    setIsFormOpen(false);
+  const closeSidebar = () => {
+    setActiveSidebar(null);
+    setEditData(null);
   };
 
   useEffect(() => {
-    if (isFormOpen) {
+    if (activeSidebar) {
       const handleEscape = (event: KeyboardEvent) => {
         if (event.key === 'Escape') {
-          closeForm();
+          closeSidebar();
         }
       };
       document.addEventListener('keydown', handleEscape);
       return () => document.removeEventListener('keydown', handleEscape);
     }
-  }, [isFormOpen]);
+  }, [activeSidebar]);
 
   useEffect(() => {
-    if (isFormOpen) {
+    if (activeSidebar) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'auto';
     }
-  }, [isFormOpen]);
+  }, [activeSidebar]);
 
   return (
-    <AdminContext.Provider value={{isFormOpen, openForm, closeForm}}>
+    <AdminContext.Provider
+      value={{activeSidebar, openSidebar, closeSidebar, editData}}
+    >
       <div>
         <div className='-mt-[54px] py-12 px-8'>{children}</div>
-        <FormWrapper onClose={closeForm} isFormOpen={isFormOpen} />
+        <FormWrapper onClose={closeSidebar} />
       </div>
     </AdminContext.Provider>
   );
