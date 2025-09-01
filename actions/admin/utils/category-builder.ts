@@ -17,26 +17,29 @@ export function buildCategoryTree(
 
 export function transformTreeToNavLinks(
   categories: CategoryWithChildren[],
-  mainCategorySlug: string | null = null
+  parentSlugs: string[] = []
 ): NavLink[] {
-  return categories.map((category) => {
-    const currentMainSlug = mainCategorySlug || category.slug;
-    const hasChildren = category.children && category.children.length > 0;
-    let href: string;
+  const sortedCategories = [...categories].sort(
+    (a, b) => a.displayOrder - b.displayOrder
+  );
 
-    if (mainCategorySlug === null) {
-      href = `/c/${category.slug}`;
+  return sortedCategories.map((category) => {
+    let currentPathSlugs: string[];
+    const hasChildren = category.children && category.children.length > 0;
+
+    // Här sker magin! Vi anpassar logiken baserat på kategorityp.
+    if (category.type === 'CONTAINER') {
+      // Om kategorin är en 'CONTAINER', lägg INTE till dess slug i URL-sökvägen.
+      // Vi för bara vidare de befintliga föräldra-slugsen till barnen.
+      currentPathSlugs = parentSlugs;
     } else {
-      if (hasChildren) {
-        href = '#';
-      } else {
-        href = `/c/${mainCategorySlug}/${category.slug}`;
-      }
+      // För 'STANDARD' och 'COLLECTION' lägger vi till slugen som vanligt.
+      currentPathSlugs = [...parentSlugs, category.slug];
     }
 
     const navLink: NavLink = {
       title: category.name,
-      href: href,
+      href: `/c/${currentPathSlugs.join('/')}`,
       displayOrder: category.displayOrder,
       isFolder: hasChildren,
     };
@@ -44,10 +47,13 @@ export function transformTreeToNavLinks(
     if (hasChildren) {
       navLink.children = transformTreeToNavLinks(
         category.children!,
-        currentMainSlug
+        currentPathSlugs
       );
     }
 
     return navLink;
   });
 }
+
+
+

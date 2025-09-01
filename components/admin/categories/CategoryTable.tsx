@@ -16,7 +16,7 @@ import {
   formatDateForAdmin,
   getAdminHeader,
 } from '@/components/admin/utils/admin.helpers';
-import { useAdmin } from '@/app/admin/layout';
+import { useAdmin } from '@/context/AdminContextProvider';
 
 type CategoryManagerProps = {
   categories: CategoryWithChildren[];
@@ -110,7 +110,7 @@ export default function CategoryManager({categories}: CategoryManagerProps) {
     () => [
       {
         header: 'Kategorier',
-        headerClassName: 'pl-12',
+        headerClassName: 'pl-11',
         cell: (category: FlattenedCategory) => {
           const isExpanded = expandedCategories.has(category.id);
           const hasChildren = category.children && category.children.length > 0;
@@ -214,6 +214,12 @@ export default function CategoryManager({categories}: CategoryManagerProps) {
         header: 'Sortering',
         cell: (category: FlattenedCategory) => (
           <div>{category.displayOrder}</div>
+        ),
+      },
+      {
+        header: 'Typ',
+        cell: (category: FlattenedCategory) => (
+          <div>{category.type}</div>
         ),
       },
       {

@@ -5,7 +5,7 @@ import AdminTable from '../shared/AdminTable';
 import {FiEdit, FiTrash} from 'react-icons/fi';
 import {formatDateForAdmin,  getAdminHeader} from '@/components/admin/utils/admin.helpers';
 import {formatPrice} from '@/utils/helpers';
-import { useAdmin } from '@/app/admin/layout';
+import { useAdmin } from '@/context/AdminContextProvider';
 
 type ProductManagerProps = {
   products: Product[];

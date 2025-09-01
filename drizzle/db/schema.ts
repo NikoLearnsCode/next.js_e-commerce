@@ -12,6 +12,7 @@ import {
   AnyPgColumn,
   unique,
   serial,
+  pgEnum,
 } from 'drizzle-orm/pg-core';
 import {relations} from 'drizzle-orm';
 
@@ -140,23 +141,27 @@ export const favoritesTable = pgTable('favorites', {
 });
 
 // CATEGORIES
+export const categoryTypeEnum = pgEnum('category_type', [
+  'STANDARD', // En vanlig kategori med produkter, syns i URL:en (t.ex. "Byxor")
+  'CONTAINER', // En strukturell mapp, syns INTE i URL:en (t.ex. "Plagg")
+  'COLLECTION', // En specialsida som har en URL men samlar innehåll (t.ex. "Nyheter", "Rea")
+]);
+
 export const categories = pgTable('categories', {
   id: serial('id').primaryKey(),
   name: text('name').notNull(),
   slug: text('slug').notNull(),
+  type: categoryTypeEnum('type').notNull().default('STANDARD'),
   displayOrder: integer('display_order').notNull().default(0),
   isActive: boolean('is_active').notNull().default(true),
   created_at: timestamp('created_at').notNull().defaultNow(),
   updated_at: timestamp('updated_at').notNull().defaultNow(),
 
-  // HÄR ÄR DEN MAGISKA FIXEN: `(): AnyPgColumn => ...`
-  // Vi ger TypeScript en ledtråd om vad funktionen returnerar.
   parentId: integer('parent_id').references((): AnyPgColumn => categories.id, {
     onDelete: 'cascade',
   }),
 });
 
-// Unika slug bara för enskilda kategorier - main - sub - subsub
 export const categoriesSlugParentUniqueIndex = unique(
   'slug_parent_unique_idx'
 ).on(categories.slug, categories.parentId);

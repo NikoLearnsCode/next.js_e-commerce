@@ -6,7 +6,7 @@ import {
 import {AnimatePresence} from 'framer-motion';
 import ProductForm from './products/ProductForm';
 import CategoryForm from './categories/CategoryForm';
-import {useAdmin} from '@/app/admin/layout';
+import {useAdmin} from '@/context/AdminContextProvider';
 
 export default function FormWrapper({onClose}: {onClose: () => void}) {
   const {activeSidebar} = useAdmin();

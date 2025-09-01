@@ -11,11 +11,9 @@ import {
   MotionCloseX,
 } from '@/components/shared/AnimatedSidebar';
 
-// Helper-funktion som säkert hanterar undefined navLinks
+// Helper-funktion är oförändrad
 const findInitialCategory = (navLinks: NavLink[], pathname: string): number => {
-  if (!navLinks) {
-    return 0;
-  }
+  if (!navLinks) return 0;
   for (let i = 0; i < navLinks.length; i++) {
     if (
       (navLinks[i].href === '/' && pathname === '/') ||
@@ -30,97 +28,86 @@ const findInitialCategory = (navLinks: NavLink[], pathname: string): number => {
 export default function MobileNav({navLinks}: {navLinks: NavLink[]}) {
   const pathname = usePathname();
 
-  // Initialisera med ett säkert standardvärde
-  const [activeCategory, setActiveCategory] = useState(0);
+  const [activeCategoryIndex, setActiveCategoryIndex] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [showingSubSub, setShowingSubSub] = useState(false);
-  const [activeSubIndex, setActiveSubIndex] = useState<number | null>(null);
 
-  // Använd useEffect för att uppdatera state när navLinks eller pathname ändras
+  // STEG 1: Byt ut det gamla statet mot en "navigeringsstack".
+  // Denna array håller reda på vilken nivå användaren är på.
+  const [navigationStack, setNavigationStack] = useState<NavLink[]>([]);
+
   useEffect(() => {
-    setActiveCategory(findInitialCategory(navLinks, pathname));
+    setActiveCategoryIndex(findInitialCategory(navLinks, pathname));
+    // Återställ stacken om huvudkategorin ändras via sidnavigering
+    setNavigationStack([]);
   }, [navLinks, pathname]);
 
+  // STEG 2: Bestäm vad som ska visas baserat på stacken.
+  const currentLevel = navigationStack[navigationStack.length - 1];
+  const activeTopLevelCategory = navLinks[activeCategoryIndex];
+  // Om stacken är tom, visa huvudmenyn. Annars, visa barnen till det sista objektet i stacken.
+  const linksToDisplay =
+    currentLevel?.children ?? activeTopLevelCategory?.children ?? [];
+  const currentTitle = currentLevel?.title ?? activeTopLevelCategory?.title;
+
   const toggleMenu = () => {
-    const newMenuState = !isMenuOpen;
-    setIsMenuOpen(newMenuState);
-    if (newMenuState) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
+    document.body.style.overflow = !isMenuOpen ? 'hidden' : '';
+    setIsMenuOpen(!isMenuOpen);
   };
 
   const closeMenu = () => {
     setIsMenuOpen(false);
-    setShowingSubSub(false);
-    setActiveSubIndex(null);
+    setNavigationStack([]); // Återställ alltid stacken vid stängning
     document.body.style.overflow = '';
   };
 
-  const handleEscape = (e: KeyboardEvent) => {
-    if (e.key === 'Escape') {
+  // STEG 3: Förenklade funktioner för att navigera
+  const handleLinkClick = (link: NavLink) => {
+    // Om länken är en mapp (har barn), gå djupare in i stacken.
+    if (link.isFolder) {
+      setNavigationStack((prevStack) => [...prevStack, link]);
+    } else {
+      // Om det är en vanlig länk, stäng menyn.
       closeMenu();
     }
+  };
+
+  const goBack = () => {
+    // Ta bort det sista objektet från stacken för att gå ett steg tillbaka.
+    setNavigationStack((prevStack) => prevStack.slice(0, -1));
   };
 
   const changeCategory = (index: number) => {
-    setActiveCategory(index);
-    setShowingSubSub(false);
-    setActiveSubIndex(null);
+    setActiveCategoryIndex(index);
+    setNavigationStack([]); // Återställ stacken när man byter huvudkategori
   };
 
-  const openSubSub = (subIndex: number) => {
-    setActiveSubIndex(subIndex);
-    setShowingSubSub(true);
-  };
-
-  const backToSub = () => {
-    setShowingSubSub(false);
-    setActiveSubIndex(null);
-  };
-
-  const handleSubClick = (subLink: any, subIndex: number) => {
-    if (subLink.children && subLink.children.length > 0) {
-      openSubSub(subIndex);
-    } else {
-      closeMenu();
-    }
-  };
-
+  // ... useEffects för Escape-tangent och skärmstorlek är i princip oförändrade ...
   useEffect(() => {
-    document.addEventListener('keydown', handleEscape);
-    return () => {
-      document.removeEventListener('keydown', handleEscape);
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') closeMenu();
     };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
   }, []);
 
   useEffect(() => {
     const checkScreenSize = () => {
-      if (window.innerWidth >= 1024) {
-        document.body.style.overflow = '';
-        closeMenu();
-      }
+      if (window.innerWidth >= 1024) closeMenu();
     };
-    checkScreenSize();
     window.addEventListener('resize', checkScreenSize);
-    return () => {
-      window.removeEventListener('resize', checkScreenSize);
-    };
+    return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
 
-  if (!navLinks || navLinks.length === 0) {
-    return null; // Renderar inget om det inte finns några länkar
-  }
+  if (!navLinks || navLinks.length === 0) return null;
 
   return (
-    <nav className='relative uppercase '>
+    <nav className='relative uppercase'>
       <button
         onClick={toggleMenu}
         className='flex flex-col gap-1 py-2 items-center group relative focus:outline-none cursor-pointer'
         aria-label={isMenuOpen ? 'Stäng meny' : 'Öppna meny'}
       >
-        <span className='w-6 border-t-[1.4px] border-black '></span>
+        <span className='w-6 border-t-[1.4px] border-black'></span>
         <span className='w-6 border-t-[1.4px] border-black'></span>
         <span className='w-6 border-t-[1.4px] border-black'></span>
       </button>
@@ -128,24 +115,24 @@ export default function MobileNav({navLinks}: {navLinks: NavLink[]}) {
       <AnimatePresence>
         {isMenuOpen && (
           <>
-            <MotionOverlay key='mobile-overlay' withDelay={true} />
-
+            <MotionOverlay
+              key='mobile-overlay'
+              onClick={closeMenu}
+              withDelay={true}
+            />
             <MotionDropdown
               position='newLeft'
               key='mobile-dropdown'
               isMobile={true}
               className='overflow-y-auto'
             >
-              <ul className='flex uppercase px-2  text-sm  font-semibold font-syne py-5 items-center '>
+              {/* Huvudkategorier (Dam, Herr etc.) visas alltid */}
+              <ul className='flex uppercase px-2 text-sm font-semibold font-syne py-5 items-center'>
                 {navLinks.map((link, index) => (
                   <li
                     key={link.title}
                     onClick={() => changeCategory(index)}
-                    className={`mx-3 cursor-pointer border-b  ${
-                      activeCategory === index
-                        ? 'text-black border-black'
-                        : 'text-gray-500 border-transparent'
-                    }`}
+                    className={`mx-3 cursor-pointer border-b ${activeCategoryIndex === index ? 'text-black border-black' : 'text-gray-500 border-transparent'}`}
                   >
                     {link.title}
                   </li>
@@ -160,78 +147,49 @@ export default function MobileNav({navLinks}: {navLinks: NavLink[]}) {
                 />
               </div>
 
-              <div className='p-2 pt-5 '>
-                {showingSubSub && activeSubIndex !== null ? (
-                  // SubSub View
-                  <div>
-                    <div className='flex items-center mb-6'>
-                      <button
-                        onClick={backToSub}
-                        className='text-sm font-medium pl-3 pr-2 border-b border-transparent hover:border-black transition'
-                      >
-                        <ArrowLeft
-                          strokeWidth={1}
-                          className='w-5 h-5 inline text-gray-600'
-                        />
-                      </button>
-                      <span className='text-[11px]  font-semibold text-gray-600'>
-                        {
-                          navLinks[activeCategory]?.children?.[activeSubIndex]
-                            ?.title
-                        }
-                      </span>
-                    </div>
-                    <ul className='space-y-4 text-sm'>
-                      {navLinks[activeCategory]?.children?.[
-                        activeSubIndex
-                      ]?.children?.map((subSubLink) => (
-                        <li key={subSubLink.title} className='not-first:pt-2'>
-                          <Link
-                            href={subSubLink.href}
-                            className='block mx-4 font-medium border-b border-transparent active:border-b active:border-black w-fit transition'
-                            onClick={closeMenu}
-                          >
-                            {subSubLink.title}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
+              {/* STEG 4: En enda, dynamisk vy istället för en komplex ternary */}
+              <div className='p-2 pt-5'>
+                {/* Visa "Tillbaka"-knapp om vi inte är på första nivån */}
+                {navigationStack.length > 0 && (
+                  <div className='flex items-center mb-6'>
+                    <button
+                      onClick={goBack}
+                      className='text-sm font-medium pl-3 pr-2 border-b border-transparent hover:border-black transition'
+                    >
+                      <ArrowLeft
+                        strokeWidth={1}
+                        className='w-5 h-5 inline text-gray-600'
+                      />
+                    </button>
+                    <span className='text-[11px] font-semibold text-gray-600'>
+                      {currentTitle}
+                    </span>
                   </div>
-                ) : (
-                  // Sub View
-                  <ul className='space-y-4 text-sm '>
-                    {navLinks[activeCategory]?.children?.map(
-                      (subLink, subIndex) => (
-                        <li key={subLink.title} className='not-first:pt-2'>
-                          {subLink.children && subLink.children.length > 0 ? (
-                            <button
-                              onClick={() => handleSubClick(subLink, subIndex)}
-                              className={`block mx-4 font-medium border-b border-transparent active:border-b active:border-black uppercase w-fit transition text-left ${
-                                subLink.title === 'Nyheter'
-                                  ? 'text-red-800 active:border-red-800'
-                                  : ''
-                              }`}
-                            >
-                              {subLink.title}
-                            </button>
-                          ) : (
-                            <Link
-                              href={subLink.href}
-                              className={`block mx-4 font-medium border-b border-transparent active:border-b active:border-black w-fit transition ${
-                                subLink.title === 'Nyheter'
-                                  ? 'text-red-800 active:border-red-800'
-                                  : ''
-                              }`}
-                              onClick={() => handleSubClick(subLink, subIndex)}
-                            >
-                              {subLink.title}
-                            </Link>
-                          )}
-                        </li>
-                      )
-                    )}
-                  </ul>
                 )}
+
+                {/* Rendera länkarna för den nuvarande nivån */}
+                <ul className='space-y-4 text-sm'>
+                  {linksToDisplay.map((link) => (
+                    <li key={link.href} className='not-first:pt-2'>
+                      {link.isFolder ? (
+                        <button
+                          onClick={() => handleLinkClick(link)}
+                          className='block mx-4 font-medium border-b border-transparent active:border-b active:border-black uppercase w-fit transition text-left'
+                        >
+                          {link.title}
+                        </button>
+                      ) : (
+                        <Link
+                          href={link.href}
+                          onClick={() => handleLinkClick(link)}
+                          className='block mx-4 font-medium border-b border-transparent active:border-b active:border-black w-fit transition'
+                        >
+                          {link.title}
+                        </Link>
+                      )}
+                    </li>
+                  ))}
+                </ul>
               </div>
             </MotionDropdown>
           </>

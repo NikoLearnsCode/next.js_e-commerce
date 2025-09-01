@@ -1,7 +1,7 @@
 'use client';
 
 import {Button} from '@/components/shared/ui/button';
-import {useAdmin} from '@/app/admin/layout';
+import {useAdmin} from '@/context/AdminContextProvider';
 import {PlusIcon} from 'lucide-react';
 
 type AdminHeaderProps = {

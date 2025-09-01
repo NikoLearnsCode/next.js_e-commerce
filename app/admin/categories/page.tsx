@@ -2,7 +2,7 @@
 
 'use server';
 
-import {getCategoriesWithChildren} from '@/actions/admin';
+import {getCategoriesWithChildren} from '@/actions/admin/categories';
 import CategoryManager from '@/components/admin/categories/CategoryManager';
 import {getServerSession} from 'next-auth';
 import {authOptions} from '@/lib/auth';
@@ -24,11 +24,11 @@ export default async function CategoriesPage() {
     return redirect('/denied');
   }
 
-  const rawCategories = await getCategoriesWithChildren();
+  const categoryTree = await getCategoriesWithChildren();
 
-  if (!rawCategories || rawCategories.length === 0) {
+  if (!categoryTree || categoryTree.length === 0) {
     return <NoResults message='Inga kategorier hittades.' />;
   }
 
-  return <CategoryManager categories={rawCategories} />;
+  return <CategoryManager categories={categoryTree} />;
 }
