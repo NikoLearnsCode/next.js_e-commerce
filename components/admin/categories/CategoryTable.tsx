@@ -16,6 +16,7 @@ import {
   formatDateForAdmin,
   getAdminHeader,
 } from '@/components/admin/utils/admin.helpers';
+import { useAdmin } from '@/app/admin/layout';
 
 type CategoryManagerProps = {
   categories: CategoryWithChildren[];
@@ -65,6 +66,8 @@ const getAllCategoryIdsRecursive = (cats: CategoryWithChildren[]): number[] => {
 };
 
 export default function CategoryManager({categories}: CategoryManagerProps) {
+  const {openSidebar} = useAdmin();
+
   const [expandedCategories, setExpandedCategories] = useState<Set<number>>(
     () => {
       if (!categories || categories.length === 0) {
@@ -240,7 +243,7 @@ export default function CategoryManager({categories}: CategoryManagerProps) {
       label: <FiEdit size={16} className='text-gray-600 hover:text-gray-900' />,
       key: 'edit',
       onClick: (category: FlattenedCategory) =>
-        console.log('Redigera kategori:', category),
+        openSidebar('category', category),
     },
     {
       label: (

@@ -1,7 +1,7 @@
 'use client';
 
 import {createContext, useContext, useEffect, useState} from 'react';
-import FormWrapper from '@/components/admin/shared/FormWrapper';
+import FormWrapper from '@/components/admin/FormWrapper';
 import {Category} from '@/lib/types/category';
 import {Product} from '@/lib/types/db';
 
@@ -16,14 +16,6 @@ type AdminContextType = {
   closeSidebar: () => void;
   editData: Category | Product | null;
 };
-
-export function useAdmin() {
-  const context = useContext(AdminContext);
-  if (!context) {
-    throw new Error('useAdmin must be used within an AdminProvider');
-  }
-  return context;
-}
 
 export default function AdminContextProvider({
   children,
@@ -78,4 +70,12 @@ export default function AdminContextProvider({
       </div>
     </AdminContext.Provider>
   );
+}
+
+export function useAdmin() {
+  const context = useContext(AdminContext);
+  if (!context) {
+    throw new Error('useAdmin must be used within an AdminProvider');
+  }
+  return context;
 }

@@ -5,12 +5,15 @@ import AdminTable from '../shared/AdminTable';
 import {FiEdit, FiTrash} from 'react-icons/fi';
 import {formatDateForAdmin,  getAdminHeader} from '@/components/admin/utils/admin.helpers';
 import {formatPrice} from '@/utils/helpers';
+import { useAdmin } from '@/app/admin/layout';
 
 type ProductManagerProps = {
   products: Product[];
 };
 
 export default function ProductManager({products}: ProductManagerProps) {
+  const {openSidebar} = useAdmin();
+
   const desiredKeys = [
     'name',
     'price',
@@ -50,6 +53,7 @@ export default function ProductManager({products}: ProductManagerProps) {
       key: 'edit',
       onClick: (product: Product) => {
         console.log('Redigera produkt:', product);
+        openSidebar('product', product);
       },
     },
     {

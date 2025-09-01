@@ -4,8 +4,8 @@ import {
   MotionCloseX,
 } from '@/components/shared/AnimatedSidebar';
 import {AnimatePresence} from 'framer-motion';
-import ProductForm from '../products/ProductForm';
-import CategoryForm from '../categories/CategoryForm';
+import ProductForm from './products/ProductForm';
+import CategoryForm from './categories/CategoryForm';
 import {useAdmin} from '@/app/admin/layout';
 
 export default function FormWrapper({onClose}: {onClose: () => void}) {
@@ -37,7 +37,11 @@ export default function FormWrapper({onClose}: {onClose: () => void}) {
             >
               <div className='flex uppercase font-semibold justify-between items-center pb-8'>
                 <h1>{title}</h1>
-                <MotionCloseX onClick={onClose} size={16} className='px-4 py-1'/>
+                <MotionCloseX
+                  onClick={onClose}
+                  size={16}
+                  className='px-4 py-1'
+                />
               </div>
 
               {renderForm()}
