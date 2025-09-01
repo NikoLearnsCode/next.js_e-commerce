@@ -18,8 +18,8 @@ const CustomTextarea = React.forwardRef<
   return (
     <div className='w-full'>
       {label && (
-        <label htmlFor={id} className='sr-only'>
-          {label}
+        <label className='text-sm block font-medium text-gray-700 mb-1' htmlFor={id}>
+          {label}:
         </label>
       )}
       <textarea
@@ -29,7 +29,7 @@ const CustomTextarea = React.forwardRef<
         className={cn(
           'w-full border border-gray-400 rounded-xs text-sm px-3 py-2',
           'focus:outline-none  ',
-          'hover:border-gray-500 transition-colors',
+          'hover:border-gray-600 h-24 transition-colors',
           'resize-none',
           'disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
           'placeholder:text-gray-400',

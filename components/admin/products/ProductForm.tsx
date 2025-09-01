@@ -5,7 +5,6 @@ import {useForm} from 'react-hook-form';
 import {productFormSchema, type ProductFormData} from '@/lib/form-validators';
 import {Button} from '@/components/shared/ui/button';
 import {FloatingLabelInput} from '@/components/shared/ui/floatingLabelInput';
-import {CustomTextarea} from '@/components/shared/ui/CustomTextarea';
 
 export default function ProductForm() {
   const form = useForm<ProductFormData>({
@@ -13,7 +12,8 @@ export default function ProductForm() {
     defaultValues: {
       name: 'Test Product',
       slug: 'test-product',
-      description: 'test description',
+      description:
+        'Detta är en fantastisk testprodukt med många fina egenskaper.',
       price: '100',
       brand: 'Test Brand',
       gender: 'herr',
@@ -30,48 +30,62 @@ export default function ProductForm() {
   };
 
   return (
-  <div>
-    <form onSubmit={form.handleSubmit(onSubmit)}>
-    <div>
-      {[
-        {
-          name: 'name',
-          label: 'Namn',
-          type: 'text',
-        },
-        {
-          name: 'name',
-          label: 'Namn',
-          type: 'text',
-        },
-        {
-          name: 'name',
-          label: 'Namn',
-          type: 'text',
-        },
-        {
-          name: 'name',
-          label: 'Namn',
-          type: 'text',
-        },
-        {
-          name: 'name',
-          label: 'Namn',
-          type: 'text',
-        },
-      ]}
+    <div className='overflow-y-auto'>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className='space-y-6 overflow-y-auto'
+      >
+        <div className='grid grid-cols-1 gap-5 md:grid-cols-1'>
+          {[
+            {name: 'name', label: 'Produktnamn', type: 'text'},
+            {name: 'slug', label: 'Slug', type: 'text'},
+            {name: 'price', label: 'Pris (SEK)', type: 'number'},
+            {name: 'brand', label: 'Märke', type: 'text'},
+            {name: 'color', label: 'Färg', type: 'text'},
+            {name: 'gender', label: 'Kön', type: 'text'},
+            {name: 'category', label: 'Kategori', type: 'text'},
+            {name: 'sizes', label: 'Storlekar (kommaseparerade)', type: 'text'},
+
+            {
+              name: 'description',
+              label: 'Beskrivning',
+              type: 'textarea',
+              className: ' h-32',
+            },
+            {
+              name: 'specs',
+              label: 'Specifikationer (en per rad)',
+              type: 'textarea',
+              className: 'h-24',
+            },
+            {
+              name: 'images',
+              label: 'Bilder (en URL per rad)',
+              type: 'textarea',
+              className: 'h-24',
+            },
+          ].map((field) => (
+            <FloatingLabelInput
+              key={field.name}
+              {...form.register(field.name as keyof ProductFormData)}
+              id={field.name}
+              label={field.label}
+              as={field.type === 'textarea' ? 'textarea' : 'input'}
+              type={field.type !== 'textarea' ? field.type : undefined}
+              className={field.className}
+            />
+          ))}
+        </div>
+        <div className='flex justify-end gap-2 pb-5'>
+          <Button className='w-full h-12' type='submit'>
+            Spara produkt
+          </Button>
+
+          <Button className='w-full h-12' variant='outline' type='button'>
+            Rensa
+          </Button>
+        </div>
+      </form>
     </div>
-
-
-
-
-
-
-
-
-
-
-    </form>
-  </div>
   );
 }

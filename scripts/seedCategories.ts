@@ -47,7 +47,7 @@ const navLinks = [
           {
             title: 'Byxor',
             slug: 'byxor',
-            /*     // 3. Tredje
+                 // 3. Tredje
             children: [
               {title: 'Jeans', slug: 'jeans'},
               {
@@ -67,7 +67,7 @@ const navLinks = [
                   },
                 ],
               },
-            ], */
+            ], 
           },
         ],
       },

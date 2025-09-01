@@ -3,105 +3,90 @@
 import * as React from 'react';
 import {cn} from '@/styles/style.utils';
 
-interface FloatingLabelInputProps
-  extends React.InputHTMLAttributes<HTMLInputElement> {
+type FowardableElement = HTMLInputElement | HTMLTextAreaElement;
+
+interface FloatingLabelBaseProps {
   label: string;
   id: string;
 }
 
-const FloatingLabelInput = React.forwardRef<
-  HTMLInputElement,
-  FloatingLabelInputProps
->(
+type FloatingLabelProps = FloatingLabelBaseProps &
   (
-    {
-      className,
-      label,
-      id,
-      onFocus,
-      onBlur,
-      onChange,
-      value,
-      defaultValue,
-      ...props
-    },
-    ref
-  ) => {
-    const [isFocused, setIsFocused] = React.useState(false);
-    const [hasValue, setHasValue] = React.useState(false);
-    const inputRef = React.useRef<HTMLInputElement | null>(null);
+    | ({as?: 'input'} & React.InputHTMLAttributes<HTMLInputElement>)
+    | ({as: 'textarea'} & React.TextareaHTMLAttributes<HTMLTextAreaElement>)
+  );
 
-    // Kombinera refs
-    const combinedRef = React.useCallback(
-      (node: HTMLInputElement | null) => {
-        inputRef.current = node;
-        if (typeof ref === 'function') {
-          ref(node);
-        } else if (ref) {
-          ref.current = node;
-        }
-      },
-      [ref]
-    );
+const FloatingLabelField = React.forwardRef<
+  FowardableElement,
+  FloatingLabelProps
+>((allProps, ref) => {
+  const [isFocused, setIsFocused] = React.useState(false);
+  const [hasValue, setHasValue] = React.useState(false);
+  const elementRef = React.useRef<FowardableElement | null>(null);
 
-    // Kontrollera DOM-elementets faktiska värde
-    const checkInputValue = React.useCallback(() => {
-      if (inputRef.current) {
-        setHasValue(inputRef.current.value !== '');
+  const combinedRef = React.useCallback(
+    (node: FowardableElement | null) => {
+      elementRef.current = node;
+      if (typeof ref === 'function') {
+        ref(node);
+      } else if (ref) {
+        ref.current = node;
       }
-    }, []);
+    },
+    [ref]
+  );
 
-    // Kontrollera initial värde och när props ändras
-    React.useEffect(() => {
-      checkInputValue();
-    }, [checkInputValue, value, defaultValue]);
 
-    const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-      setIsFocused(true);
-      onFocus?.(e);
-    };
+  const checkElementValue = React.useCallback(() => {
+    if (elementRef.current) {
+      setHasValue(elementRef.current.value !== '');
+    }
+  }, []);
 
-    const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-      setIsFocused(false);
-      checkInputValue();
-      onBlur?.(e);
-    };
+  React.useEffect(() => {
+    checkElementValue();
+  }, [checkElementValue]);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      checkInputValue();
-      onChange?.(e);
-    };
+  const {id, label} = allProps;
+  const isFloating = isFocused || hasValue;
 
-    const isFloating = isFocused || hasValue;
+  // ----- RENDERINGSBLOCK FÖR TEXTAREA -----
+  if (allProps.as === 'textarea') {
+    const {className, onFocus, onBlur, onChange, ...restProps} = allProps;
 
     return (
       <div className='relative'>
-        <input
-          {...props}
-          id={id}
-          ref={combinedRef}
-          value={value}
-          defaultValue={defaultValue}
+        <textarea
+          {...restProps}
+          ref={combinedRef as React.Ref<HTMLTextAreaElement>}
           className={cn(
             'peer w-full border border-gray-400 bg-transparent px-3 pt-5 pb-1 text-base',
-            'rounded-xs outline-none transition-all duration-200',
-            'hover:border-black focus:border-black',
-            'disabled:cursor-not-allowed disabled:opacity-50',
-            'aria-invalid:border-destructive',
+            'rounded-xs outline-none transition-all duration-200 hover:border-black focus:border-black',
+            'disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive',
+            'resize-none min-h-[80px]',
             className
           )}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
-          onChange={handleChange}
+          onFocus={(e) => {
+            setIsFocused(true);
+            onFocus?.(e);
+          }}
+          onBlur={(e) => {
+            setIsFocused(false);
+            checkElementValue();
+            onBlur?.(e);
+          }}
+          onChange={(e) => {
+            checkElementValue();
+            onChange?.(e);
+          }}
         />
-
         <label
           htmlFor={id}
           className={cn(
             'absolute left-3 pointer-events-none select-none transition-all duration-200',
             isFloating
               ? 'top-1 text-xs text-black'
-              : 'top-1/2 -translate-y-1/2 text-sm text-gray-500',
+              : 'top-3 text-sm text-gray-500',
             'peer-focus:text-black peer-disabled:opacity-50'
           )}
         >
@@ -110,8 +95,50 @@ const FloatingLabelInput = React.forwardRef<
       </div>
     );
   }
-);
 
-FloatingLabelInput.displayName = 'FloatingLabelInput';
+  const {className, onFocus, onBlur, onChange, ...restProps} = allProps;
 
-export {FloatingLabelInput};
+  return (
+    <div className='relative'>
+      <input
+        {...restProps}
+        ref={combinedRef as React.Ref<HTMLInputElement>}
+        className={cn(
+          'peer w-full border border-gray-400 bg-transparent px-3 pt-5 pb-1 text-base',
+          'rounded-xs outline-none transition-all duration-200 hover:border-black focus:border-black',
+          'disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive',
+          className
+        )}
+        onFocus={(e) => {
+          setIsFocused(true);
+          onFocus?.(e);
+        }}
+        onBlur={(e) => {
+          setIsFocused(false);
+          checkElementValue();
+          onBlur?.(e);
+        }}
+        onChange={(e) => {
+          checkElementValue();
+          onChange?.(e);
+        }}
+      />
+      <label
+        htmlFor={id}
+        className={cn(
+          'absolute left-3 pointer-events-none select-none transition-all duration-200',
+          isFloating
+            ? 'top-1 text-xs text-black'
+            : 'top-1/2 -translate-y-1/2 text-sm text-gray-500',
+          'peer-focus:text-black peer-disabled:opacity-50'
+        )}
+      >
+        {label}
+      </label>
+    </div>
+  );
+});
+
+FloatingLabelField.displayName = 'FloatingLabelField';
+
+export {FloatingLabelField as FloatingLabelInput};
