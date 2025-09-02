@@ -142,16 +142,17 @@ export const favoritesTable = pgTable('favorites', {
 
 // CATEGORIES
 export const categoryTypeEnum = pgEnum('category_type', [
-  'STANDARD', // En vanlig kategori med produkter, syns i URL:en (t.ex. "Byxor")
+  'MAIN-CATEGORY', // En huvudkategori på toppnivå (t.ex. "Dam", "Herr")
+  'SUB-CATEGORY', // En underkategori som produkter kan tillhöra (t.ex. "Byxor")
   'CONTAINER', // En strukturell mapp, syns INTE i URL:en (t.ex. "Plagg")
-  'COLLECTION', // En specialsida som har en URL men samlar innehåll (t.ex. "Nyheter", "Rea")
+  'COLLECTION', // En specialsida som samlar innehåll (t.ex. "Nyheter")
 ]);
 
 export const categories = pgTable('categories', {
   id: serial('id').primaryKey(),
   name: text('name').notNull(),
   slug: text('slug').notNull(),
-  type: categoryTypeEnum('type').notNull().default('STANDARD'),
+  type: categoryTypeEnum('type').notNull().default('SUB-CATEGORY'),
   displayOrder: integer('display_order').notNull().default(0),
   isActive: boolean('is_active').notNull().default(true),
   created_at: timestamp('created_at').notNull().defaultNow(),

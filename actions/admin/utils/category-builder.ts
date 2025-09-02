@@ -27,13 +27,12 @@ export function transformTreeToNavLinks(
     let currentPathSlugs: string[];
     const hasChildren = category.children && category.children.length > 0;
 
-    // Här sker magin! Vi anpassar logiken baserat på kategorityp.
+
     if (category.type === 'CONTAINER') {
-      // Om kategorin är en 'CONTAINER', lägg INTE till dess slug i URL-sökvägen.
-      // Vi för bara vidare de befintliga föräldra-slugsen till barnen.
+      // 'MAIN', 'SUB' och 'COLLECTION' hamnar INTE här. Perfekt.
       currentPathSlugs = parentSlugs;
     } else {
-      // För 'STANDARD' och 'COLLECTION' lägger vi till slugen som vanligt.
+      // 'MAIN', 'SUB' och 'COLLECTION' hamnar här. Perfekt.
       currentPathSlugs = [...parentSlugs, category.slug];
     }
 
@@ -54,6 +53,3 @@ export function transformTreeToNavLinks(
     return navLink;
   });
 }
-
-
-

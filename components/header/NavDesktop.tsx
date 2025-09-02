@@ -172,7 +172,7 @@ export default function DesktopNav({navLinks}: {navLinks: NavLink[]}) {
               initial={{clipPath: 'inset(0% 100% 0% 0%)'}}
               animate={{
                 clipPath: 'inset(0% 0% 0% 0%)',
-                width: shouldExpand ? '750px' : '330px',
+                width: shouldExpand ? '450px' : '330px',
               }}
               exit={{clipPath: 'inset(0% 100% 0% 0%)'}}
               transition={{type: 'tween', ease: 'easeOut', duration: 0.3}}

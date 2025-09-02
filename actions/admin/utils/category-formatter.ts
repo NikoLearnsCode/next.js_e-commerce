@@ -23,7 +23,7 @@ function findAssignableCategories(
 
   for (const node of nodes) {
     // Endast kategorier av typen 'STANDARD' ska kunna väljas.
-    if (node.type === 'STANDARD') {
+    if (node.type === 'SUB-CATEGORY') {
       options.push({
         value: node.id,
         // Skapa etiketten "Barn - Förälder" om det finns en förälder

@@ -42,7 +42,7 @@ export default function ProductForm() {
     {name: 'brand', label: 'Märke', type: 'text'},
     {name: 'color', label: 'Färg', type: 'text'},
     {name: 'gender', label: 'Kön', type: 'text'},
-    {name: 'category', label: 'Kategori', type: 'text'}, // Behåll den här för filtrering
+    {name: 'category', label: 'Kategori', type: 'text'}, 
     {name: 'sizes', label: 'Storlekar (kommaseparerade)', type: 'text'},
     {
       name: 'description',
@@ -76,6 +76,31 @@ export default function ProductForm() {
         onSubmit={form.handleSubmit(onSubmit)}
         className='space-y-6 overflow-y-auto'
       >
+        {/* KATEGORI-DROPDWON */}
+        <div className='pt-2 border'>
+          <label
+            htmlFor='category-select'
+            className='block text-sm font-medium sr-only text-gray-700 mb-1'
+          >
+            Kategori
+          </label>
+          <select
+            id='category-select'
+            className='block w-full h-12 px-3 text-base border-gray-400 focus:outline-none focus:ring-black focus:border-black rounded-xs'
+            {...form.register('category')}
+          >
+            <option value=''>-- Välj en kategori --</option>
+            {categories.map((group) => (
+              <optgroup key={group.label} label={group.label}>
+                {group.options.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </optgroup>
+            ))}
+          </select>
+        </div>
 
         {/* VANLIGA TEXT-INPUTS */}
         <div className='grid grid-cols-1 gap-5 md:grid-cols-1'>
@@ -89,32 +114,6 @@ export default function ProductForm() {
               type={field.type}
             />
           ))}
-
-          {/* KATEGORI-DROPDWON */}
-          <div className='pt-2'>
-            <label
-              htmlFor='category-select'
-              className='block text-sm font-medium text-gray-700 mb-1'
-            >
-              Kategori
-            </label>
-            <select
-              id='category-select'
-              className='block w-full h-12 px-3 text-base border-gray-400 focus:outline-none focus:ring-black focus:border-black rounded-xs'
-              {...form.register('category')}
-            >
-              <option value=''>-- Välj en kategori --</option>
-              {categories.map((group) => (
-                <optgroup key={group.label} label={group.label}>
-                  {group.options.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </optgroup>
-              ))}
-            </select>
-          </div>
 
           {/* TEXTAREA-FÄLT */}
           {textareaFields.map((field) => (

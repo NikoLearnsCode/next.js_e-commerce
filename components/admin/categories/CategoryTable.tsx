@@ -16,7 +16,7 @@ import {
   formatDateForAdmin,
   getAdminHeader,
 } from '@/components/admin/utils/admin.helpers';
-import { useAdmin } from '@/context/AdminContextProvider';
+import {useAdmin} from '@/context/AdminContextProvider';
 
 type CategoryManagerProps = {
   categories: CategoryWithChildren[];
@@ -219,7 +219,16 @@ export default function CategoryManager({categories}: CategoryManagerProps) {
       {
         header: 'Typ',
         cell: (category: FlattenedCategory) => (
-          <div>{category.type}</div>
+          <div>
+            {' '}
+            {category.type === 'CONTAINER'
+              ? 'Container'
+              : category.type === 'COLLECTION'
+                ? 'Collection'
+                : category.type === 'SUB-CATEGORY'
+                  ? 'Underkategori'
+                  : 'Huvudkategori'}
+          </div>
         ),
       },
       {

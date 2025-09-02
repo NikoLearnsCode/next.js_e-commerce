@@ -47,6 +47,7 @@ export const adminHeaderMapping: Record<string, string> = {
   delivery_info: 'Leveransinfo',
   user_id: 'Användare',
   session_id: 'Session',
+
 };
 
 // Hjälpfunktion för att få rätt header-namn för admin-tabeller

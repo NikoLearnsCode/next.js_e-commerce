@@ -12,79 +12,82 @@ type CategoryBlueprint = {
   children?: CategoryBlueprint[];
 };
 
-// STEG 1: Uppdatera din datastruktur till att inkludera `type`.
-// Jag har döpt om den för tydlighetens skull.
 const categoryTreeDefinition: CategoryBlueprint[] = [
   {
     title: 'Dam',
     slug: 'dam',
-    type: 'STANDARD', // En klickbar huvudsida
+    type: 'MAIN-CATEGORY',
     children: [
       {title: 'Nyheter', slug: 'nyheter', type: 'COLLECTION'},
       {
         title: 'Plagg',
         slug: 'plagg',
-        type: 'CONTAINER', // En strukturell mapp, syns ej i URL
+        type: 'CONTAINER',
         children: [
-          {title: 'Klänningar', slug: 'klanningar', type: 'STANDARD'},
-          {title: 'Toppar', slug: 'toppar', type: 'STANDARD'},
-          {title: 'Byxor', slug: 'byxor', type: 'STANDARD'},
+          {title: 'Klänningar', slug: 'klanningar', type: 'SUB-CATEGORY'},
+          {title: 'Toppar', slug: 'toppar', type: 'SUB-CATEGORY'},
+          {title: 'Byxor', slug: 'byxor', type: 'SUB-CATEGORY'},
         ],
       },
       {
         title: 'Ytterplagg',
         slug: 'ytterplagg',
-        type: 'STANDARD', // Klickbar kategori
-        children: [{title: 'Jackor', slug: 'jackor', type: 'STANDARD'}],
+        type: 'CONTAINER',
+        children: [{title: 'Jackor', slug: 'jackor', type: 'SUB-CATEGORY'}],
       },
     ],
   },
   {
     title: 'Herr',
     slug: 'herr',
-    type: 'STANDARD',
+    type: 'MAIN-CATEGORY',
     children: [
       {title: 'Nyheter', slug: 'nyheter', type: 'COLLECTION'},
       {
         title: 'Plagg',
         slug: 'plagg',
-        type: 'CONTAINER', // Osynlig i URL
+        type: 'CONTAINER',
         children: [
-          {title: 'T-shirts', slug: 't-shirts', type: 'STANDARD'},
-          {title: 'Overshirt', slug: 'overshirt', type: 'STANDARD'},
-          {
-            title: 'Byxor',
-            slug: 'byxor',
-            type: 'CONTAINER', // Klickbar mellannivå
-            children: [
-              {title: 'Jeans', slug: 'jeans', type: 'STANDARD'},
-              {
-                title: 'Chinos',
-                slug: 'chinos',
-                type: 'CONTAINER',
-                children: [
-                  {title: 'Slim Fit', slug: 'slim-fit', type: 'STANDARD'},
-                  {title: 'Regular Fit', slug: 'regular-fit', type: 'STANDARD'},
-                ],
-              },
-            ],
-          },
+          {title: 'T-shirts', slug: 't-shirts', type: 'SUB-CATEGORY'},
+          {title: 'Overshirt', slug: 'overshirt', type: 'SUB-CATEGORY'},
+          // Nivå 3
+          // {
+          //   title: 'Byxor',
+          //   slug: 'byxor',
+          //   type: 'CONTAINER',
+          //   children: [
+          //     {title: 'Jeans', slug: 'jeans', type: 'SUB-CATEGORY'},
+          //     // Nivå 4
+          //     {
+          //       title: 'Chinos',
+          //       slug: 'chinos',
+          //       type: 'CONTAINER',
+          //       children: [
+          //         {title: 'Slim Fit', slug: 'slim-fit', type: 'SUB-CATEGORY'},
+          //         // Nivå 5
+          //         {
+          //           title: 'Regular Fit',
+          //           slug: 'regular-fit',
+          //           type: 'SUB-CATEGORY',
+          //         },
+          //       ],
+          //     },
+          //   ],
+          // },
         ],
       },
       {
         title: 'Ytterplagg',
         slug: 'ytterplagg',
-        type: 'STANDARD',
-        children: [{title: 'Jackor', slug: 'jackor', type: 'STANDARD'}],
+        type: 'CONTAINER',
+        children: [{title: 'Jackor', slug: 'jackor', type: 'SUB-CATEGORY'}],
       },
     ],
   },
 ];
 
-// Definiera typen för en kategori som ska infogas, baserat på ditt schema
 type InsertCategory = InferInsertModel<typeof categories>;
 
-// Funktionens logik är nästan identisk, vi lägger bara till 'type'
 const byggKategoriMedDessBarn = async (
   ritningForKategorin: CategoryBlueprint,
   parentId: number | null,
@@ -96,8 +99,7 @@ const byggKategoriMedDessBarn = async (
     parentId: parentId,
     displayOrder: displayOrder,
     isActive: true,
-    // STEG 2: Lägg till `type` från vår ritning
-    type: ritningForKategorin.type,
+    type: ritningForKategorin.type, // Läser den nya typen ('MAIN', 'SUB', etc)
   };
 
   console.log(
@@ -126,7 +128,6 @@ const byggKategoriMedDessBarn = async (
   }
 };
 
-// Huvudfunktionen är densamma, den använder bara den nya datastrukturen
 const seed = async () => {
   console.log('🏁 Startar databas-seeding...');
   try {
