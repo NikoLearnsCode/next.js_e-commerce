@@ -1,11 +1,10 @@
+'use client';
 import CategoryTable from '@/components/admin/categories/CategoryTable';
-import {CategoryWithChildren} from '@/lib/types/category';
 import AdminHeader from '../shared/AdminHeader';
-type CategoryManagerProps = {
-  categories: CategoryWithChildren[];
-};
+import {useAdmin} from '@/context/AdminContextProvider';
 
-export default function CategoryManager({categories}: CategoryManagerProps) {
+export default function CategoryManager() {
+  const {categories} = useAdmin();
   const count = categories.reduce((a, c) => a + (c.children?.length || 0), 0);
 
   return (

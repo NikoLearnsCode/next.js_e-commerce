@@ -66,7 +66,8 @@ const getAllCategoryIdsRecursive = (cats: CategoryWithChildren[]): number[] => {
 };
 
 export default function CategoryManager({categories}: CategoryManagerProps) {
-  const {openSidebar} = useAdmin();
+  const {openSidebar, setDeleteModalOpen, setItemToDelete, setTriggerElement} =
+    useAdmin();
 
   const [expandedCategories, setExpandedCategories] = useState<Set<number>>(
     () => {
@@ -257,16 +258,30 @@ export default function CategoryManager({categories}: CategoryManagerProps) {
     {
       label: <FiEdit size={16} className='text-gray-600 hover:text-gray-900' />,
       key: 'edit',
-      onClick: (category: FlattenedCategory) =>
-        openSidebar('category', category),
+      onClick: (category: FlattenedCategory, event?: React.MouseEvent) => {
+        // Öppna sidebar i edit mode
+        openSidebar('category', category);
+      },
     },
     {
       label: (
         <FiTrash size={16} className='text-gray-600 hover:text-gray-900' />
       ),
       key: 'delete',
-      onClick: (category: FlattenedCategory) =>
-        console.log('Ta bort kategori:', category),
+      onClick: (category: FlattenedCategory, event?: React.MouseEvent) => {
+        // Spara trigger-elementet (delete-knappen)
+        if (event) {
+          setTriggerElement(event.currentTarget as HTMLElement);
+        }
+
+        // Öppna delete confirmation modal
+        setItemToDelete({
+          id: category.id,
+          name: category.name,
+          type: 'category',
+        });
+        setDeleteModalOpen(true);
+      },
     },
   ];
 

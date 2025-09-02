@@ -29,10 +29,10 @@ export function transformTreeToNavLinks(
 
 
     if (category.type === 'CONTAINER') {
-      // 'MAIN', 'SUB' och 'COLLECTION' hamnar INTE här. Perfekt.
+      // 'MAIN', 'SUB' och 'COLLECTION' hamnar INTE här.
       currentPathSlugs = parentSlugs;
     } else {
-      // 'MAIN', 'SUB' och 'COLLECTION' hamnar här. Perfekt.
+      // 'MAIN', 'SUB' och 'COLLECTION' hamnar här
       currentPathSlugs = [...parentSlugs, category.slug];
     }
 

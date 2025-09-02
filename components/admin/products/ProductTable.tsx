@@ -3,17 +3,18 @@
 import {Product} from '@/lib/types/db';
 import AdminTable from '../shared/AdminTable';
 import {FiEdit, FiTrash} from 'react-icons/fi';
-import {formatDateForAdmin,  getAdminHeader} from '@/components/admin/utils/admin.helpers';
+import {
+  formatDateForAdmin,
+  getAdminHeader,
+} from '@/components/admin/utils/admin.helpers';
 import {formatPrice} from '@/utils/helpers';
-import { useAdmin } from '@/context/AdminContextProvider';
+import {useAdmin} from '@/context/AdminContextProvider';
 
 type ProductManagerProps = {
   products: Product[];
 };
 
 export default function ProductManager({products}: ProductManagerProps) {
-  const {openSidebar} = useAdmin();
-
   const desiredKeys = [
     'name',
     'price',
@@ -47,20 +48,34 @@ export default function ProductManager({products}: ProductManagerProps) {
     },
   }));
 
+  const {openSidebar, setDeleteModalOpen, setItemToDelete, setTriggerElement} =
+    useAdmin();
+
   const actions = [
     {
       label: <FiEdit size={16} />,
       key: 'edit',
-      onClick: (product: Product) => {
-        console.log('Redigera produkt:', product);
+      onClick: (product: Product, event?: React.MouseEvent) => {
+        // Öppna sidebar i edit mode
         openSidebar('product', product);
       },
     },
     {
       label: <FiTrash size={16} />,
       key: 'delete',
-      onClick: (product: Product) => {
-        console.log('Ta bort produkt:', product);
+      onClick: (product: Product, event?: React.MouseEvent) => {
+        // Spara trigger-elementet (delete-knappen)
+        if (event) {
+          setTriggerElement(event.currentTarget as HTMLElement);
+        }
+
+        // Öppna delete confirmation modal
+        setItemToDelete({
+          id: product.id,
+          name: product.name,
+          type: 'product',
+        });
+        setDeleteModalOpen(true);
       },
     },
   ];

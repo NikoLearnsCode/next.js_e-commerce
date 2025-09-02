@@ -72,7 +72,7 @@ export const productsTable = pgTable('products', {
   gender: varchar('gender', {length: 255}).notNull(),
   category: varchar('category', {length: 255}).notNull(),
   color: varchar('color', {length: 255}).notNull(),
-  specs: jsonb('specs').$type<string[]>().notNull(),
+  specs: jsonb('specs').$type<string[]>(),
   images: jsonb('images').$type<string[]>().notNull(),
   sizes: jsonb('sizes').$type<string[]>().notNull(),
   created_at: timestamp('created_at').defaultNow(),

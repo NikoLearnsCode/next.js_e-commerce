@@ -1,15 +1,15 @@
 import AdminContextProvider from '@/context/AdminContextProvider';
-import {getDataForProductForm} from '@/actions/admin/categories';
+import {getCategoriesWithChildren} from '@/actions/admin/categories';
 
 export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const dropdownOptions = await getDataForProductForm();
+  const categoryTree = await getCategoriesWithChildren();
 
   return (
-    <AdminContextProvider categories={dropdownOptions}>
+    <AdminContextProvider categories={categoryTree}>
       {children}
     </AdminContextProvider>
   );

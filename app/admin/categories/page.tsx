@@ -2,14 +2,12 @@
 
 'use server';
 
-import {getCategoriesWithChildren} from '@/actions/admin/categories';
 import CategoryManager from '@/components/admin/categories/CategoryManager';
 import {getServerSession} from 'next-auth';
 import {authOptions} from '@/lib/auth';
 import {redirect} from 'next/navigation';
-import NoResults from '@/components/admin/shared/NoResults';
+
 import {Metadata} from 'next';
-// Importera den nya, centrala UI-typen
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
@@ -24,11 +22,5 @@ export default async function CategoriesPage() {
     return redirect('/denied');
   }
 
-  const categoryTree = await getCategoriesWithChildren();
-
-  if (!categoryTree || categoryTree.length === 0) {
-    return <NoResults message='Inga kategorier hittades.' />;
-  }
-
-  return <CategoryManager categories={categoryTree} />;
+  return <CategoryManager />;
 }

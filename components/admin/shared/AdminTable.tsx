@@ -13,7 +13,7 @@ interface ReusableTableProps<T extends {id: string | number}> {
   columns: ColumnDef<T>[];
   actions?: {
     label: React.ReactNode;
-    onClick: (item: T) => void;
+    onClick: (item: T, event?: React.MouseEvent) => void;
     key: string;
   }[];
   getRowClassName?: (item: T) => string;
@@ -69,7 +69,7 @@ export default function ReusableTable<T extends {id: string | number}>({
                     {actions.map((action) => (
                       <button
                         key={action.key}
-                        onClick={() => action.onClick(item)}
+                        onClick={(event) => action.onClick(item, event)}
                         className={`px-3   text-xs font-syne hover:underline  uppercase font-semibold cursor-pointer text-black ${actions.length > 1 ? 'first:border-r border-gray-400' : ''}`}
                       >
                         {action.label}

@@ -9,21 +9,42 @@ import CategoryForm from './categories/CategoryForm';
 import {useAdmin} from '@/context/AdminContextProvider';
 
 export default function FormWrapper({onClose}: {onClose: () => void}) {
-  const {activeSidebar} = useAdmin();
+  const {activeSidebar, editData} = useAdmin();
 
   const renderForm = () => {
+    const isEditMode = editData !== null;
+
     switch (activeSidebar) {
       case 'product':
-        return <ProductForm />;
+        return (
+          <ProductForm
+            mode={isEditMode ? 'edit' : 'create'}
+            initialData={isEditMode && editData ? (editData as any) : null}
+          />
+        );
       case 'category':
-        return <CategoryForm />;
+        return (
+          <CategoryForm
+            mode={isEditMode ? 'edit' : 'create'}
+            initialData={isEditMode && editData ? (editData as any) : null}
+          />
+        );
       default:
         return null;
     }
   };
 
   const isFormOpen = activeSidebar !== null;
-  const title = activeSidebar === 'product' ? 'ny produkt' : 'ny kategori';
+  const isEditMode = editData !== null;
+
+  const getTitle = () => {
+    if (activeSidebar === 'product') {
+      return isEditMode ? 'redigera produkt' : 'ny produkt';
+    }
+    return isEditMode ? 'redigera kategori' : 'ny kategori';
+  };
+
+  const title = getTitle();
 
   return (
     <>
@@ -33,7 +54,7 @@ export default function FormWrapper({onClose}: {onClose: () => void}) {
             <MotionOverlay id='admin-form-overlay' onClick={onClose} />
             <MotionDropdown
               position='right'
-              className='max-w-full z-50 p-6 min-w-full md:max-w-[500px] md:min-w-[500px] overflow-y-auto'
+              className='max-w-full z-50 p-6 min-w-full sm:max-w-[640px] sm:min-w-[640px] overflow-y-auto'
             >
               <div className='flex uppercase font-semibold justify-between items-center pb-8'>
                 <h1>{title}</h1>
