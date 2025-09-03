@@ -35,7 +35,7 @@ export default function ProductManager({products}: ProductManagerProps) {
     cell: (product: Product) => {
       const value = product[header as keyof Product];
 
-      // Formatera datum-fält
+
       if (header === 'created_at' || header === 'updated_at') {
         return <div>{formatDateForAdmin(value as Date)}</div>;
       }
@@ -55,8 +55,7 @@ export default function ProductManager({products}: ProductManagerProps) {
     {
       label: <FiEdit size={16} />,
       key: 'edit',
-      onClick: (product: Product, event?: React.MouseEvent) => {
-        // Öppna sidebar i edit mode
+      onClick: (product: Product) => {
         openSidebar('product', product);
       },
     },
@@ -64,12 +63,11 @@ export default function ProductManager({products}: ProductManagerProps) {
       label: <FiTrash size={16} />,
       key: 'delete',
       onClick: (product: Product, event?: React.MouseEvent) => {
-        // Spara trigger-elementet (delete-knappen)
+        // Spara trigger-elementet för dialogruta
         if (event) {
           setTriggerElement(event.currentTarget as HTMLElement);
         }
 
-        // Öppna delete confirmation modal
         setItemToDelete({
           id: product.id,
           name: product.name,

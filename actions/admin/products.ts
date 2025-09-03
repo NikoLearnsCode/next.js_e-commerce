@@ -1,111 +1,105 @@
 'use server';
 
 import {db} from '@/drizzle';
-
-import {z} from 'zod';
-import {productFormSchema} from '@/lib/form-validators';
-
+import {eq, desc} from 'drizzle-orm';
+import {productFormSchema, type ProductFormData} from '@/lib/form-validators';
 import {productsTable} from '@/drizzle/db/schema';
-
-// Importera Node.js-moduler för att hantera filsystemet
+import {ActionResult} from '@/lib/types/query';
 import path from 'path';
 import fs from 'fs/promises';
 import {revalidatePath} from 'next/cache';
 
-// Definiera en typ för returvärdet för bättre typsäkerhet
-type ActionResult = {
-  success: boolean;
-  data?: any; // Byt ut 'any' mot din produkttyp om du vill
-  error?: string;
-};
+// --------------------------------------------------------
 
-export async function addProductWithImages(
-  formData: FormData
+export async function getAllProducts() {
+  const products = await db
+    .select()
+    .from(productsTable)
+    .orderBy(desc(productsTable.created_at));
+  return products;
+}
+
+// --------------------------------------------------------
+
+export async function createProduct(
+  data: ProductFormData & {images: string[]}
 ): Promise<ActionResult> {
-  const rawData = Object.fromEntries(formData.entries());
-
-  // Manually parse JSON string fields back into arrays before validation
-  if (typeof rawData.sizes === 'string') {
-    try {
-      rawData.sizes = JSON.parse(rawData.sizes);
-    } catch (e) {
-      return {success: false, error: 'Ogiltigt format för storlekar.'};
-    }
-  }
-  if (typeof rawData.specs === 'string') {
-    try {
-      rawData.specs = JSON.parse(rawData.specs);
-    } catch (e) {
-      return {success: false, error: 'Ogiltigt format för specifikationer.'};
-    }
-  }
-
-  // Create a new schema on the server to validate the transformed data
-  const serverSchema = productFormSchema.extend({
-    sizes: z.array(z.string()),
-    specs: z.array(z.string()),
-  });
-
-  const validationResult = serverSchema.safeParse(rawData);
-
-  if (!validationResult.success) {
-    console.error('Valideringsfel:', validationResult.error.flatten());
-    // Skicka tillbaka ett mer användarvänligt felmeddelande
-    return {
-      success: false,
-      error: 'Formulärdatan är ogiltig. Kontrollera alla fält.',
-    };
-  }
-  const validatedData = validationResult.data;
-
-  const images = formData
-    .getAll('images')
-    .filter((f) => f instanceof File && f.size > 0) as File[];
-
-  if (images.length === 0) {
-    return {success: false, error: 'Minst en bild måste laddas upp.'};
-  }
-
   try {
-    const imageUrls: string[] = [];
+    const validationResult = productFormSchema.safeParse(data);
 
-    const uploadDir = path.join(
-      process.cwd(),
-      'public',
-      'images',
-      validatedData.gender,
-      validatedData.category
-    );
-
-    await fs.mkdir(uploadDir, {recursive: true});
-
-    for (const image of images) {
-      const buffer = Buffer.from(await image.arrayBuffer());
-
-      const filename = `${Date.now()}-${image.name.replace(/\s/g, '_')}`;
-      const savePath = path.join(uploadDir, filename);
-
-      await fs.writeFile(savePath, buffer);
-
-      const publicUrl = `/images/${validatedData.gender}/${validatedData.category}/${filename}`;
-      imageUrls.push(publicUrl);
+    if (!validationResult.success) {
+      console.error('Valideringsfel:', validationResult.error.flatten());
+      return {
+        success: false,
+        error: 'Produktdata är ogiltig. Kontrollera alla fält.',
+      };
     }
+
+    if (data.images.length === 0) {
+      return {success: false, error: 'Minst en bild måste laddas upp.'};
+    }
+
+    const existingProduct = await db
+      .select()
+      .from(productsTable)
+      .where(eq(productsTable.slug, data.slug))
+      .limit(1);
+
+    if (existingProduct.length > 0) {
+      return {
+        success: false,
+        error: `Slug "${data.slug}" används redan av en annan produkt. Välj en unik slug.`,
+      };
+    }
+
+    // Transform strings to arrays for database
+    const sizesArray = data.sizes
+      .split(',')
+      .map((s) => s.trim())
+      .filter((s) => s);
+    const specsArray = data.specs
+      ? data.specs
+          .split('\n')
+          .map((s) => s.trim())
+          .filter((s) => s)
+      : [];
+
+    // Insert into database
     const [newProduct] = await db
       .insert(productsTable)
       .values({
-        ...validatedData,
-        price: validatedData.price.toString(),
-        // sizes and specs are now correctly typed as string[]
-        images: imageUrls,
+        name: data.name,
+        slug: data.slug,
+        description: data.description,
+        price: data.price.toString(),
+        brand: data.brand,
+        gender: data.gender,
+        category: data.category,
+        color: data.color,
+        sizes: sizesArray, // Transformed array
+        specs: specsArray, // Transformed array
+        images: data.images,
       })
       .returning();
 
-    revalidatePath('/products');
-    revalidatePath(`/products/${newProduct.slug}`);
+    revalidatePath('/admin/products');
+    // revalidatePath(`/c/${newProduct.gender}/${newProduct.category}`);
 
     return {success: true, data: newProduct};
   } catch (error) {
-    console.error('Ett fel uppstod i Server Action:', error);
+    console.error('Ett fel uppstod i createProduct:', error);
+
+    if (error instanceof Error) {
+      if (
+        error.message.includes('duplicate key') ||
+        error.message.includes('unique constraint')
+      ) {
+        return {
+          success: false,
+          error: 'En produkt med denna slug eller information finns redan.',
+        };
+      }
+    }
 
     return {
       success: false,
@@ -114,40 +108,134 @@ export async function addProductWithImages(
   }
 }
 
-export async function getAllProducts() {
-  const products = await db.select().from(productsTable);
-  return products;
-}
+// --------------------------------------------------------
 
-// TODO: Implementera updateProduct server action
 export async function updateProduct(
-  id: number,
-  formData: FormData
+  id: string,
+  data: ProductFormData & {images?: string[]} // images optional for updates
 ): Promise<ActionResult> {
-  // TODO: Validera inkommande data
-  // TODO: Hantera bilduppdateringar (ta bort gamla, lägg till nya)
-  // TODO: Uppdatera product i databas
-  // TODO: Revalidate relevanta paths
+  try {
+    const validationResult = productFormSchema.safeParse(data);
 
-  console.log('updateProduct called with:', id, formData);
+    if (!validationResult.success) {
+      return {
+        success: false,
+        error: 'Produktdata är ogiltig. Kontrollera alla fält.',
+      };
+    }
 
-  return {
-    success: false,
-    error: 'updateProduct inte implementerad ännu',
-  };
+    const existingProduct = await db
+      .select()
+      .from(productsTable)
+      .where(eq(productsTable.slug, data.slug))
+      .limit(1);
+
+    if (existingProduct.length > 0 && existingProduct[0].id !== id) {
+      return {
+        success: false,
+        error: `Slug "${data.slug}" används redan av en annan produkt. Välj en unik slug.`,
+      };
+    }
+
+    const sizesArray = data.sizes
+      .split(',')
+      .map((s) => s.trim())
+      .filter((s) => s);
+    const specsArray = data.specs
+      ? data.specs
+          .split('\n')
+          .map((s) => s.trim())
+          .filter((s) => s)
+      : [];
+
+    const updateData: any = {
+      name: data.name,
+      slug: data.slug,
+      description: data.description,
+      price: data.price.toString(),
+      brand: data.brand,
+      gender: data.gender,
+      category: data.category,
+      color: data.color,
+      sizes: sizesArray, // Transformed array
+      specs: specsArray, // Transformed array
+    };
+
+    if (data.images && data.images.length > 0) {
+      updateData.images = data.images;
+    }
+
+    const [updatedProduct] = await db
+      .update(productsTable)
+      .set(updateData)
+      .where(eq(productsTable.id, id))
+      .returning();
+
+    revalidatePath('/admin/products');
+    // revalidatePath(`/c/${updatedProduct.gender}/${updatedProduct.category}`);
+
+    return {success: true, data: updatedProduct};
+  } catch (error) {
+    console.error('Ett fel uppstod i updateProduct:', error);
+
+    if (error instanceof Error) {
+      if (
+        error.message.includes('duplicate key') ||
+        error.message.includes('unique constraint')
+      ) {
+        return {
+          success: false,
+          error: 'En produkt med denna slug eller information finns redan.',
+        };
+      }
+    }
+
+    return {
+      success: false,
+      error: 'Ett oväntat fel uppstod vid uppdatering av produkten.',
+    };
+  }
 }
 
-// TODO: Implementera deleteProduct server action
-export async function deleteProduct(id: number): Promise<ActionResult> {
-  // TODO: Hitta produkt i databas
-  // TODO: Ta bort alla associerade bilder från filesystem
-  // TODO: Ta bort product från databas
-  // TODO: Revalidate relevanta paths
+// --------------------------------------------------------
 
-  console.log('deleteProduct called with:', id);
+export async function deleteProduct(id: string): Promise<ActionResult> {
+  try {
+    const [product] = await db
+      .select()
+      .from(productsTable)
+      .where(eq(productsTable.id, id));
 
-  return {
-    success: false,
-    error: 'deleteProduct inte implementerad ännu',
-  };
+    if (!product) {
+      return {
+        success: false,
+        error: 'Produkten kunde inte hittas.',
+      };
+    }
+
+    // Delete images from filesystem
+    if (product.images && product.images.length > 0) {
+      for (const imageUrl of product.images) {
+        try {
+          const imagePath = path.join(process.cwd(), 'uploads', imageUrl);
+          await fs.unlink(imagePath);
+        } catch (error) {
+          console.warn('Could not delete image:', imageUrl, error);
+        }
+      }
+    }
+
+    // Delete product from database
+    await db.delete(productsTable).where(eq(productsTable.id, id));
+
+    revalidatePath('/admin/products');
+
+    return {success: true};
+  } catch (error) {
+    console.error('Ett fel uppstod i deleteProduct:', error);
+    return {
+      success: false,
+      error: 'Ett oväntat fel uppstod vid borttagning av produkten.',
+    };
+  }
 }

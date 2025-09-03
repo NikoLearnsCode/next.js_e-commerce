@@ -15,6 +15,7 @@ import {
 } from '@/utils/dropdown-helper';
 import Image from 'next/image';
 import {Product} from '@/lib/types/db';
+import {X} from 'lucide-react';
 
 type ProductFormProps = {
   mode: 'create' | 'edit';
@@ -22,15 +23,15 @@ type ProductFormProps = {
 };
 
 export default function ProductForm({mode, initialData}: ProductFormProps) {
-  const {categories, createProduct, updateProduct, closeSidebar, isLoading} =
-    useAdmin();
+  const {categories, createProduct, updateProduct, isLoading} = useAdmin();
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+
   const [subCategoryOptions, setSubCategoryOptions] = useState<
     DropdownOption[]
   >([]);
 
-  // Sätt defaultValues baserat på mode och initialData
+  // Tillgällig lösning för test av form
   const getDefaultValues = (): Partial<ProductFormData> => {
     if (mode === 'edit' && initialData) {
       return {
@@ -54,9 +55,8 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
       };
     }
 
-    // Default values för create mode (för development)
     return {
-      name: 'test',
+      /*  name: 'test',
       slug: 'test',
       description: 'test',
       price: 1337,
@@ -65,7 +65,17 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
       gender: '',
       category: '',
       sizes: 'S,M,L',
-      specs: 'Material: Bomull',
+      specs: 'Material: Bomull', */
+      name: '',
+      slug: '',
+      description: '',
+      price: 0,
+      brand: '',
+      color: '',
+      gender: '',
+      category: '',
+      sizes: '',
+      specs: '',
     };
   };
 
@@ -77,17 +87,27 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
   // Ladda befintliga bilder vid edit mode
   useEffect(() => {
     if (mode === 'edit' && initialData?.images) {
-      // TODO: Sätt imagePreviews till befintliga bilder
-      // setImagePreviews(initialData.images);
-      console.log('Edit mode - existing images:', initialData.images);
+      setImagePreviews(initialData.images);
+
+      setImageFiles([]);
     }
   }, [mode, initialData]);
 
-  // Hämta errors-objektet från formState. Det uppdateras automatiskt.
+  // Tillgällig lösning för att fylla Select vid edit
+  useEffect(() => {
+    if (mode === 'edit' && initialData) {
+      form.reset({
+        gender: initialData.gender,
+        category: initialData.category,
+      });
+    }
+  }, [initialData, mode, form]);
+
   const {errors} = form.formState;
 
   const selectedMainCategorySlug = form.watch('gender');
 
+  // Hanterar select options
   useEffect(() => {
     if (!selectedMainCategorySlug) {
       setSubCategoryOptions([]);
@@ -109,6 +129,7 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
     }
   }, [selectedMainCategorySlug, categories, form]);
 
+  // Hanterar bilduppladdning
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
 
@@ -129,33 +150,39 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
 
   const onSubmit = async (data: ProductFormData) => {
     try {
-      // TODO: Hantera bilduppladdning separat för edit mode
-      // TODO: I edit mode, hantera både nya bilder och befintliga bilder
-
       if (mode === 'edit' && initialData) {
-        // Update mode
-        await updateProduct(initialData.id, data);
+        await updateProduct(
+          initialData.id,
+          data,
+          imageFiles.length > 0 ? imageFiles : undefined
+        );
       } else {
-        // Create mode - använd befintlig logik
-        await createProduct(data);
+        await createProduct(data, imageFiles);
       }
-
-      // Reset form och stäng sidebar hanteras i context funktionerna
-      form.reset();
-      setImageFiles([]);
-      setImagePreviews([]);
     } catch (error) {
       console.error('Form submission error:', error);
-      // TODO: Visa error toast/notification
     }
   };
 
   const handleReset = () => {
-    form.reset();
+    form.reset({
+      name: '',
+      slug: '',
+      description: '',
+      price: 0,
+      brand: '',
+      color: '',
+      gender: '',
+      category: '',
+      sizes: '',
+      specs: '',
+    });
+
     setImageFiles([]);
     setImagePreviews([]);
   };
 
+  // Fält som ska visas i formuläret
   const allFields = [
     {
       name: 'name',
@@ -308,20 +335,33 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
           {imagePreviews.length > 0 && (
             <div className='mt-4   grid grid-cols-2 sm:grid-cols-3 gap-1'>
               {imagePreviews.map((src, index) => (
-                <Image
-                  key={index}
-                  src={src}
-                  height={250}
-                  width={160}
-                  alt={`Förhandsgranskning ${index + 1}`}
-                  className='w-full h-auto object-cover rounded-md'
-                />
+                <div key={index} className='relative'>
+                  <Image
+                    key={index}
+                    src={src}
+                    height={250}
+                    width={160}
+                    alt={`Förhandsgranskning ${index + 1}`}
+                    className='w-full h-auto object-cover rounded-md'
+                  />
+                  <button
+                    type='button'
+                    className='absolute cursor-pointer text-gray-500 hover:text-red-700 p-3 top-0 right-0'
+                    onClick={() =>
+                      setImagePreviews(
+                        imagePreviews.filter((_, i) => i !== index)
+                      )
+                    }
+                  >
+                    <X size={12} strokeWidth={1.5} />
+                  </button>
+                </div>
               ))}
             </div>
           )}
         </div>
         <div className='flex justify-end gap-2 pb-5'>
-          <Button className='w-full h-12' type='submit' disabled={isLoading}>
+          <Button className='w-full h-14' type='submit' disabled={isLoading}>
             {isLoading
               ? mode === 'edit'
                 ? 'Uppdaterar...'
@@ -331,7 +371,7 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
                 : 'Spara produkt'}
           </Button>
           <Button
-            className='w-full h-12'
+            className='w-full h-14'
             variant='outline'
             type='button'
             onClick={handleReset}

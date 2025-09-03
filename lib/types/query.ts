@@ -38,3 +38,9 @@ export type Result = {
     availableCategories: string[];
   };
 };
+
+export type ActionResult = {
+  success: boolean;
+  data?: any;
+  error?: string;
+};

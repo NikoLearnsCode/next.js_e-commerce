@@ -19,7 +19,7 @@ export default function CategoryForm({mode, initialData}: CategoryFormProps) {
   // TODO: Implementera dropdown för parent category
   // TODO: Lägg till fält för: name, slug, type, displayOrder, isActive
 
-  const handleSubmit = async (data: any) => {
+ /*  const handleSubmit = async (data: any) => {
     try {
       if (mode === 'edit' && initialData) {
         await updateCategory(initialData.id, data);
@@ -29,7 +29,7 @@ export default function CategoryForm({mode, initialData}: CategoryFormProps) {
     } catch (error) {
       console.error('Category form submission error:', error);
     }
-  };
+  }; */
 
   return (
     <div className='p-4'>
@@ -48,7 +48,7 @@ export default function CategoryForm({mode, initialData}: CategoryFormProps) {
         <button
           className='px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50'
           disabled={isLoading}
-          onClick={() => handleSubmit({})}
+          // onClick={() => handleSubmit({})}
         >
           {isLoading
             ? mode === 'edit'

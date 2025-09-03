@@ -8,13 +8,17 @@ import ConfirmDialog from '@/components/shared/ConfirmDialog';
 import {Category, CategoryWithChildren} from '@/lib/types/category';
 import {Product} from '@/lib/types/db';
 import {ProductFormData} from '@/lib/form-validators';
+import {uploadProductImages} from '@/actions/admin/utils/upload-image';
+import {
+  createProduct as createProductAction,
+  updateProduct as updateProductAction,
+  deleteProduct as deleteProductAction,
+} from '@/actions/admin/products';
+import {toast, Toaster} from 'sonner';
 
-// CRUD operationer types
 type CRUDOperationType = 'create' | 'update' | 'delete' | null;
 
-// UTÖKAD TYP: Lägg till CRUD funktioner
 type AdminContextType = {
-  // Befintliga sidebar funktioner
   activeSidebar: 'category' | 'product' | null;
   openSidebar: (
     type: 'category' | 'product',
@@ -24,15 +28,19 @@ type AdminContextType = {
   editData: Category | Product | null;
   categories: CategoryWithChildren[];
 
-  // CRUD funktioner för produkter
-  createProduct: (data: ProductFormData) => Promise<void>;
-  updateProduct: (id: number, data: ProductFormData) => Promise<void>;
-  deleteProduct: (id: number) => Promise<void>;
+  // PRODUCTS
+  createProduct: (data: ProductFormData, images: File[]) => Promise<void>;
+  updateProduct: (
+    id: string,
+    data: ProductFormData,
+    images?: File[]
+  ) => Promise<void>;
+  deleteProduct: (id: string) => Promise<void>;
 
-  // CRUD funktioner för kategorier
+  // CATEGORIES
   createCategory: (data: any) => Promise<void>; // TODO: Lägg till CategoryFormData type
-  updateCategory: (id: number, data: any) => Promise<void>;
-  deleteCategory: (id: number) => Promise<void>;
+  updateCategory: (id: string, data: any) => Promise<void>;
+  deleteCategory: (id: string) => Promise<void>;
 
   // Loading states
   isLoading: boolean;
@@ -41,9 +49,9 @@ type AdminContextType = {
   // Delete confirmation modal
   deleteModalOpen: boolean;
   setDeleteModalOpen: (open: boolean) => void;
-  itemToDelete: {id: number; name: string; type: 'product' | 'category'} | null;
+  itemToDelete: {id: string; name: string; type: 'product' | 'category'} | null;
   setItemToDelete: (
-    item: {id: number; name: string; type: 'product' | 'category'} | null
+    item: {id: string; name: string; type: 'product' | 'category'} | null
   ) => void;
   triggerElement: HTMLElement | null;
   setTriggerElement: (element: HTMLElement | null) => void;
@@ -60,6 +68,7 @@ type AdminContextProviderProps = {
 export default function AdminContextProvider({
   children,
   categories, // Ta emot datan som en prop
+  //// TODO FLYTTA ANROP FRÅN LAYOUT
 }: AdminContextProviderProps) {
   // Sidebar state
   const [activeSidebar, setActiveSidebar] = useState<
@@ -74,7 +83,7 @@ export default function AdminContextProvider({
   // Delete confirmation modal state
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<{
-    id: number;
+    id: string;
     name: string;
     type: 'product' | 'category';
   } | null>(null);
@@ -95,63 +104,114 @@ export default function AdminContextProvider({
     setEditData(null);
   };
 
+  // --------------------------------------------------------
+
   // CRUD FUNKTIONER FÖR PRODUKTER
-  const createProduct = async (data: ProductFormData) => {
+  const createProduct = async (data: ProductFormData, images: File[]) => {
     setIsLoading(true);
     setOperationType('create');
     try {
-      // TODO: Flytta befintlig addProductWithImages logik hit
-      // TODO: Hantera FormData transformation
-      // TODO: Anropa server action
-      // TODO: Stäng sidebar vid framgång
-      // TODO: Uppdatera produktlista/cache
-      console.log('Creating product:', data);
+      const imageUrls = await uploadProductImages(
+        images,
+        data.gender,
+        data.category
+      );
+
+      const productData = {
+        ...data,
+        images: imageUrls,
+      };
+
+      const result = await createProductAction(productData);
+
+      if (result.success) {
+        closeSidebar();
+        toast.success('Produkt skapad');
+      } else {
+        toast.error(result.error);
+        console.error('Product creation failed:', result.error);
+      }
     } catch (error) {
-      // TODO: Hantera fel med toast/notification
       console.error('Error creating product:', error);
+
+      toast.error(
+        'Ett oväntat fel uppstod på servern. Produkten kunde inte sparas.'
+      );
     } finally {
       setIsLoading(false);
       setOperationType(null);
     }
   };
 
-  const updateProduct = async (id: number, data: ProductFormData) => {
+  const updateProduct = async (
+    id: string,
+    data: ProductFormData,
+    images?: File[]
+  ) => {
     setIsLoading(true);
     setOperationType('update');
     try {
-      // TODO: Implementera server action för update
-      // TODO: Hantera FormData transformation
-      // TODO: Stäng sidebar vid framgång
-      // TODO: Uppdatera produktlista/cache
-      console.log('Updating product:', id, data);
+      // Prepare form data (transformation happens in server action)
+      const productData: ProductFormData & {images?: string[]} = {...data};
+
+      // Upload new images if provided
+      if (images && images.length > 0) {
+        const imageUrls = await uploadProductImages(
+          images,
+          data.gender,
+          data.category
+        );
+        productData.images = imageUrls;
+      }
+
+      const result = await updateProductAction(id, productData);
+
+      if (result.success) {
+        closeSidebar();
+        toast.success('Produkt uppdaterad');
+      } else {
+        // Display the specific error from server action
+        toast.error(result.error);
+        console.error('Product update failed:', result.error);
+      }
     } catch (error) {
-      // TODO: Hantera fel med toast/notification
       console.error('Error updating product:', error);
+      // Only show generic message for truly unexpected errors
+      toast.error(
+        'Ett oväntat fel uppstod på servern. Produkten kunde inte uppdateras.'
+      );
     } finally {
       setIsLoading(false);
       setOperationType(null);
     }
   };
 
-  const deleteProduct = async (id: number) => {
+  const deleteProduct = async (id: string) => {
     setIsLoading(true);
     setOperationType('delete');
     try {
-      // TODO: Implementera server action för delete
-      // TODO: Ta bort bilder från filesystem
-      // TODO: Uppdatera produktlista/cache
-      // TODO: Stäng delete modal
-      console.log('Deleting product:', id);
-      setDeleteModalOpen(false);
-      setItemToDelete(null);
+      const result = await deleteProductAction(id);
+
+      if (result.success) {
+        setDeleteModalOpen(false);
+        setItemToDelete(null);
+        toast.success('Produkt borttagen');
+      } else {
+        console.error('Product deletion failed:', result.error);
+        toast.error(result.error);
+      }
     } catch (error) {
-      // TODO: Hantera fel med toast/notification
       console.error('Error deleting product:', error);
+      toast.error(
+        'Ett oväntat fel uppstod på servern. Produkten kunde inte raderas.'
+      );
     } finally {
       setIsLoading(false);
       setOperationType(null);
     }
   };
+
+  // --------------------------------------------------------
 
   // CRUD FUNKTIONER FÖR KATEGORIER
   const createCategory = async (data: any) => {
@@ -171,7 +231,7 @@ export default function AdminContextProvider({
     }
   };
 
-  const updateCategory = async (id: number, data: any) => {
+  const updateCategory = async (id: string, data: any) => {
     setIsLoading(true);
     setOperationType('update');
     try {
@@ -181,6 +241,7 @@ export default function AdminContextProvider({
       console.log('Updating category:', id, data);
     } catch (error) {
       // TODO: Hantera fel med toast/notification
+
       console.error('Error updating category:', error);
     } finally {
       setIsLoading(false);
@@ -188,7 +249,7 @@ export default function AdminContextProvider({
     }
   };
 
-  const deleteCategory = async (id: number) => {
+  const deleteCategory = async (id: string) => {
     setIsLoading(true);
     setOperationType('delete');
     try {
@@ -207,6 +268,8 @@ export default function AdminContextProvider({
       setOperationType(null);
     }
   };
+
+  // --------------------------------------------------------
 
   useEffect(() => {
     if (activeSidebar) {
@@ -296,7 +359,6 @@ export default function AdminContextProvider({
               }
             } catch (error) {
               console.error('Delete error:', error);
-              // TODO: Visa error toast/notification
             }
           }}
           onCancel={() => {
@@ -307,6 +369,7 @@ export default function AdminContextProvider({
           }}
         />
       </div>
+      <Toaster />
     </AdminContext.Provider>
   );
 }

@@ -195,9 +195,9 @@ export default function ConfirmDialog({
                 `}
               >
                 {isLoading ? (
-                  <div className='flex items-center gap-2'>
+                  <div className='flex items-center gap-2 justify-center'>
                     <div className='w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin' />
-                    <span>Laddar...</span>
+                    <span >Laddar...</span>
                   </div>
                 ) : (
                   confirmText

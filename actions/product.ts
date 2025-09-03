@@ -266,11 +266,19 @@ function createSortOrderClause(sort: string, order: 'asc' | 'desc') {
 // Fetches available filter options (colors, sizes, categories) for the current scope
 async function fetchAvailableFilterOptions(
   gender: string | null,
-  category: string | null
+  category: string | null,
+  isNewOnly: boolean = false
 ) {
   const metadataConditions = [];
   if (gender) metadataConditions.push(eq(productsTable.gender, gender));
   if (category) metadataConditions.push(eq(productsTable.category, category));
+
+  // Add new products filter if isNewOnly is true
+  if (isNewOnly) {
+    metadataConditions.push(
+      sql`${productsTable.created_at} > NOW() - INTERVAL '${sql.raw(NEW_PRODUCT_DAYS.toString())} days'`
+    );
+  }
 
   const facetQuery =
     metadataConditions.length > 0
@@ -393,7 +401,11 @@ export async function getInitialProducts({
 
     // Add metadata if requested
     if (metadata) {
-      result.metadata = await fetchAvailableFilterOptions(gender, category);
+      result.metadata = await fetchAvailableFilterOptions(
+        gender,
+        category,
+        isNewOnly
+      );
     }
 
     return result;
