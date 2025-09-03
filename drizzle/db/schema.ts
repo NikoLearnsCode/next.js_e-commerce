@@ -79,7 +79,8 @@ export const productsTable = pgTable('products', {
   updated_at: timestamp('updated_at').defaultNow(),
 });
 
-// CARTS
+// CARTS (Uppdaterad)
+// Nu håller den bara övergripande information om varukorgen.
 export const cartsTable = pgTable('carts', {
   id: uuid('id').primaryKey().defaultRandom(),
   user_id: uuid('user_id').references(() => usersTable.id, {
@@ -88,7 +89,22 @@ export const cartsTable = pgTable('carts', {
   session_id: varchar('session_id', {length: 255}),
   created_at: timestamp('created_at').defaultNow(),
   updated_at: timestamp('updated_at').defaultNow(),
-  items: jsonb('items').$type<CartItem[]>().notNull(),
+});
+
+// CART ITEMS (Ny tabell)
+// Varje rad är en produkt i en specifik varukorg.
+export const cartItemsTable = pgTable('cart_items', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  cart_id: uuid('cart_id')
+    .notNull()
+    .references(() => cartsTable.id, {onDelete: 'cascade'}),
+  product_id: uuid('product_id')
+    .notNull()
+    .references(() => productsTable.id, {onDelete: 'cascade'}),
+  quantity: integer('quantity').notNull(),
+  size: varchar('size', {length: 255}).notNull(),
+  created_at: timestamp('created_at').defaultNow(),
+  updated_at: timestamp('updated_at').defaultNow(),
 });
 
 // ORDERS
@@ -167,39 +183,31 @@ export const categoriesSlugParentUniqueIndex = unique(
   'slug_parent_unique_idx'
 ).on(categories.slug, categories.parentId);
 
-//  export const usersRelations = relations(usersTable, ({many}) => ({
-//   accounts: many(accountsTable),
-//   sessions: many(sessionsTable),
-//   orders: many(ordersTable),
-//   carts: many(cartsTable),
-//   favorites: many(favoritesTable),
-// }));
+// Relations för nya cart-strukturen
+export const cartsRelations = relations(cartsTable, ({one, many}) => ({
+  user: one(usersTable, {
+    fields: [cartsTable.user_id],
+    references: [usersTable.id],
+  }),
+  cartItems: many(cartItemsTable),
+}));
 
-// export const accountsRelations = relations(accountsTable, ({one}) => ({
-//   user: one(usersTable, {
-//     fields: [accountsTable.userId],
-//     references: [usersTable.id],
-//   }),
-// }));
+export const cartItemsRelations = relations(cartItemsTable, ({one}) => ({
+  cart: one(cartsTable, {
+    fields: [cartItemsTable.cart_id],
+    references: [cartsTable.id],
+  }),
+  product: one(productsTable, {
+    fields: [cartItemsTable.product_id],
+    references: [productsTable.id],
+  }),
+}));
 
-// export const sessionsRelations = relations(sessionsTable, ({one}) => ({
-//   user: one(usersTable, {
-//     fields: [sessionsTable.userId],
-//     references: [usersTable.id],
-//   }),
-// }));
-
-// export const productsRelations = relations(productsTable, ({many}) => ({
-//   orderItems: many(orderItemsTable),
-//   favorites: many(favoritesTable),
-// }));
-
-// export const cartsRelations = relations(cartsTable, ({one}) => ({
-//   user: one(usersTable, {
-//     fields: [cartsTable.user_id],
-//     references: [usersTable.id],
-//   }),
-// }));
+export const productsRelations = relations(productsTable, ({many}) => ({
+  orderItems: many(orderItemsTable),
+  cartItems: many(cartItemsTable),
+  favorites: many(favoritesTable),
+}));
 
 export const ordersRelations = relations(ordersTable, ({one, many}) => ({
   user: one(usersTable, {

@@ -3,7 +3,7 @@
 import {getServerSession} from 'next-auth';
 import {authOptions} from '@/lib/auth';
 import {getSessionId} from '@/utils/cookies';
-import {CartItem, DeliveryFormData} from '@/lib/validators';
+import {CartItemWithProduct, DeliveryFormData} from '@/lib/validators';
 import {db} from '@/drizzle/index';
 import {ordersTable, orderItemsTable} from '@/drizzle/db/schema';
 import {eq, desc, inArray} from 'drizzle-orm';
@@ -12,7 +12,7 @@ import {PaymentInfo} from '@/lib/types/query';
 
 /* ------------------------------------------------- */
 export async function createOrder(
-  cartItems: CartItem[],
+  cartItems: CartItemWithProduct[],
   deliveryInfo: DeliveryFormData,
   paymentInfo: PaymentInfo,
   totalPrice: number

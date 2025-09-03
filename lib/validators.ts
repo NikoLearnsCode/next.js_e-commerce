@@ -1,22 +1,48 @@
-import {cartsTable} from '@/drizzle/db/schema';
+import {cartsTable, cartItemsTable} from '@/drizzle/db/schema';
 import {z} from 'zod';
 
-export const cartItemSchema = z.object({
-  id: z.string().uuid(),
+// Schema för att lägga till nya items (utan ID - skapas av databasen)
+export const newCartItemSchema = z.object({
   product_id: z.string().uuid(),
   quantity: z.number().int().min(1),
-  price: z.string().min(1, 'Pris måste vara minst 1 kr'),
-  color: z.string(),
-  brand: z.string(),
-  name: z.string(),
-  slug: z.string(),
-  images: z.array(z.string()).default([]),
-  size: z.string(),
+  size: z.string().min(1, 'Storlek måste anges'),
 });
 
+// Schema för befintliga cart items (med ID från databasen)
+export const cartItemSchema = z.object({
+  id: z.string().uuid(),
+  cart_id: z.string().uuid(),
+  product_id: z.string().uuid(),
+  quantity: z.number().int().min(1),
+  size: z.string(),
+  created_at: z.date().optional(),
+  updated_at: z.date().optional(),
+});
+
+// Schema för cart items med produktdata (från JOIN)
+export const cartItemWithProductSchema = z.object({
+  id: z.string().uuid(),
+  cart_id: z.string().uuid(),
+  quantity: z.number().int().min(1),
+  size: z.string(),
+  // Produktdata från JOIN
+  product_id: z.string().uuid(),
+  name: z.string(),
+  price: z.string(),
+  brand: z.string(),
+  color: z.string(),
+  slug: z.string(),
+  images: z.array(z.string()),
+});
+
+export type NewCartItem = z.infer<typeof newCartItemSchema>;
 export type CartItem = z.infer<typeof cartItemSchema>;
+export type CartItemWithProduct = z.infer<typeof cartItemWithProductSchema>;
+
 export type Cart = typeof cartsTable.$inferSelect;
 export type NewCart = typeof cartsTable.$inferInsert;
+export type DbCartItem = typeof cartItemsTable.$inferSelect;
+export type NewDbCartItem = typeof cartItemsTable.$inferInsert;
 
 export const deliverySchema = z.object({
   deliveryMethod: z.string(),

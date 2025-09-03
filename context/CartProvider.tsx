@@ -15,11 +15,11 @@ import {
   updateCartItemQuantity,
   clearCart,
 } from '@/actions/cart';
-import {CartItem} from '@/lib/validators';
+import {NewCartItem, CartItemWithProduct} from '@/lib/validators';
 import {useAuth} from '@/hooks/useAuth';
 
 interface CartContextType {
-  cartItems: CartItem[];
+  cartItems: CartItemWithProduct[];
   itemCount: number;
   loading: boolean;
   totalPrice: number;
@@ -27,7 +27,7 @@ interface CartContextType {
   updatingItems: Record<string, boolean>;
   removingItems: Record<string, boolean>;
   refreshCart: () => Promise<void>;
-  addItem: (item: CartItem) => Promise<void>;
+  addItem: (item: NewCartItem) => Promise<void>;
   removeItem: (itemId: string) => Promise<void>;
   updateItemQuantity: (itemId: string, quantity: number) => Promise<void>;
   clearCart: () => Promise<void>;
@@ -38,7 +38,7 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({children}: {children: React.ReactNode}) {
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [cartItems, setCartItems] = useState<CartItemWithProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalPrice, setTotalPrice] = useState(0);
   const [itemCount, setItemCount] = useState(0);
@@ -91,7 +91,7 @@ export function CartProvider({children}: {children: React.ReactNode}) {
   );
 
   const addItem = useCallback(
-    async (item: CartItem) => {
+    async (item: NewCartItem) => {
       try {
         setUpdatingItems((prev) => ({...prev, [item.product_id]: true}));
         const result = await addToCart(item);

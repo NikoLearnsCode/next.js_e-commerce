@@ -3,8 +3,7 @@
 import {useState} from 'react';
 import {Button} from '@/components/shared/ui/button';
 import {Product} from '@/lib/types/db';
-import {CartItem} from '@/lib/validators';
-import {v4 as uuidv4} from 'uuid';
+import {NewCartItem} from '@/lib/validators';
 import {useCart} from '@/context/CartProvider';
 
 type AddToCartButtonProps = {
@@ -35,20 +34,15 @@ export default function AddToCartButton({
 
     setIsLoading(true);
     try {
-      const cartItem: CartItem = {
-        id: uuidv4(),
+      // Skapa ett enkelt objekt med bara den data servern behöver.
+      // INGET ID SKAPAS HÄR - databasen skapar ID:t!
+      const itemToAdd: NewCartItem = {
         product_id: product.id,
         quantity: quantity,
-        price: product.price,
-        color: product.color.charAt(0).toUpperCase() + product.color.slice(1),
-        brand: product.brand,
-        name: product.name,
-        slug: product.slug,
         size: selectedSize,
-        images: product.images.slice(0, 1),
       };
 
-      await addItem(cartItem);
+      await addItem(itemToAdd);
 
       onAddSuccess?.();
       openCart();
