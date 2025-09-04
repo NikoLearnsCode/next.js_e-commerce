@@ -6,11 +6,11 @@ import {X, Minus, Plus} from 'lucide-react';
 import {motion} from 'framer-motion';
 import {formatPrice} from '@/utils/helpers';
 import SpinningLogo from '@/components/shared/ui/SpinningLogo';
-import type {CartItem} from '@/lib/validators';
+import type {CartItemWithProduct} from '@/lib/validators';
 import type {Favorite} from '@/lib/types/db';
 
 type ProductListItemProps = {
-  item: CartItem | Favorite;
+  item: CartItemWithProduct | Favorite;
   type: 'cart' | 'favorite';
   isUpdating?: boolean;
   isRemoving?: boolean;
@@ -28,7 +28,7 @@ export default function ProductListItem({
 }: ProductListItemProps) {
   const itemData = (() => {
     if (type === 'cart') {
-      const cartItem = item as CartItem;
+      const cartItem = item as CartItemWithProduct;
       return {
         id: cartItem.id,
         productId: cartItem.product_id,
