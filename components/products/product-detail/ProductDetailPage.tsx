@@ -43,7 +43,7 @@ export default function ProductPage({
   return (
     <>
       <div className='w-full mx-auto lg:pt-4 lg:pb-8 '>
-        <div className='flex  flex-col justify-center gap-4 lg:gap-8 lg:flex-row xl:gap-10 '>
+        <div className='flex  flex-col justify-center gap-4  lg:gap-8 lg:flex-row xl:gap-10 '>
           {/* Left column - images */}
           <div className='h-full w-full '>
             {product.images && product.images.length > 0 ? (
@@ -85,7 +85,7 @@ export default function ProductPage({
           </div>
 
           {/* Right column - product info */}
-          <div className='flex flex-col lg:pt-12 px-5 lg:px-0 2xl:px-4 lg:mr-7 sticky top-18 h-full   gap-3 lg:gap-1 mb-10   lg:w-[35%] transition-all duration-300'>
+          <div className='flex  flex-col lg:pt-12 px-5 lg:px-0 2xl:px-4 lg:mr-7 sticky top-18 h-full   gap-3 lg:gap-1 mb-10   lg:w-[35%] transition-all duration-300'>
             {/* Product name */}
             <div>
               <h1 className='text-lg sm:text-xl mt-2 lg:mt-4 font-medium'>
@@ -158,7 +158,7 @@ export default function ProductPage({
           </div>
         </div>
       </div>
-      <div className=' px-5 lg:px-10 lg:w-[65%]'>
+      <div className=' px-5 pb-20 lg:pb-36 lg:px-10 lg:w-[65%]'>
         <h5 className='uppercase sm:text-base text-sm   mb-1 font-medium'>
           Beskrivning
         </h5>
@@ -168,7 +168,7 @@ export default function ProductPage({
       </div>
       {/* Products in the same category */}
       {categoryProducts.length > 0 && (
-        <div className='mx-auto pt-24 lg:pt-40 pb-8'>
+        <div className='mx-auto  pb-8'>
           <Carousel
             items={categoryProducts}
             slidesOffsetBefore={isDesktop ? 30 : 20}

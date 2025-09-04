@@ -61,7 +61,7 @@ const categoryConfig = {
   },
   'SUB-CATEGORY': {
     name: 'Underkategori',
-    className: 'text-black ',
+    className: 'text-black font-medium',
   },
   COLLECTION: {
     name: 'Collection',
@@ -69,7 +69,7 @@ const categoryConfig = {
   },
   CONTAINER: {
     name: 'Container',
-    className: 'text-emerald-900 font-syne uppercase  ', 
+    className: 'text-emerald-900 font-syne uppercase  ',
   },
 };
 
@@ -243,15 +243,15 @@ export default function CategoryManager({categories}: CategoryManagerProps) {
           const config =
             categoryConfig[category.type] || categoryConfig['MAIN-CATEGORY'];
 
-          return (
-            <div className={`text-sm ${config.className}`}>{config.name}</div>
-          );
+          return <div className={` ${config.className}`}>{config.name}</div>;
         },
       },
       {
         header: getAdminHeader('isActive'),
         cell: (category: FlattenedCategory) => (
-          <div className='text-sm '>{category.isActive ? 'Aktiv' : 'Inaktiv'}</div>
+          <div className='text-sm '>
+            {category.isActive ? 'Aktiv' : 'Inaktiv'}
+          </div>
         ),
       },
       {
@@ -274,7 +274,11 @@ export default function CategoryManager({categories}: CategoryManagerProps) {
     {
       label: <FiEdit size={16} className='text-gray-600 hover:text-gray-900' />,
       key: 'edit',
+
       onClick: (category: FlattenedCategory) => {
+        if (category.type === 'COLLECTION') {
+          return;
+        }
         // Öppna sidebar i edit mode
         openSidebar('category', category);
       },
@@ -285,6 +289,9 @@ export default function CategoryManager({categories}: CategoryManagerProps) {
       ),
       key: 'delete',
       onClick: (category: FlattenedCategory, event?: React.MouseEvent) => {
+        if (category.type === 'COLLECTION') {
+          return;
+        }
         // Spara trigger-elementet för dialogruta
         if (event) {
           setTriggerElement(event.currentTarget as HTMLElement);
@@ -295,6 +302,7 @@ export default function CategoryManager({categories}: CategoryManagerProps) {
           name: category.name,
           type: 'category',
         });
+
         setDeleteModalOpen(true);
       },
     },

@@ -183,6 +183,10 @@ export const categoriesSlugParentUniqueIndex = unique(
   'slug_parent_unique_idx'
 ).on(categories.slug, categories.parentId);
 
+export const categoriesNameParentUniqueIndex = unique(
+  'name_unique_idx'
+).on(categories.name, categories.parentId);
+
 // Relations för nya cart-strukturen
 export const cartsRelations = relations(cartsTable, ({one, many}) => ({
   user: one(usersTable, {

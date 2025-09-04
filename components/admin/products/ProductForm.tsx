@@ -363,7 +363,7 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
         <div className='   hover:border-gray-500 rounded-xs'>
           <label
             htmlFor='image-upload'
-            className='block uppercase text-base font-medium px-3  mb-4'
+            className='block uppercase text-base font-medium px-  mb-4'
           >
             Bilder *
           </label>

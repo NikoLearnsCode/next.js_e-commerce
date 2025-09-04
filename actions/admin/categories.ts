@@ -2,7 +2,7 @@
 
 import {db} from '@/drizzle/index';
 import {categories, productsTable} from '@/drizzle/db/schema';
-import {asc, eq, and, isNull} from 'drizzle-orm';
+import {asc, eq, and, isNull, or, sql} from 'drizzle-orm';
 import {buildCategoryTree} from '@/actions/admin/utils/category-builder';
 import {categoryFormSchema, CategoryFormData} from '@/lib/form-validators';
 import {revalidatePath} from 'next/cache';
@@ -26,24 +26,42 @@ export async function createCategory(
     // Validera inkommande data
     const validatedData = categoryFormSchema.parse(data);
 
-    // Kontrollera att slug är unikt inom samma parent
-    const existingCategory = await db
+    // Kontrollera att slug och name är unikt inom samma parent
+    const existingCategories = await db
       .select()
       .from(categories)
       .where(
         and(
-          eq(categories.slug, validatedData.slug),
+          or(
+            eq(
+              sql`lower(${categories.slug})`,
+              validatedData.slug.toLowerCase()
+            ),
+            eq(sql`lower(${categories.name})`, validatedData.name.toLowerCase())
+          ),
           validatedData.parentId
             ? eq(categories.parentId, validatedData.parentId)
             : isNull(categories.parentId)
         )
-      )
-      .limit(1);
+      );
 
-    if (existingCategory.length > 0) {
+    if (existingCategories.length > 0) {
+      const slugConflict = existingCategories.some(
+        (c) => c.slug.toLowerCase() === validatedData.slug.toLowerCase()
+      );
+      const nameConflict = existingCategories.some(
+        (c) => c.name.toLowerCase() === validatedData.name.toLowerCase()
+      );
+
+      const conflictParts = [];
+      if (slugConflict) conflictParts.push('slug');
+      if (nameConflict) conflictParts.push('name');
+
       return {
         success: false,
-        error: 'En kategori med denna slug finns redan på samma nivå.',
+        error: `En kategori med detta ${conflictParts.join(
+          ' och '
+        )} finns redan på samma nivå.`,
       };
     }
 
@@ -106,24 +124,44 @@ export async function updateCategory(
       };
     }
 
-    // Kontrollera att slug är unikt inom samma parent (exklusive nuvarande kategori)
-    const hasConflict = await db
+    // Kontrollera att slug och name är unikt inom samma parent (exklusive nuvarande kategori)
+    const potentialConflicts = await db
       .select()
       .from(categories)
       .where(
         and(
-          eq(categories.slug, validatedData.slug),
+          or(
+            eq(
+              sql`lower(${categories.slug})`,
+              validatedData.slug.toLowerCase()
+            ),
+            eq(sql`lower(${categories.name})`, validatedData.name.toLowerCase())
+          ),
           validatedData.parentId
             ? eq(categories.parentId, validatedData.parentId)
             : isNull(categories.parentId)
         )
       );
 
-    const conflict = hasConflict.find((cat) => cat.id !== id);
-    if (conflict) {
+    const conflicts = potentialConflicts.filter((cat) => cat.id !== id);
+
+    if (conflicts.length > 0) {
+      const slugConflict = conflicts.some(
+        (c) => c.slug.toLowerCase() === validatedData.slug.toLowerCase()
+      );
+      const nameConflict = conflicts.some(
+        (c) => c.name.toLowerCase() === validatedData.name.toLowerCase()
+      );
+
+      const conflictParts = [];
+      if (slugConflict) conflictParts.push('slug');
+      if (nameConflict) conflictParts.push('name');
+
       return {
         success: false,
-        error: 'En kategori med denna slug finns redan på samma nivå.',
+        error: `En kategori med detta ${conflictParts.join(
+          ' och '
+        )} finns redan på samma nivå.`,
       };
     }
 

@@ -365,11 +365,11 @@ export default function AdminContextProvider({
                 } "${itemToDelete.name}"?`
               : ''
           }
-          description={
+        /*   description={
             itemToDelete?.type === 'category'
               ? 'Obs: Detta kommer att påverka alla produkter i denna kategori.'
               : undefined
-          }
+          } */
           confirmText='Ta bort'
           cancelText='Avbryt'
           variant='danger'

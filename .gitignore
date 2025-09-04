@@ -22,6 +22,8 @@ txt
 .env.example
 
 
+/public/uploads
+
 # next.js
 /.next/
 /out/

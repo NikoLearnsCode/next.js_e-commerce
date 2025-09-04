@@ -70,7 +70,7 @@ export default function ReusableTable<T extends {id: string | number}>({
                       <button
                         key={action.key}
                         onClick={(event) => action.onClick(item, event)}
-                        className={`px-3   text-xs font-syne hover:underline  uppercase font-semibold cursor-pointer text-black ${actions.length > 1 ? 'first:border-r border-gray-400' : ''}`}
+                        className={`px-3   text-xs font-syne hover:underline  uppercase font-semibold cursor-pointer text-black ${actions.length > 1 ? 'first:border-r border-gray-400' : ''} `}
                       >
                         {action.label}
                       </button>
