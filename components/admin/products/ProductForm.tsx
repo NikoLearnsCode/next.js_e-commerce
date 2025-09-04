@@ -247,12 +247,10 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
               }
               id='category-select'
               {...register('category')}
-              options={[
-                ...subCategoryOptions.map((option) => ({
+              options={subCategoryOptions.map((option) => ({
                   value: option.slug,
                   label: option.label,
-                })),
-              ]}
+                }))}
               placeholder={
                 !selectedMainCategorySlug
                   ? 'Välj huvudkategori först'
@@ -362,10 +360,10 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
         </div>
 
         {/* BILDUPPLADDNING */}
-        <div className=' p-4 border border-gray-400/70 hover:border-gray-500 rounded-xs'>
+        <div className='   hover:border-gray-500 rounded-xs'>
           <label
             htmlFor='image-upload'
-            className='block uppercase text-base font-medium   mb-4'
+            className='block uppercase text-base font-medium px-3  mb-4'
           >
             Bilder *
           </label>

@@ -116,14 +116,14 @@ export async function addToFavorites(product: Product) {
     }
 
     // If already in favorites, return current favorites
-    if (existingFavorite) {
+  /*   if (existingFavorite) {
       const {favorites} = await getFavorites();
       return {
         success: true,
         favorites,
         message: 'Product already in favorites',
       };
-    }
+    } */
 
     // Add to favorites - only store the relationship, no product data duplication
     const newFavorite: NewFavorite = {

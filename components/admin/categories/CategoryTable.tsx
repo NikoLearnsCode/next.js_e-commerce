@@ -54,6 +54,25 @@ const flattenCategoriesRecursive = (
   return flattened;
 };
 
+const categoryConfig = {
+  'MAIN-CATEGORY': {
+    name: 'Huvudkategori',
+    className: 'text-black ',
+  },
+  'SUB-CATEGORY': {
+    name: 'Underkategori',
+    className: 'text-black ',
+  },
+  COLLECTION: {
+    name: 'Collection',
+    className: 'text-red-900 font-syne uppercase  ',
+  },
+  CONTAINER: {
+    name: 'Container',
+    className: 'text-emerald-900 font-syne uppercase  ', 
+  },
+};
+
 const getAllCategoryIdsRecursive = (cats: CategoryWithChildren[]): number[] => {
   let ids: number[] = [];
   for (const cat of cats) {
@@ -217,25 +236,22 @@ export default function CategoryManager({categories}: CategoryManagerProps) {
           <div>{category.displayOrder}</div>
         ),
       },
+
       {
         header: 'Typ',
-        cell: (category: FlattenedCategory) => (
-          <div>
-            {' '}
-            {category.type === 'CONTAINER'
-              ? 'Container'
-              : category.type === 'COLLECTION'
-                ? 'Collection'
-                : category.type === 'SUB-CATEGORY'
-                  ? 'Underkategori'
-                  : 'Huvudkategori'}
-          </div>
-        ),
+        cell: (category: FlattenedCategory) => {
+          const config =
+            categoryConfig[category.type] || categoryConfig['MAIN-CATEGORY'];
+
+          return (
+            <div className={`text-sm ${config.className}`}>{config.name}</div>
+          );
+        },
       },
       {
         header: getAdminHeader('isActive'),
         cell: (category: FlattenedCategory) => (
-          <div>{category.isActive ? 'Aktiv' : 'Inaktiv'}</div>
+          <div className='text-sm '>{category.isActive ? 'Aktiv' : 'Inaktiv'}</div>
         ),
       },
       {
