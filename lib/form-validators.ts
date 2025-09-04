@@ -1,6 +1,5 @@
 import {z} from 'zod';
 
-// This schema defines the shape of the form's input data.
 export const productFormSchema = z.object({
   name: z.string().min(3, 'Produktnamnet måste vara minst 3 tecken.'),
   slug: z.string().min(1, 'Slug får inte vara tom.'),
@@ -23,3 +22,29 @@ export const productFormSchema = z.object({
 });
 
 export type ProductFormData = z.infer<typeof productFormSchema>;
+
+export const categoryFormSchema = z.object({
+  name: z
+    .string()
+    .min(1, 'Kategorinamn får inte vara tomt.')
+    .max(100, 'Kategorinamn får inte vara längre än 100 tecken.'),
+  slug: z
+    .string()
+    .min(1, 'Slug får inte vara tom.')
+    .max(100, 'Slug får inte vara längre än 100 tecken.')
+    .regex(
+      /^[a-z0-9-]+$/,
+      'Slug får endast innehålla små bokstäver, siffror och bindestreck.'
+    ),
+  type: z.enum(['MAIN-CATEGORY', 'SUB-CATEGORY', 'CONTAINER', 'COLLECTION'], {
+    required_error: 'Du måste välja en kategori-typ.',
+  }),
+  displayOrder: z.coerce
+    .number()
+    .int('Sorteringsordning måste vara ett heltal.')
+    .min(0, 'Sorteringsordning får inte vara negativ.'),
+  isActive: z.boolean(),
+  parentId: z.number().int().positive().nullable().optional(),
+});
+
+export type CategoryFormData = z.infer<typeof categoryFormSchema>;

@@ -50,6 +50,7 @@ const categoryTreeDefinition: CategoryBlueprint[] = [
         children: [
           {title: 'T-shirts', slug: 't-shirts', type: 'SUB-CATEGORY'},
           {title: 'Overshirt', slug: 'overshirt', type: 'SUB-CATEGORY'},
+          {title: 'Byxor', slug: 'byxor', type: 'SUB-CATEGORY'},
           // Nivå 3
           // {
           //   title: 'Byxor',

@@ -13,9 +13,11 @@ import {
   findAllAssignableSubCategories,
   DropdownOption,
 } from '@/utils/dropdown-helper';
+import {generateSlug} from '@/utils/slug-generator';
 import Image from 'next/image';
 import {Product} from '@/lib/types/db';
 import {X} from 'lucide-react';
+import CustomSelect from '../shared/CustomSelect';
 
 type ProductFormProps = {
   mode: 'create' | 'edit';
@@ -31,10 +33,36 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
     DropdownOption[]
   >([]);
 
-  // Tillgällig lösning för test av form
-  const getDefaultValues = (): Partial<ProductFormData> => {
+  const {
+    register,
+    handleSubmit,
+    formState: {errors /* , isValid */},
+    setValue,
+    watch,
+    reset,
+    resetField,
+  } = useForm<ProductFormData>({
+    resolver: zodResolver(productFormSchema),
+    mode: 'onChange',
+    defaultValues: {
+      name: '',
+      slug: '',
+      description: '',
+      // @ts-ignore
+      price: '',
+      brand: '',
+      color: '',
+      gender: '',
+      category: '',
+      sizes: '',
+      specs: '',
+    },
+  });
+
+  // Populate form with initial data when editing
+  useEffect(() => {
     if (mode === 'edit' && initialData) {
-      return {
+      reset({
         name: initialData.name,
         slug: initialData.slug,
         description: initialData.description || '',
@@ -44,74 +72,64 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
             : initialData.price,
         brand: initialData.brand,
         color: initialData.color,
-        gender: initialData.gender,
-        category: initialData.category,
         sizes: Array.isArray(initialData.sizes)
           ? initialData.sizes.join(',')
           : '',
         specs: Array.isArray(initialData.specs)
           ? initialData.specs.join('\n')
           : '',
-      };
+      });
     }
+  }, [mode, initialData, reset]);
 
-    return {
-      /*  name: 'test',
-      slug: 'test',
-      description: 'test',
-      price: 1337,
-      brand: 'test',
-      color: 'test',
-      gender: '',
-      category: '',
-      sizes: 'S,M,L',
-      specs: 'Material: Bomull', */
-      name: '',
-      slug: '',
-      description: '',
-      price: 0,
-      brand: '',
-      color: '',
-      gender: '',
-      category: '',
-      sizes: '',
-      specs: '',
-    };
-  };
+  // Separat useEffect för att hantera select-fält i edit mode (timing-fix)
+  useEffect(() => {
+    if (mode === 'edit' && initialData) {
+      // Sätt gender först
+      setValue('gender', initialData.gender);
+    }
+  }, [mode, initialData, setValue]);
 
-  const form = useForm<ProductFormData>({
-    resolver: zodResolver(productFormSchema),
-    defaultValues: getDefaultValues(),
-  });
+  // Sätt category när subCategoryOptions har laddats (efter gender är satt)
+  useEffect(() => {
+    if (mode === 'edit' && initialData && subCategoryOptions.length > 0) {
+      const categoryExists = subCategoryOptions.some(
+        (option) => option.slug === initialData.category
+      );
+
+      if (categoryExists) {
+        setValue('category', initialData.category);
+      }
+    }
+  }, [mode, initialData, subCategoryOptions, setValue]);
 
   // Ladda befintliga bilder vid edit mode
   useEffect(() => {
     if (mode === 'edit' && initialData?.images) {
       setImagePreviews(initialData.images);
-
       setImageFiles([]);
     }
   }, [mode, initialData]);
 
-  // Tillgällig lösning för att fylla Select vid edit
+  const selectedMainCategorySlug = watch('gender');
+
+  // Auto-generate slug from name
+  const watchedName = watch('name');
   useEffect(() => {
-    if (mode === 'edit' && initialData) {
-      form.reset({
-        gender: initialData.gender,
-        category: initialData.category,
-      });
+    if (watchedName && mode === 'create') {
+      const slug = generateSlug(watchedName);
+      setValue('slug', slug);
     }
-  }, [initialData, mode, form]);
-
-  const {errors} = form.formState;
-
-  const selectedMainCategorySlug = form.watch('gender');
+  }, [watchedName, setValue, mode]);
 
   // Hanterar select options
   useEffect(() => {
     if (!selectedMainCategorySlug) {
       setSubCategoryOptions([]);
-      form.resetField('category');
+      // Resettera bara category i create mode, inte edit mode
+      if (mode === 'create') {
+        resetField('category');
+      }
       return;
     }
 
@@ -127,7 +145,7 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
     } else {
       setSubCategoryOptions([]);
     }
-  }, [selectedMainCategorySlug, categories, form]);
+  }, [selectedMainCategorySlug, categories, resetField, mode]);
 
   // Hanterar bilduppladdning
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -165,11 +183,12 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
   };
 
   const handleReset = () => {
-    form.reset({
+    reset({
       name: '',
       slug: '',
       description: '',
-      price: 0,
+      // @ts-ignore
+      price: '',
       brand: '',
       color: '',
       gender: '',
@@ -182,68 +201,31 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
     setImagePreviews([]);
   };
 
-  // Fält som ska visas i formuläret
-  const allFields = [
-    {
-      name: 'name',
-      label: 'Produktnamn',
-      type: 'text',
-      className: '',
-    },
-    {name: 'slug', label: 'Slug', type: 'text'},
-    {name: 'price', label: 'Pris (SEK)', type: 'number'},
-    {name: 'brand', label: 'Märke', type: 'text'},
-    {name: 'color', label: 'Färg', type: 'text'},
-
-    {
-      name: 'sizes',
-      label: 'Storlekar (kommaseparerade)',
-      type: 'text',
-      className: 'col-span-2',
-    },
-    {
-      name: 'description',
-      label: 'Beskrivning',
-      type: 'textarea',
-      className: 'h-32  col-span-1',
-    },
-    {
-      name: 'specs',
-      label: 'Specifikationer (en per rad)',
-      type: 'textarea',
-      className: 'h-24  col-span-1',
-    },
-  ];
-
-  const regularFields = allFields.filter((field) => field.type !== 'textarea');
-  const textareaFields = allFields.filter((field) => field.type === 'textarea');
-
   return (
     <div className='overflow-y-auto'>
       <form
-        onSubmit={form.handleSubmit(onSubmit, onError)}
-        className='space-y-6 overflow-y-auto'
+        onSubmit={handleSubmit(onSubmit, onError)}
+        className='space-y-5 overflow-y-auto'
       >
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-5 pt-2'>
+        <div className='grid grid-cols-1 md:grid-cols-1 gap-5 '>
           <div>
             <label
               htmlFor='gender-select'
-              className='block text-sm font-medium text-gray-700 mb-1'
+              className='block text-sm font-medium sr-only text-gray-700 mb-1'
             >
               Huvudkategori
             </label>
-            <select
+            <CustomSelect
+              value={watch('gender')}
               id='gender-select'
-              className='block w-full h-12 px-3 text-base border-gray-400 focus:outline-none focus:ring-black focus:border-black rounded-xs'
-              {...form.register('gender')}
-            >
-              <option value=''>-- Välj --</option>
-              {categories.map((mainCat) => (
-                <option key={mainCat.id} value={mainCat.slug}>
-                  {mainCat.name}
-                </option>
-              ))}
-            </select>
+              {...register('gender')}
+              options={categories.map((mainCat) => ({
+                value: mainCat.slug,
+                label: mainCat.name,
+              }))}
+              placeholder='Välj huvudkategori'
+            />
+
             {errors.gender && (
               <p className='text-xs text-destructive mt-1'>
                 {errors.gender.message}
@@ -254,25 +236,30 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
           <div>
             <label
               htmlFor='category-select'
-              className='block text-sm font-medium text-gray-700 mb-1'
+              className='block text-sm font-medium sr-only text-gray-700 mb-1'
             >
               Underkategori
             </label>
-            <select
-              id='category-select'
-              className='block w-full h-12 px-3 text-base border-gray-400 focus:outline-none focus:ring-black focus:border-black rounded-xs disabled:bg-gray-100'
-              {...form.register('category')}
+            <CustomSelect
+              value={watch('category')}
               disabled={
                 !selectedMainCategorySlug || subCategoryOptions.length === 0
               }
-            >
-              <option value=''>-- Välj --</option>
-              {subCategoryOptions.map((option) => (
-                <option key={option.value} value={option.slug}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+              id='category-select'
+              {...register('category')}
+              options={[
+                ...subCategoryOptions.map((option) => ({
+                  value: option.slug,
+                  label: option.label,
+                })),
+              ]}
+              placeholder={
+                !selectedMainCategorySlug
+                  ? 'Välj huvudkategori först'
+                  : 'Välj underkategori'
+              }
+            />
+
             {errors.category && (
               <p className='text-xs text-destructive mt-1'>
                 {errors.category.message}
@@ -281,42 +268,101 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
           </div>
         </div>
 
-        {/* VANLIGA TEXT-INPUTS */}
+        {/* TEXT-INPUTS */}
         <div className='grid grid-cols-1 gap-5 md:grid-cols-1'>
-          {regularFields.map((field) => (
-            <FloatingLabelInput
-              key={field.name}
-              {...form.register(field.name as keyof ProductFormData)}
-              id={field.name}
-              label={field.label}
-              as={'input'}
-              type={field.type}
-              hasError={!!errors[field.name as keyof ProductFormData]}
-              errorMessage={
-                errors[field.name as keyof ProductFormData]?.message
-              }
-            />
-          ))}
+          {/* Name */}
+          <FloatingLabelInput
+            {...register('name')}
+            id='product-name'
+            label='Produktnamn'
+            as='input'
+            type='text'
+            hasError={!!errors.name}
+            errorMessage={errors.name?.message}
+          />
 
-          {/* TEXTAREA-FÄLT */}
-          {textareaFields.map((field) => (
-            <FloatingLabelInput
-              key={field.name}
-              {...form.register(field.name as keyof ProductFormData)}
-              id={field.name}
-              label={field.label}
-              as={'textarea'}
-              className={field.className}
-              hasError={!!errors[field.name as keyof ProductFormData]}
-              errorMessage={
-                errors[field.name as keyof ProductFormData]?.message
-              }
-            />
-          ))}
+          {/* Slug */}
+          <FloatingLabelInput
+            {...register('slug')}
+            id='product-slug'
+            label='Slug'
+            as='input'
+            type='text'
+            value={watch('slug')}
+            hasError={!!errors.slug}
+            errorMessage={errors.slug?.message}
+          />
+
+          {/* Price */}
+          <FloatingLabelInput
+            {...register('price')}
+            id='product-price'
+            label='Pris (SEK)'
+            as='input'
+            type='number'
+            hasError={!!errors.price}
+            errorMessage={errors.price?.message}
+          />
+
+          {/* Brand */}
+          <FloatingLabelInput
+            {...register('brand')}
+            id='product-brand'
+            label='Märke'
+            as='input'
+            type='text'
+            hasError={!!errors.brand}
+            errorMessage={errors.brand?.message}
+          />
+
+          {/* Color */}
+          <FloatingLabelInput
+            {...register('color')}
+            id='product-color'
+            label='Färg'
+            as='input'
+            type='text'
+            hasError={!!errors.color}
+            errorMessage={errors.color?.message}
+          />
+
+          {/* Sizes */}
+          <FloatingLabelInput
+            {...register('sizes')}
+            id='product-sizes'
+            label='Storlekar (kommaseparerade)'
+            as='input'
+            type='text'
+            className='col-span-2'
+            hasError={!!errors.sizes}
+            errorMessage={errors.sizes?.message}
+          />
+
+          {/* Description */}
+          <FloatingLabelInput
+            {...register('description')}
+            id='product-description'
+            label='Beskrivning'
+            as='textarea'
+            className='h-24 col-span-1'
+            hasError={!!errors.description}
+            errorMessage={errors.description?.message}
+          />
+
+          {/* Specs */}
+          <FloatingLabelInput
+            {...register('specs')}
+            id='product-specs'
+            label='Specifikationer (en per rad)'
+            as='textarea'
+            className='h-36 col-span-1'
+            hasError={!!errors.specs}
+            errorMessage={errors.specs?.message}
+          />
         </div>
 
         {/* BILDUPPLADDNING */}
-        <div className=' p-4 border border-gray-400 rounded-xs'>
+        <div className=' p-4 border border-gray-400/70 hover:border-gray-500 rounded-xs'>
           <label
             htmlFor='image-upload'
             className='block uppercase text-base font-medium   mb-4'
@@ -333,7 +379,7 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
           />
           {/* FÖRHANDSGRANSKNING */}
           {imagePreviews.length > 0 && (
-            <div className='mt-4   grid grid-cols-2 sm:grid-cols-3 gap-1'>
+            <div className='mt-4   grid grid-cols-2 sm:grid-cols-2 gap-1'>
               {imagePreviews.map((src, index) => (
                 <div key={index} className='relative'>
                   <Image
@@ -361,7 +407,11 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
           )}
         </div>
         <div className='flex justify-end gap-2 pb-5'>
-          <Button className='w-full h-14' type='submit' disabled={isLoading}>
+          <Button
+            className='w-full h-14'
+            type='submit'
+            disabled={isLoading /* || !isValid */}
+          >
             {isLoading
               ? mode === 'edit'
                 ? 'Uppdaterar...'

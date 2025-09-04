@@ -7,13 +7,18 @@ import FormWrapper from '@/components/admin/FormWrapper';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
 import {Category, CategoryWithChildren} from '@/lib/types/category';
 import {Product} from '@/lib/types/db';
-import {ProductFormData} from '@/lib/form-validators';
+import {ProductFormData, CategoryFormData} from '@/lib/form-validators';
 import {uploadProductImages} from '@/actions/admin/utils/upload-image';
 import {
   createProduct as createProductAction,
   updateProduct as updateProductAction,
   deleteProduct as deleteProductAction,
 } from '@/actions/admin/products';
+import {
+  createCategory as createCategoryAction,
+  updateCategory as updateCategoryAction,
+  deleteCategory as deleteCategoryAction,
+} from '@/actions/admin/categories';
 import {toast, Toaster} from 'sonner';
 
 type CRUDOperationType = 'create' | 'update' | 'delete' | null;
@@ -38,8 +43,8 @@ type AdminContextType = {
   deleteProduct: (id: string) => Promise<void>;
 
   // CATEGORIES
-  createCategory: (data: any) => Promise<void>; // TODO: Lägg till CategoryFormData type
-  updateCategory: (id: string, data: any) => Promise<void>;
+  createCategory: (data: CategoryFormData) => Promise<void>;
+  updateCategory: (id: string, data: CategoryFormData) => Promise<void>;
   deleteCategory: (id: string) => Promise<void>;
 
   // Loading states
@@ -199,6 +204,7 @@ export default function AdminContextProvider({
       } else {
         console.error('Product deletion failed:', result.error);
         toast.error(result.error);
+        setDeleteModalOpen(false);
       }
     } catch (error) {
       console.error('Error deleting product:', error);
@@ -208,41 +214,55 @@ export default function AdminContextProvider({
     } finally {
       setIsLoading(false);
       setOperationType(null);
+      
     }
   };
 
   // --------------------------------------------------------
 
   // CRUD FUNKTIONER FÖR KATEGORIER
-  const createCategory = async (data: any) => {
+  const createCategory = async (data: CategoryFormData) => {
     setIsLoading(true);
     setOperationType('create');
     try {
-      // TODO: Implementera server action för create category
-      // TODO: Uppdatera kategorilista/cache
-      // TODO: Stäng sidebar vid framgång
-      console.log('Creating category:', data);
+      const result = await createCategoryAction(data);
+
+      if (result.success) {
+        closeSidebar();
+        toast.success('Kategori skapad');
+      } else {
+        toast.error(result.error);
+        console.error('Category creation failed:', result.error);
+      }
     } catch (error) {
-      // TODO: Hantera fel med toast/notification
       console.error('Error creating category:', error);
+      toast.error(
+        'Ett oväntat fel uppstod på servern. Kategorin kunde inte sparas.'
+      );
     } finally {
       setIsLoading(false);
       setOperationType(null);
     }
   };
 
-  const updateCategory = async (id: string, data: any) => {
+  const updateCategory = async (id: string, data: CategoryFormData) => {
     setIsLoading(true);
     setOperationType('update');
     try {
-      // TODO: Implementera server action för update category
-      // TODO: Uppdatera kategorilista/cache
-      // TODO: Stäng sidebar vid framgång
-      console.log('Updating category:', id, data);
-    } catch (error) {
-      // TODO: Hantera fel med toast/notification
+      const result = await updateCategoryAction(parseInt(id), data);
 
+      if (result.success) {
+        closeSidebar();
+        toast.success('Kategori uppdaterad');
+      } else {
+        toast.error(result.error);
+        console.error('Category update failed:', result.error);
+      }
+    } catch (error) {
       console.error('Error updating category:', error);
+      toast.error(
+        'Ett oväntat fel uppstod på servern. Kategorin kunde inte uppdateras.'
+      );
     } finally {
       setIsLoading(false);
       setOperationType(null);
@@ -253,16 +273,22 @@ export default function AdminContextProvider({
     setIsLoading(true);
     setOperationType('delete');
     try {
-      // TODO: Implementera server action för delete category
-      // TODO: Kontrollera att inga produkter är kopplade
-      // TODO: Uppdatera kategorilista/cache
-      // TODO: Stäng delete modal
-      console.log('Deleting category:', id);
-      setDeleteModalOpen(false);
-      setItemToDelete(null);
+      const result = await deleteCategoryAction(parseInt(id));
+
+      if (result.success) {
+        setDeleteModalOpen(false);
+        setItemToDelete(null);
+        toast.success('Kategori borttagen');
+      } else {
+        console.error('Category deletion failed:', result.error);
+        toast.error(result.error);
+        setDeleteModalOpen(false);
+      }
     } catch (error) {
-      // TODO: Hantera fel med toast/notification
       console.error('Error deleting category:', error);
+      toast.error(
+        'Ett oväntat fel uppstod på servern. Kategorin kunde inte raderas.'
+      );
     } finally {
       setIsLoading(false);
       setOperationType(null);
@@ -359,6 +385,7 @@ export default function AdminContextProvider({
               }
             } catch (error) {
               console.error('Delete error:', error);
+
             }
           }}
           onCancel={() => {

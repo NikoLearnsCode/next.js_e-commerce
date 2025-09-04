@@ -4,6 +4,35 @@ body {
   margin-top: var(--header-height);
 }
 
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  /* Måla över bakgrunden med en vit box-shadow */
+  -webkit-box-shadow: 0 0 0 30px white inset !important;
+
+  /* Valfritt: Tvinga textfärgen att vara svart */
+  -webkit-text-fill-color: #000 !important;
+}
+
+/* --- Dölj pilar på input[type="number"] --- */
+
+/* För Chrome, Safari, Edge, Opera */
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0; /* Nödvändigt i vissa fall för att ta bort allt utrymme */
+}
+
+/* Samma sak för textarea om det behövs */
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+textarea:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px white inset !important;
+  -webkit-text-fill-color: #000 !important;
+}
+
 @plugin 'tailwindcss-animate';
 
 :root {

@@ -274,12 +274,11 @@ export default function CategoryManager({categories}: CategoryManagerProps) {
           setTriggerElement(event.currentTarget as HTMLElement);
         }
 
-
-        // setItemToDelete({
-        //   id: category.id,
-        //   name: category.name,
-        //   type: 'category',
-        // });
+        setItemToDelete({
+          id: category.id.toString(),
+          name: category.name,
+          type: 'category',
+        });
         setDeleteModalOpen(true);
       },
     },

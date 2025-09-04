@@ -10,6 +10,7 @@ interface FloatingLabelBaseProps {
   id: string;
   hasError?: boolean;
   errorMessage?: string;
+  value?: string; // Lägg till value prop för att kunna lyssna på externa ändringar
 }
 
 type FloatingLabelProps = FloatingLabelBaseProps &
@@ -56,6 +57,11 @@ const FloatingLabelField = React.forwardRef<
     return () => observer.disconnect();
   }, [checkElementValue]);
 
+  // Lyssna på externa värdeändringar (från React Hook Form setValue())
+  React.useEffect(() => {
+    checkElementValue();
+  }, [allProps.value, checkElementValue]);
+
   // Vi väntar med att plocka ut props till efter vi vet om det är en input eller textarea
 
   // ----- RENDERINGSBLOCK FÖR TEXTAREA -----
@@ -82,13 +88,13 @@ const FloatingLabelField = React.forwardRef<
           {...restProps}
           ref={combinedRef as React.Ref<HTMLTextAreaElement>}
           className={cn(
-            'peer w-full border bg-transparent px-3 pt-5 pb-1 text-base',
+            'peer w-full border bg-transparent px-3 pt-5 pb-1 text-[15px]',
             'rounded-xs outline-none transition-all duration-200',
-            'disabled:cursor-not-allowed disabled:opacity-50',
+            'disabled:cursor-not-allowed  disabled:opacity-50',
             'resize-none min-h-[80px]',
             hasError
               ? 'border-destructive'
-              : 'border-gray-400 hover:border-black focus:border-black',
+              : 'border-gray-400/70 hover:border-gray-500 focus:border-gray-500',
             className
           )}
           onFocus={(e) => {
@@ -145,12 +151,12 @@ const FloatingLabelField = React.forwardRef<
         {...restProps}
         ref={combinedRef as React.Ref<HTMLInputElement>}
         className={cn(
-          'peer w-full  border bg-transparent px-3 pt-5 pb-1 text-base',
+          'peer w-full  border bg-transparent px-4 pt-5 pb-1 text-[15px]',
           'rounded-xs outline-none transition-all duration-200',
-          'disabled:cursor-not-allowed disabled:opacity-50',
+          'disabled:cursor-not-allowed autofill:bg-transparent disabled:opacity-50',
           hasError
             ? 'border-destructive'
-            : 'border-gray-400 hover:border-black focus:border-black',
+            : 'border-gray-400/70 hover:border-gray-500 focus:border-gray-500',
           className
         )}
         onFocus={(e) => {

@@ -79,7 +79,7 @@ export const MotionDropdown = ({
         type: 'spring',
         damping: 25,
         stiffness: 200,
-        duration: 0.3,
+        duration: 0.2,
       },
     },
     exit: {x: 150, opacity: 0, width: 0, transition: {duration: 0.2}},

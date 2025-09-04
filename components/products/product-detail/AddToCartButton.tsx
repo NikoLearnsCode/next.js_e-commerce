@@ -34,8 +34,6 @@ export default function AddToCartButton({
 
     setIsLoading(true);
     try {
-      // Skapa ett enkelt objekt med bara den data servern behöver.
-      // INGET ID SKAPAS HÄR - databasen skapar ID:t!
       const itemToAdd: NewCartItem = {
         product_id: product.id,
         quantity: quantity,
