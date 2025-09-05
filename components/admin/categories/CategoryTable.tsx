@@ -249,7 +249,7 @@ export default function CategoryManager({categories}: CategoryManagerProps) {
       {
         header: getAdminHeader('isActive'),
         cell: (category: FlattenedCategory) => (
-          <div className='text-sm '>
+          <div className={` text-sm  ${category.isActive ? 'text-black' : 'text-red-900'}`}>
             {category.isActive ? 'Aktiv' : 'Inaktiv'}
           </div>
         ),
@@ -274,11 +274,9 @@ export default function CategoryManager({categories}: CategoryManagerProps) {
     {
       label: <FiEdit size={16} className='text-gray-600 hover:text-gray-900' />,
       key: 'edit',
-
+      isDisabled: (category: FlattenedCategory) =>
+        category.type === 'COLLECTION',
       onClick: (category: FlattenedCategory) => {
-        if (category.type === 'COLLECTION') {
-          return;
-        }
         // Öppna sidebar i edit mode
         openSidebar('category', category);
       },
@@ -288,10 +286,9 @@ export default function CategoryManager({categories}: CategoryManagerProps) {
         <FiTrash size={16} className='text-gray-600 hover:text-gray-900' />
       ),
       key: 'delete',
+      isDisabled: (category: FlattenedCategory) =>
+        category.type === 'COLLECTION',
       onClick: (category: FlattenedCategory, event?: React.MouseEvent) => {
-        if (category.type === 'COLLECTION') {
-          return;
-        }
         // Spara trigger-elementet för dialogruta
         if (event) {
           setTriggerElement(event.currentTarget as HTMLElement);

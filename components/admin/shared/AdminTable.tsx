@@ -12,9 +12,10 @@ interface ReusableTableProps<T extends {id: string | number}> {
   data: T[];
   columns: ColumnDef<T>[];
   actions?: {
-    label: React.ReactNode;
+    label: React.ReactNode | ((item: T) => React.ReactNode);
     onClick: (item: T, event?: React.MouseEvent) => void;
     key: string;
+    isDisabled?: (item: T) => boolean;
   }[];
   getRowClassName?: (item: T) => string;
 }
@@ -66,15 +67,32 @@ export default function ReusableTable<T extends {id: string | number}>({
                 ))}
                 {actions && (
                   <td className='px-6 py-2.5 flex justify-end whitespace-nowrap'>
-                    {actions.map((action) => (
-                      <button
-                        key={action.key}
-                        onClick={(event) => action.onClick(item, event)}
-                        className={`px-3   text-xs font-syne hover:underline  uppercase font-semibold cursor-pointer text-black ${actions.length > 1 ? 'first:border-r border-gray-400' : ''} `}
-                      >
-                        {action.label}
-                      </button>
-                    ))}
+                    {actions.map((action) => {
+                      const isDisabled = action.isDisabled
+                        ? action.isDisabled(item)
+                        : false;
+
+                      return (
+                        <button
+                          key={action.key}
+                          onClick={(event) => action.onClick(item, event)}
+                          disabled={isDisabled}
+                          className={twMerge(
+                            'px-3 text-xs font-syne uppercase font-semibold',
+                            actions.length > 1
+                              ? 'first:border-r border-gray-400'
+                              : '',
+                            isDisabled
+                              ? 'pointer-events-none hidden  '
+                              : 'cursor-pointer text-black hover:underline'
+                          )}
+                        >
+                          {typeof action.label === 'function'
+                            ? action.label(item)
+                            : action.label}
+                        </button>
+                      );
+                    })}
                   </td>
                 )}
               </tr>

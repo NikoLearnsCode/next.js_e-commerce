@@ -1,5 +1,3 @@
-// components/admin/ProductForm.tsx
-
 'use client';
 
 import {zodResolver} from '@hookform/resolvers/zod';
@@ -36,7 +34,7 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
   const {
     register,
     handleSubmit,
-    formState: {errors /* , isValid */},
+    formState: {errors, isDirty/* , isValid */},
     setValue,
     watch,
     reset,
@@ -85,7 +83,6 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
   // Separat useEffect för att hantera select-fält i edit mode (timing-fix)
   useEffect(() => {
     if (mode === 'edit' && initialData) {
-      // Sätt gender först
       setValue('gender', initialData.gender);
     }
   }, [mode, initialData, setValue]);
@@ -126,7 +123,6 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
   useEffect(() => {
     if (!selectedMainCategorySlug) {
       setSubCategoryOptions([]);
-      // Resettera bara category i create mode, inte edit mode
       if (mode === 'create') {
         resetField('category');
       }
@@ -202,12 +198,14 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
   };
 
   return (
-    <div className='overflow-y-auto'>
-      <form
-        onSubmit={handleSubmit(onSubmit, onError)}
-        className='space-y-5 overflow-y-auto'
-      >
-        <div className='grid grid-cols-1 md:grid-cols-1 gap-5 '>
+    <form
+      onSubmit={handleSubmit(onSubmit, onError)}
+      className='flex flex-col h-full'
+    >
+      {/* Scrollbart område för alla input-fält */}
+      <div className='flex-1 space-y-4 overflow-y-auto pt-8 pb-16 pr-5 -mr-5'>
+        <div className='grid grid-cols-1 md:grid-cols-1 gap-4 '>
+          {/* Huvudkategori Select */}
           <div>
             <label
               htmlFor='gender-select'
@@ -226,14 +224,14 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
               }))}
               placeholder='Välj huvudkategori'
             />
-
             {errors.gender && (
-              <p className='text-xs text-destructive mt-1'>
+              <p className='text-xs text-destructive font-medium ml-1 mt-1'>
                 {errors.gender.message}
               </p>
             )}
           </div>
 
+          {/* Underkategori Select */}
           <div>
             <label
               htmlFor='category-select'
@@ -250,18 +248,17 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
               id='category-select'
               {...register('category')}
               options={subCategoryOptions.map((option) => ({
-                  value: option.slug,
-                  label: option.label,
-                }))}
+                value: option.slug,
+                label: option.label,
+              }))}
               placeholder={
                 !selectedMainCategorySlug
                   ? 'Välj huvudkategori först'
                   : 'Välj underkategori'
               }
             />
-
             {errors.category && (
-              <p className='text-xs text-destructive mt-1'>
+              <p className='text-xs text-destructive font-medium ml-1 mt-1'>
                 {errors.category.message}
               </p>
             )}
@@ -269,8 +266,7 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
         </div>
 
         {/* TEXT-INPUTS */}
-        <div className='grid grid-cols-1 gap-5 md:grid-cols-1'>
-          {/* Name */}
+        <div className='grid gap-4 grid-cols-1 w-full'>
           <FloatingLabelInput
             {...register('name')}
             id='product-name'
@@ -280,8 +276,6 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
             hasError={!!errors.name}
             errorMessage={errors.name?.message}
           />
-
-          {/* Slug */}
           <FloatingLabelInput
             {...register('slug')}
             id='product-slug'
@@ -292,8 +286,6 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
             hasError={!!errors.slug}
             errorMessage={errors.slug?.message}
           />
-
-          {/* Price */}
           <FloatingLabelInput
             {...register('price')}
             id='product-price'
@@ -303,8 +295,6 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
             hasError={!!errors.price}
             errorMessage={errors.price?.message}
           />
-
-          {/* Brand */}
           <FloatingLabelInput
             {...register('brand')}
             id='product-brand'
@@ -314,8 +304,6 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
             hasError={!!errors.brand}
             errorMessage={errors.brand?.message}
           />
-
-          {/* Color */}
           <FloatingLabelInput
             {...register('color')}
             id='product-color'
@@ -323,49 +311,46 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
             as='input'
             type='text'
             hasError={!!errors.color}
+            // className='col-span-2 col-start-1'
             errorMessage={errors.color?.message}
           />
-
-          {/* Sizes */}
           <FloatingLabelInput
             {...register('sizes')}
             id='product-sizes'
             label='Storlekar (kommaseparerade)'
             as='input'
             type='text'
-            className='col-span-2'
+            // className='w-full col-span-2 col-start-1 '
             hasError={!!errors.sizes}
             errorMessage={errors.sizes?.message}
           />
-
-          {/* Description */}
           <FloatingLabelInput
             {...register('description')}
             id='product-description'
             label='Beskrivning'
             as='textarea'
-            className='h-24 col-span-1'
+            rows={3}
+            // className='w-full  col-span-2 col-start-1'
             hasError={!!errors.description}
             errorMessage={errors.description?.message}
           />
-
-          {/* Specs */}
           <FloatingLabelInput
             {...register('specs')}
             id='product-specs'
             label='Specifikationer (en per rad)'
             as='textarea'
-            className='h-36 col-span-1'
+            // className=' w-full col-span-2 col-start-1'
+            rows={5}
             hasError={!!errors.specs}
             errorMessage={errors.specs?.message}
           />
         </div>
 
         {/* BILDUPPLADDNING */}
-        <div className='   hover:border-gray-500 rounded-xs'>
+        <div className='hover:border-gray-500 rounded-xs'>
           <label
             htmlFor='image-upload'
-            className='block uppercase text-base font-medium px-  mb-4'
+            className='block uppercase text-base font-medium mb-4'
           >
             Bilder *
           </label>
@@ -375,15 +360,13 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
             multiple
             accept='image/*'
             onChange={handleImageChange}
-            className='block w-full text-sm  file:mr-4 file:py-2 file:px-4 file:rounded-xs file:uppercase file:text-xs uppercase file:font-semibold file:bg-gray-50 file:cursor-pointer hover:file:bg-gray-100 cursor-pointer'
+            className='block w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-xs file:uppercase file:text-xs uppercase file:font-semibold file:bg-gray-50 file:cursor-pointer hover:file:bg-gray-100 cursor-pointer'
           />
-          {/* FÖRHANDSGRANSKNING */}
           {imagePreviews.length > 0 && (
-            <div className='mt-4   grid grid-cols-2 sm:grid-cols-2 gap-1'>
+            <div className='mt-4 grid grid-cols-2 sm:grid-cols-2 gap-1'>
               {imagePreviews.map((src, index) => (
                 <div key={index} className='relative'>
                   <Image
-                    key={index}
                     src={src}
                     height={250}
                     width={160}
@@ -406,31 +389,29 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
             </div>
           )}
         </div>
-        <div className='flex justify-end gap-2 pb-5'>
-          <Button
-            className='w-full h-14'
-            type='submit'
-            disabled={isLoading /* || !isValid */}
-          >
-            {isLoading
-              ? mode === 'edit'
-                ? 'Uppdaterar...'
-                : 'Sparar...'
-              : mode === 'edit'
-                ? 'Uppdatera produkt'
-                : 'Spara produkt'}
-          </Button>
-          <Button
-            className='w-full h-14'
-            variant='outline'
-            type='button'
-            onClick={handleReset}
-            disabled={isLoading}
-          >
-            Rensa
-          </Button>
-        </div>
-      </form>
-    </div>
+      </div>
+
+      {/* Footer med knappar som alltid är synlig */}
+      <div className='flex w-full gap-2 pb-6 pt-4 '>
+        <Button className='w-full mt-0 h-13' type='submit' disabled={isLoading || !isDirty /* || !isValid */}>
+          {isLoading
+            ? mode === 'edit'
+              ? 'Uppdaterar...'
+              : 'Sparar...'
+            : mode === 'edit'
+              ? 'Uppdatera produkt'
+              : 'Spara produkt'}
+        </Button>
+        <Button
+          className='w-full mt-0 h-13'
+          variant='outline'
+          type='button'
+          onClick={handleReset}
+          disabled={isLoading}
+        >
+          Rensa
+        </Button>
+      </div>
+    </form>
   );
 }

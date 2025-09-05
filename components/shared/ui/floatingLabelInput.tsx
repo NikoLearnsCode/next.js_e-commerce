@@ -10,7 +10,7 @@ interface FloatingLabelBaseProps {
   id: string;
   hasError?: boolean;
   errorMessage?: string;
-  value?: string; // Lägg till value prop för att kunna lyssna på externa ändringar
+  value?: string;
 }
 
 type FloatingLabelProps = FloatingLabelBaseProps &
@@ -57,17 +57,12 @@ const FloatingLabelField = React.forwardRef<
     return () => observer.disconnect();
   }, [checkElementValue]);
 
-  // Lyssna på externa värdeändringar (från React Hook Form setValue())
   React.useEffect(() => {
     checkElementValue();
   }, [allProps.value, checkElementValue]);
 
-  // Vi väntar med att plocka ut props till efter vi vet om det är en input eller textarea
 
-  // ----- RENDERINGSBLOCK FÖR TEXTAREA -----
   if (allProps.as === 'textarea') {
-    // NY, ENKLARE DEKLARATION: Plocka ut ALLT vi behöver i ett svep.
-    // 'restProps' kommer nu garanterat bara innehålla standard-attribut för en textarea.
     const {
       id,
       label,
@@ -82,9 +77,9 @@ const FloatingLabelField = React.forwardRef<
     const isFloating = isFocused || hasValue;
 
     return (
-      <div className='relative'>
+      <div className={cn('relative', className)}>
         <textarea
-          id={id} // Sätt id här
+          id={id}
           {...restProps}
           ref={combinedRef as React.Ref<HTMLTextAreaElement>}
           className={cn(
@@ -94,8 +89,7 @@ const FloatingLabelField = React.forwardRef<
             'resize-none min-h-[80px]',
             hasError
               ? 'border-destructive'
-              : 'border-gray-400/70 hover:border-gray-500 focus:border-gray-500',
-            className
+              : 'border-gray-400/70 hover:border-gray-500 focus:border-gray-500'
           )}
           onFocus={(e) => {
             setIsFocused(true);
@@ -123,14 +117,12 @@ const FloatingLabelField = React.forwardRef<
           {label}
         </label>
         {hasError && errorMessage && (
-          <p className='text-xs text-destructive '>{errorMessage}</p>
+          <p className='text-xs ml-1 text-destructive '>{errorMessage}</p>
         )}
       </div>
     );
   }
 
-  // ----- RENDERINGSBLOCK FÖR INPUT -----
-  // NY, ENKLARE DEKLARATION: Samma sak görs här för input.
   const {
     id,
     label,
@@ -145,19 +137,18 @@ const FloatingLabelField = React.forwardRef<
   const isFloating = isFocused || hasValue;
 
   return (
-    <div className='relative'>
+    <div className={cn('relative', className)}>
       <input
-        id={id} // Sätt id här
+        id={id}
         {...restProps}
         ref={combinedRef as React.Ref<HTMLInputElement>}
         className={cn(
-          'peer w-full  border bg-transparent px-4 pt-5 pb-1 text-[15px]',
+          'peer w-full border bg-transparent px-4 pt-5 pb-1 text-[15px]',
           'rounded-xs outline-none transition-all duration-200',
           'disabled:cursor-not-allowed autofill:bg-transparent disabled:opacity-50',
           hasError
             ? 'border-destructive'
-            : 'border-gray-400/70 hover:border-gray-500 focus:border-gray-500',
-          className
+            : 'border-gray-400/70 hover:border-gray-500 focus:border-gray-500'
         )}
         onFocus={(e) => {
           setIsFocused(true);
@@ -187,7 +178,7 @@ const FloatingLabelField = React.forwardRef<
         {label}
       </label>
       {hasError && errorMessage && (
-        <p className='text-xs text-destructive mt-1 '>{errorMessage}</p>
+        <p className='text-xs ml-1 text-destructive mt-1 '>{errorMessage}</p>
       )}
     </div>
   );

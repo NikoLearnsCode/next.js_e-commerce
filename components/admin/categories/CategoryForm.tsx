@@ -129,8 +129,8 @@ export default function CategoryForm({mode, initialData}: CategoryFormProps) {
   const availableParents = getValidParentOptions();
 
   return (
-    <div className=''>
-      <form onSubmit={handleSubmit(onSubmit)} className='space-y-5'>
+    <form onSubmit={handleSubmit(onSubmit)} className='space-y-5'>
+      <div className='flex-1 space-y-4 overflow-y-auto pt-8  pr-5 -mr-5'>
         {/* Select 1 - Kategori-typ */}
         <div>
           <label className='block text-sm sr-only font-medium text-gray-700 mb-1'>
@@ -145,7 +145,9 @@ export default function CategoryForm({mode, initialData}: CategoryFormProps) {
             disabled={mode === 'edit'}
           />
           {errors.type && (
-            <p className='text-red-500 text-sm mt-1'>{errors.type.message}</p>
+            <p className='text-red-500 font-medium text-xs mt-1 ml-1'>
+              {errors.type.message}
+            </p>
           )}
         </div>
 
@@ -181,7 +183,7 @@ export default function CategoryForm({mode, initialData}: CategoryFormProps) {
           />
 
           {errors.parentId && (
-            <p className='text-red-500 text-sm mt-1'>
+            <p className='text-red-500 font-medium text-xs ml-1 mt-1'>
               {errors.parentId.message}
             </p>
           )}
@@ -218,41 +220,42 @@ export default function CategoryForm({mode, initialData}: CategoryFormProps) {
         />
 
         <CheckboxOption
-          svgClassName='w-5 h-5'
-          className='ml-1 w-6 h-6 '
+          svgClassName='w-5 h-5 '
+          className=' ml-0.5 w-10 h-6 '
           {...register('isActive')}
-          labelClassName={`font-semibold text-sm font-syne ${watch('isActive') ? 'text-black' : 'text-red-900'}`}
+          labelClassName={`font-medium text-sm normal-case  ${watch('isActive') ? 'text-black' : 'text-red-900/80'}`}
           id='category-is-active'
-          label={watch('isActive') ? 'Aktiv ' : 'Inaktiv'}
+          label={watch('isActive') ? 'Aktiv' : 'Inaktiv'}
           checked={watch('isActive')}
         />
+      </div>
 
-        <div className='flex gap-3 pt-4'>
-          <Button
-            type='submit'
-            disabled={
-              isLoading /* || !isValid */ || (mode === 'edit' && !isDirty)
-            }
-            className='flex-1'
-          >
-            {isLoading
-              ? mode === 'edit'
-                ? 'Uppdaterar...'
-                : 'Sparar...'
-              : mode === 'edit'
-                ? 'Uppdatera kategori'
-                : 'Skapa kategori'}
-          </Button>
-          <Button
-            type='button'
-            variant='outline'
-            onClick={closeSidebar}
-            disabled={isLoading}
-          >
-            Avbryt
-          </Button>
-        </div>
-      </form>
-    </div>
+      <div className='flex  gap-3 pt-4  pb-6'>
+        <Button
+          type='submit'
+          disabled={
+            isLoading /* || !isValid */ || (mode === 'edit' && !isDirty)
+          }
+          className=' h-13 mt-0 w-full'
+        >
+          {isLoading
+            ? mode === 'edit'
+              ? 'Uppdaterar...'
+              : 'Sparar...'
+            : mode === 'edit'
+              ? 'Uppdatera kategori'
+              : 'Skapa kategori'}
+        </Button>
+        <Button
+          type='button'
+          variant='outline'
+          onClick={closeSidebar}
+          disabled={isLoading}
+          className='w-full h-13 mt-0'
+        >
+          Avbryt
+        </Button>
+      </div>
+    </form>
   );
 }

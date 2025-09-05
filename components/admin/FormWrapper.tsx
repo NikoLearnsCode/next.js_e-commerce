@@ -54,17 +54,27 @@ export default function FormWrapper({onClose}: {onClose: () => void}) {
             <MotionOverlay id='admin-form-overlay' onClick={onClose} />
             <MotionDropdown
               position='right'
-              className='max-w-full z-50  min-w-full sm:max-w-[550px] sm:min-w-[550px] overflow-y-auto'
+              // ÄNDRING: Ta bort z-50 härifrån om du vill, den sätts på overlay
+              className='max-w-full min-w-full sm:max-w-[550px] sm:min-w-[550px]'
             >
-              <div className='flex uppercase font-semibold justify-between items-center  pl-8 pr-2 pt-6 pb-3'>
-                <h1 className='font-semibold font-syne text-[17px]'>{title}</h1>
-                <MotionCloseX
-                  onClick={onClose}
-                  size={16}
-                  className='px-7 py-3'
-                />
+              {/* ÄNDRING: Omslutande div för flex-layout */}
+              <div className='flex flex-col h-screen bg-white'>
+                <div className='flex uppercase font-semibold justify-between items-center pl-8 pr-2 pt-5 pb-3 '>
+                  <h1 className='font-semibold font-syne text-[17px]'>
+                    {title}
+                  </h1>
+                  <MotionCloseX
+                    onClick={onClose}
+                    size={16}
+                    className='px-7 py-3'
+                  />
+                </div>
+
+                {/* ÄNDRING: Denna div blir nu scrollbar */}
+                <div className='px-8  flex-1 overflow-y-auto'>
+                  {renderForm()}
+                </div>
               </div>
-              <div className='px-8 py-4'>{renderForm()}</div>
             </MotionDropdown>
           </>
         )}
