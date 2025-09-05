@@ -242,3 +242,7 @@ export const orderItemsRelations = relations(orderItemsTable, ({one}) => ({
 //     references: [productsTable.id],
 //   }),
 // }));
+
+
+
+

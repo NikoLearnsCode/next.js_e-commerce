@@ -216,6 +216,7 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
               Huvudkategori
             </label>
             <CustomSelect
+              hasError={!!errors.gender}
               value={watch('gender')}
               id='gender-select'
               {...register('gender')}
@@ -241,6 +242,7 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
               Underkategori
             </label>
             <CustomSelect
+              hasError={!!errors.category}
               value={watch('category')}
               disabled={
                 !selectedMainCategorySlug || subCategoryOptions.length === 0

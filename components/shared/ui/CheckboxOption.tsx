@@ -1,47 +1,52 @@
 'use client';
+import {twMerge} from 'tailwind-merge';
+import React, {forwardRef, useRef} from 'react';
 
-export function CheckboxOption({
-  id,
-  label,
-  checked,
-  onChange,
-}: {
+interface CheckboxOptionProps
+  extends React.InputHTMLAttributes<HTMLInputElement> {
   id: string;
   label: string;
-  checked: boolean;
-  onChange: () => void;
-}) {
-  const handleKeyDown = (event: React.KeyboardEvent) => {
-    if (event.key === ' ' || event.key === 'Enter') {
-      event.preventDefault();
-      onChange();
-    }
-  };
+  className?: string;
+  svgClassName?: string;
+  labelClassName?: string; // Ny prop för text-label
+}
 
-  return (
-    <label htmlFor={id} className='flex items-center space-x-2 cursor-pointer'>
-      <div className='relative'>
-        <input
-          type='checkbox'
-          id={id}
-          checked={checked}
-          tabIndex={-1}
-          onChange={onChange}
-          className='sr-only'
-        />
+export const CheckboxOption = forwardRef<HTMLInputElement, CheckboxOptionProps>(
+  // Plocka ut alla tre custom className props
+  ({id, label, className, svgClassName, labelClassName, ...props}, ref) => {
+    const inputRef = useRef<HTMLInputElement | null>(null);
+
+    const handleKeyDown = (event: React.KeyboardEvent) => {
+      if (event.key === ' ' || event.key === 'Enter') {
+        event.preventDefault();
+        inputRef.current?.click();
+      }
+    };
+
+    return (
+      <label
+        htmlFor={id}
+        className='flex items-center space-x-2 cursor-pointer'
+      >
         <div
-          className={`w-5 h-5 border ${checked ? 'border-black' : 'border-gray-300'} flex items-center justify-center`}
+          // För div:en
+          className={twMerge(
+            'w-5 h-5 border',
+            props.checked ? 'border-black' : 'border-gray-300',
+            'flex items-center justify-center',
+            className
+          )}
+          role='checkbox'
+          aria-checked={props.checked}
           tabIndex={0}
           onKeyDown={handleKeyDown}
-          role='checkbox'
-          aria-checked={checked}
         >
-          {checked && (
+          {props.checked && (
             <svg
-              className='w-4 h-4 text-black'
+              // För SVGen
+              className={twMerge('w-4 h-4 text-black', svgClassName)}
               viewBox='0 0 20 20'
               fill='currentColor'
-              xmlns='http://www.w3.org/2000/svg'
             >
               <path
                 fillRule='evenodd'
@@ -51,8 +56,35 @@ export function CheckboxOption({
             </svg>
           )}
         </div>
-      </div>
-      <span className='text-xs uppercase  cursor-pointer'>{label}</span>
-    </label>
-  );
-}
+
+        <input
+          type='checkbox'
+          id={id}
+          className='sr-only'
+          {...props}
+          tabIndex={-1}
+          ref={(node) => {
+            inputRef.current = node;
+            if (typeof ref === 'function') {
+              ref(node);
+            } else if (ref) {
+              ref.current = node;
+            }
+          }}
+        />
+
+        <span
+          // För texten
+          className={twMerge(
+            'text-xs uppercase cursor-pointer',
+            labelClassName
+          )}
+        >
+          {label}
+        </span>
+      </label>
+    );
+  }
+);
+
+CheckboxOption.displayName = 'CheckboxOption';

@@ -4,16 +4,18 @@ import {ChevronDown} from 'lucide-react';
 interface Option {
   value: string | number;
   label: string;
+  
 }
 
 interface CustomSelectProps
   extends React.SelectHTMLAttributes<HTMLSelectElement> {
   options: Option[];
   placeholder?: string;
+  hasError?: boolean;
 }
 
 const CustomSelect = forwardRef<HTMLSelectElement, CustomSelectProps>(
-  ({options, placeholder = 'Välj...', className, ...props}, ref) => {
+  ({options, placeholder = 'Välj...', className, hasError, ...props}, ref) => {
     const [isOpen, setIsOpen] = useState(false);
     const [selectedValue, setSelectedValue] = useState(props.value || '');
     const selectRef = useRef<HTMLDivElement>(null);
@@ -94,7 +96,9 @@ const CustomSelect = forwardRef<HTMLSelectElement, CustomSelectProps>(
           className={`${className} cursor-pointer group relative  text-[15px] ${props.disabled ? 'opacity-50 pointer-events-none' : ''}`}
           onClick={() => setIsOpen(!isOpen)}
         >
-          <div className='flex border  border-gray-400/70  rounded-xs items-center justify-between h-12 px-3 group-hover:border-gray-500'>
+          <div
+            className={`flex border    rounded-xs items-center justify-between h-12 px-3 ${hasError ? 'border-red-500 ' : 'border-gray-400/70 group-hover:border-gray-500 '}`}
+          >
             <span
               className={`${selectedOption ? 'text-black' : 'text-gray-600'} group-hover:border-black `}
             >
@@ -106,7 +110,8 @@ const CustomSelect = forwardRef<HTMLSelectElement, CustomSelectProps>(
           </div>
 
           {isOpen && (
-            <div className='absolute  max-h-64 overflow-y-auto top-full left-0 right-0 z-50 -mt-1 border-t-0 bg-white border border-gray-400/70 group-hover:border-gray-500   shadow-sm'>
+            <div className='absolute  max-h-64 overflow-y-auto top-full left-0 right-0 z-50 -mt-1 border-t-0 bg-white border border-gray-400/70 group-hover:border-gray-500 shadow-sm'>
+              
               {options.map((option) => (
                 <div
                   key={option.value}

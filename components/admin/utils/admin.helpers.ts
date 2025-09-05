@@ -21,7 +21,7 @@ export function formatDateForAdmin(date: Date | null | undefined): string {
 export const adminHeaderMapping: Record<string, string> = {
   // Gemensamma fält
   name: 'Produktnamn',
-  slug: 'URL',
+  slug: 'slug',
   created_at: 'Skapad',
   updated_at: 'Uppdaterad',
 

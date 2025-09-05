@@ -1,6 +1,4 @@
 import {z} from 'zod';
-import {categoryTypeEnum} from '@/drizzle/db/schema';
-
 
 export const productFormSchema = z.object({
   name: z.string().min(3, 'Produktnamnet måste vara minst 3 tecken.'),
@@ -25,34 +23,27 @@ export const productFormSchema = z.object({
 
 export type ProductFormData = z.infer<typeof productFormSchema>;
 
-
-// ------------------ INITIALT KATEGORI-KAOS ------------------
-// ------------------ SKRIV OM SNARAST ---------------------
-
-// DRY: Extrahera giltiga kategorityper från database schema
-// COLLECTION exkluderas eftersom den ska genereras automatiskt
 export const CREATABLE_CATEGORY_TYPES = [
   'MAIN-CATEGORY',
   'SUB-CATEGORY',
   'CONTAINER',
+  // 'COLLECTION',
 ] as const;
 
-// DRY: Endast dessa typer kan vara föräldrar till andra kategorier
-export const VALID_PARENT_TYPES = ['MAIN-CATEGORY', 'CONTAINER'] as const;
-
-// Extrahera typer från Drizzle schema för typ-säkerhet
-export type CategoryType = (typeof categoryTypeEnum.enumValues)[number];
-export type CreatableCategoryType = (typeof CREATABLE_CATEGORY_TYPES)[number];
-export type ValidParentType = (typeof VALID_PARENT_TYPES)[number];
-
-// Typ-guard för att kontrollera om en CategoryType är skapbar
-export const isCreatableCategoryType = (
-  type: CategoryType
-): type is CreatableCategoryType => {
-  return (CREATABLE_CATEGORY_TYPES as readonly string[]).includes(type);
+export const CATEGORY_TYPE_LABELS: Record<
+  (typeof CREATABLE_CATEGORY_TYPES)[number],
+  string
+> = {
+  'MAIN-CATEGORY': 'Huvudkategori',
+  'SUB-CATEGORY': 'Underkategori',
+  CONTAINER: 'Container (endast struktur)',
+  // COLLECTION: 'Collection',
 };
 
-
+export const CATEGORY_TYPE_OPTIONS = CREATABLE_CATEGORY_TYPES.map((type) => ({
+  value: type,
+  label: CATEGORY_TYPE_LABELS[type],
+}));
 
 export const categoryFormSchema = z
   .object({
@@ -68,61 +59,39 @@ export const categoryFormSchema = z
         /^[a-z0-9-]+$/,
         'Slug får endast innehålla små bokstäver, siffror och bindestreck.'
       ),
-    type: z.enum(CREATABLE_CATEGORY_TYPES, {
-      required_error: 'Du måste välja en kategori-typ.',
-    }),
+    type: z.preprocess(
+      (val) => (val === '' ? undefined : val),
+      z.enum(CREATABLE_CATEGORY_TYPES, {
+        required_error: 'Du måste välja en kategori-typ.',
+      })
+    ),
     displayOrder: z.coerce
       .number()
       .int('Sorteringsordning måste vara ett heltal.')
       .min(0, 'Sorteringsordning får inte vara negativ.'),
     isActive: z.boolean(),
-    parentId: z.number().int().positive().nullable(),
+    parentId: z.coerce
+      .number()
+      .int()
+      .positive('Du måste välja en föräldrakategori.')
+      .nullable(),
   })
   .refine(
     (data) => {
-      // MAIN-CATEGORY kan vara null (toppnivå)
-      if (data.type === 'MAIN-CATEGORY') {
-        return true; // parentId kan vara vad som helst för MAIN-CATEGORY
+      // Om typen är SUB-CATEGORY eller CONTAINER, MÅSTE parentId vara ett nummer
+      if (
+        (data.type === 'SUB-CATEGORY' || data.type === 'CONTAINER') &&
+        data.parentId === null
+      ) {
+        return false; // Valideringen misslyckas
       }
-
-      // SUB-CATEGORY och CONTAINER MÅSTE ha en förälder
-      if (data.type === 'SUB-CATEGORY' || data.type === 'CONTAINER') {
-        return data.parentId !== null && data.parentId > 0;
-      }
-
-      return true;
+      return true; // Valideringen lyckas
     },
     {
-      message: 'Underkategorier och containers måste ha en föräldrakategori.',
+      // Detta felmeddelande kopplas till `parentId`-fältet
+      message: 'En föräldrakategori måste väljas för denna typ.',
       path: ['parentId'],
     }
   );
 
 export type CategoryFormData = z.infer<typeof categoryFormSchema>;
-
-// DRY: Helper för kategori-hierarki validering med korrekta TypeScript-typer
-export const validateCategoryHierarchy = {
-  // Kontrollera om en kategori-typ kan ha förälder
-  canHaveParent: (type: CategoryType): boolean => {
-    // MAIN-CATEGORY ska normalt vara på toppnivå, men kan ha förälder i vissa fall
-    // SUB-CATEGORY kan ha MAIN-CATEGORY eller CONTAINER som förälder
-    // CONTAINER kan ha MAIN-CATEGORY som förälder
-    // COLLECTION genereras automatiskt och hanteras separat
-    return ['MAIN-CATEGORY', 'SUB-CATEGORY', 'CONTAINER'].includes(type);
-  },
-
-  // Kontrollera om en kategori-typ kan vara förälder
-  canBeParent: (type: CategoryType): boolean => {
-    return (VALID_PARENT_TYPES as readonly string[]).includes(type);
-  },
-
-  // Validera förälder-barn relation
-  isValidParentChildRelation: (
-    parentType: CategoryType | null,
-    childType: CategoryType
-  ): boolean => {
-    if (!parentType) return true; // Ingen förälder är alltid OK
-
-    return (VALID_PARENT_TYPES as readonly string[]).includes(parentType);
-  },
-};
