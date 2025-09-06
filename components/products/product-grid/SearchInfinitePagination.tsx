@@ -86,7 +86,7 @@ export default function SearchInfiniteScroll({
         {hasNextPage && (
           <div ref={ref} className='flex justify-center opacity-70 py-8'>
             {isFetchingNextPage ? (
-              <SpinningLogo width='45' height='37' />
+              <SpinningLogo height='40' className=' opacity-30' />
             ) : (
               <div />
             )}

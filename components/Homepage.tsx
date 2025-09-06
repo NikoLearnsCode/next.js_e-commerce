@@ -78,14 +78,14 @@ export default function Homepage() {
           <Link
             variant='secondaryTwo'
             href='/c/dam'
-            className='w-full h-14 sm:w-40 text-sm  font-semibold '
+            className='w-full h-12 sm:w-48 text-sm tracking-wider font-bold '
           >
             dam
           </Link>
           <Link
             variant='primaryTwo'
             href='/c/herr'
-            className='w-full h-14 sm:w-40 text-sm  font-semibold '
+            className='w-full h-12 sm:w-48 text-sm tracking-wider font-bold '
           >
             herr
           </Link>

@@ -10,14 +10,20 @@ export default function Newsletter() {
           <h2 className='font-medium mb-6 text-sm sm:text-base '>
             10 % rabatt vid nästa köp om du anmäler dig till nyhetsbrevet
           </h2>
-          <div className='max-w-sm mx-auto'>
+          <div className='max-w-md gap-2 flex mx-auto'>
             <FloatingLabelInput
               id='email'
               label='E-postadress'
               type='email'
+              className='w-full'
               required
             />
-            <Button className='w-full mt-4'>Anmälan</Button>
+            <Button
+              variant='secondary'
+              className='w-32 border-gray-400/70 rounded-xs  hover:border-gray-500 h-12 mt-0'
+            >
+              Anmälan
+            </Button>
           </div>
         </div>
       </form>

@@ -10,25 +10,24 @@ export default function CampaignCodeSection() {
 
   const handleApplyCode = () => {
     if (!campaignCode.trim()) return;
-    // TODO: Implement campaign code logic
   };
 
   return (
     <Accordion.Root
       type='single'
       collapsible={true}
-      className='text-sm my-3 md:my-0 overflow-hidden'
+      className='text-sm my-3 md:my-0 overflow-hidden '
     >
       <Accordion.Item
         value='campaignCode'
-        className='border overflow-hidden rounded-md transition-colors duration-200 data-[state=open]:border-black'
+        className='border overflow-hidden rounded-md transition-colors duration-200 data-[state=open]:border-gray-500 px-2'
       >
         <Accordion.Trigger className='data-[state=open]:outline-none'>
-          <h3 className='text-sm font-medium px-3 border-none'>
+          <h3 className='text-sm font-medium px-2 border-none'>
             LÄGG TILL KAMPANJKOD
           </h3>
         </Accordion.Trigger>
-        <Accordion.Content className='p-3'>
+        <Accordion.Content className='p-3 '>
           <FloatingLabelInput
             type='text'
             id='campaignCode'
@@ -39,7 +38,7 @@ export default function CampaignCodeSection() {
           <Button
             type='button'
             variant='outline'
-            className='w-full mt-2 border-gray-400 active:border-gray-600 hover:border-gray-600 shadow-none hover:bg-white'
+            className='w-full mt-2 border-gray-400/80 active:border-gray-600 hover:border-gray-600 shadow-none hover:bg-white'
             onClick={handleApplyCode}
           >
             Använd kod

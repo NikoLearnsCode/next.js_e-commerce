@@ -16,7 +16,7 @@ import type {
 
 import {db} from '@/drizzle/index';
 import {cartsTable, cartItemsTable, productsTable} from '@/drizzle/db/schema';
-import {eq, and, isNull} from 'drizzle-orm';
+import {eq, and, isNull, asc} from 'drizzle-orm';
 import {cookies} from 'next/headers';
 import Decimal from 'decimal.js';
 
@@ -41,7 +41,8 @@ async function getCartItemsWithProducts(cartId: string) {
     })
     .from(cartItemsTable)
     .leftJoin(productsTable, eq(cartItemsTable.product_id, productsTable.id))
-    .where(eq(cartItemsTable.cart_id, cartId));
+    .where(eq(cartItemsTable.cart_id, cartId))
+    .orderBy(asc(cartItemsTable.created_at));
 
   return cartItems as CartItemWithProduct[];
 }

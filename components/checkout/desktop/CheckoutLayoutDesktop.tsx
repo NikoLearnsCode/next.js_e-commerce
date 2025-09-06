@@ -1,7 +1,9 @@
 'use client';
 
 import {ReactNode} from 'react';
-import OrderSummaryDesktop from './OrderSummaryDesktop';
+import CampaignCodeSection from '../shared/CampaignCodeSection';
+import OrderTotals from '../shared/OrderTotals';
+import ProductListDesktop from './ProductListDesktop';
 
 interface CheckoutLayoutDesktopProps {
   children: ReactNode;
@@ -17,10 +19,18 @@ export default function CheckoutLayoutDesktop({
       {/* main step content */}
       <div className='flex-1'>{children}</div>
 
-      {/* desktop sidebar - hidden on confirmation step */}
       {currentStep !== 'confirmation' && (
         <div className='w-72'>
-          <OrderSummaryDesktop />
+          <div className='bg-white'>
+            <h2 className='text-lg font-medium mb-4'>Varukorg</h2>
+            <div className='space-y-4'>
+              <CampaignCodeSection />
+              <OrderTotals />
+              <div className='border-t pt-6'>
+                <ProductListDesktop />
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

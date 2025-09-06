@@ -18,10 +18,10 @@ const linkVariants = cva(
           'border border-gray-400/70 bg-background  hover:bg-accent hover:text-accent-foreground',
 
         secondaryTwo:
-          'bg-secondary/60 hover:bg-secondary active:bg-secondary focus:bg-secondary border border-secondary shadow-sm ',
+          'bg-secondary/50 hover:bg-secondary active:bg-secondary focus:bg-secondary border border-secondary/60 shadow-sm ',
 
         primaryTwo:
-          'bg-primary/60 hover:bg-primary active:bg-primary focus:bg-primary border hover:border-primary border-primary text-primary-foreground text-white  shadow-sm ',
+          'bg-primary/50 hover:bg-primary active:bg-primary focus:bg-primary border hover:border-primary border-primary/60 text-primary-foreground text-white  shadow-sm ',
 
         secondary:
           'border border-gray-500/70  bg-background focus:bg-secondary/80  hover:bg-secondary/80 ',

@@ -136,7 +136,7 @@ export default function InfiniteScrollProducts({
       {/* Initial loading state */}
       {isLoading && displayProducts.length === 0 && (
         <div className='flex justify-center py-8 opacity-70'>
-          <SpinningLogo width='45' height='37' />
+          <SpinningLogo height='40' className=' opacity-30' />
         </div>
       )}
     </div>

@@ -18,6 +18,7 @@ import {
   getCheckoutUrl,
 } from '@/components/checkout/utils/steps';
 import SpinningLoader from '@/components/shared/ui/SpinningLogo';
+import {Toaster} from 'sonner';
 
 export default function CheckoutPage() {
   const {loading} = useCart();
@@ -52,11 +53,8 @@ export default function CheckoutPage() {
   //  förhindra layout shift
   if (loading) {
     return (
-      <div className='absolute inset-0 flex flex-col  mb-20 justify-center items-center'>
-        <SpinningLoader height='40' className='opacity-50 pb-4' />
-        <span className='text-xs pl-1 font-semibold uppercase font-syne text-gray-400 '>
-          Laddar...
-        </span>
+      <div className='fixed inset-0 flex flex-col  mb-40 justify-center items-center'>
+        <SpinningLoader height='40' className='opacity-30 pb-4' />
       </div>
     );
   }
@@ -98,6 +96,7 @@ export default function CheckoutPage() {
           {renderStepContent()}
         </CheckoutLayoutMobile>
       )}
+      <Toaster />
     </div>
   );
 }

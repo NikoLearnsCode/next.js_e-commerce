@@ -17,7 +17,7 @@ import Image from 'next/image';
 import {CiCreditCard1} from 'react-icons/ci';
 import {useCart} from '@/context/CartProvider';
 import {createOrder} from '@/actions/orders';
-
+import {toast} from 'sonner';
 interface PaymentStepProps {
   onBack?: () => void;
   onNext: () => void;
@@ -65,7 +65,9 @@ export default function PaymentStep({onNext, deliveryData}: PaymentStepProps) {
       onNext();
     } catch (error) {
       console.error('Error processing payment:', error);
-      alert('Ett fel uppstod vid betalningen. Försök igen.');
+      toast.error(
+        'Ett oväntat fel uppstod på servern. Betalningen kunde inte göras.'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -118,12 +120,9 @@ export default function PaymentStep({onNext, deliveryData}: PaymentStepProps) {
                   type='text'
                   id='cardNumber'
                   label='Kortnummer'
+                  hasError={!!form.formState.errors.cardNumber}
+                  errorMessage={form.formState.errors.cardNumber?.message}
                 />
-                {form.formState.errors.cardNumber && (
-                  <p className='text-red-500 text-sm'>
-                    {form.formState.errors.cardNumber.message}
-                  </p>
-                )}
 
                 <div className='grid grid-cols-2 gap-4'>
                   <div>
@@ -132,12 +131,9 @@ export default function PaymentStep({onNext, deliveryData}: PaymentStepProps) {
                       type='text'
                       id='expiryDate'
                       label='Utgångsdatum'
+                      hasError={!!form.formState.errors.expiryDate}
+                      errorMessage={form.formState.errors.expiryDate?.message}
                     />
-                    {form.formState.errors.expiryDate && (
-                      <p className='text-red-500 text-sm'>
-                        {form.formState.errors.expiryDate.message}
-                      </p>
-                    )}
                   </div>
                   <div>
                     <FloatingLabelInput
@@ -145,12 +141,9 @@ export default function PaymentStep({onNext, deliveryData}: PaymentStepProps) {
                       type='text'
                       id='cvv'
                       label='CVV'
+                      hasError={!!form.formState.errors.cvv}
+                      errorMessage={form.formState.errors.cvv?.message}
                     />
-                    {form.formState.errors.cvv && (
-                      <p className='text-red-500 text-sm'>
-                        {form.formState.errors.cvv.message}
-                      </p>
-                    )}
                   </div>
                 </div>
               </div>
@@ -189,12 +182,9 @@ export default function PaymentStep({onNext, deliveryData}: PaymentStepProps) {
                   type='text'
                   id='swishNumber'
                   label='Swishnummer'
+                  hasError={!!form.formState.errors.swishNumber}
+                  errorMessage={form.formState.errors.swishNumber?.message}
                 />
-                {form.formState.errors.swishNumber && (
-                  <p className='text-red-500 text-sm'>
-                    {form.formState.errors.swishNumber.message}
-                  </p>
-                )}
               </div>
             </Accordion.Content>
           </Accordion.Item>

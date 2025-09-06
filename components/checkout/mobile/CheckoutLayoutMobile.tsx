@@ -2,7 +2,7 @@
 
 import {ReactNode} from 'react';
 import ProductListMobile from './ProductListMobile';
-import ProductSummaryMobile from './ProductSummaryMobile';
+import CampaignCodeSection from '../shared/CampaignCodeSection';
 
 interface CheckoutLayoutMobileProps {
   children: ReactNode;
@@ -15,11 +15,15 @@ export default function CheckoutLayoutMobile({
 }: CheckoutLayoutMobileProps) {
   return (
     <div className='flex flex-col gap-6 pb-16 pt-4 px-2'>
-      {/* mobile-only components - hidden on confirmation step */}
       {currentStep !== 'confirmation' && (
-        <div className='space-y-6 py-3 md:pt-0'>
+        <div className='space-y-6 py-3 '>
           <ProductListMobile />
-          <ProductSummaryMobile currentStep={currentStep} />
+
+          {currentStep === 'payment' && (
+            <div className='pt-4'>
+              <CampaignCodeSection />
+            </div>
+          )}
         </div>
       )}
 

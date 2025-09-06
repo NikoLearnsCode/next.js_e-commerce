@@ -11,7 +11,7 @@ interface FloatingLabelBaseProps {
   hasError?: boolean;
   errorMessage?: string;
   value?: string;
-}
+  }
 
 type FloatingLabelProps = FloatingLabelBaseProps &
   (
@@ -147,7 +147,7 @@ const FloatingLabelField = React.forwardRef<
           'rounded-xs outline-none transition-all duration-200',
           'disabled:cursor-not-allowed autofill:bg-transparent disabled:opacity-50',
           hasError
-            ? 'border-destructive'
+            ? 'border-destructive '
             : 'border-gray-400/70 hover:border-gray-500 focus:border-gray-500'
         )}
         onFocus={(e) => {
@@ -167,12 +167,12 @@ const FloatingLabelField = React.forwardRef<
       <label
         htmlFor={id}
         className={cn(
-          'absolute left-3 pointer-events-none select-none transition-all duration-200 bg-white px-1',
+          'absolute left-3 pointer-events-none select-none transition-all duration-200 bg-white px-1 text-gray-500',
           hasError ? 'text-destructive' : 'peer-focus:text-black',
           isFloating
             ? 'top-3 -translate-y-1/2 text-xs'
-            : 'top-6 -translate-y-1/2 text-sm text-gray-500',
-          'peer-disabled:opacity-50'
+            : 'top-6 -translate-y-1/2 text-sm ',
+          'peer-disabled:opacity-50 '
         )}
       >
         {label}
