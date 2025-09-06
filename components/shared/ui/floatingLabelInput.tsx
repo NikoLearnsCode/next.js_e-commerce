@@ -86,7 +86,7 @@ const FloatingLabelField = React.forwardRef<
             'peer w-full border bg-transparent px-3 pt-5 pb-1 text-[15px]',
             'rounded-xs outline-none transition-all duration-200',
             'disabled:cursor-not-allowed  disabled:opacity-50',
-            'resize-none min-h-[80px]',
+            ' min-h-[80px]',
             hasError
               ? 'border-destructive'
               : 'border-gray-400/70 hover:border-gray-500 focus:border-gray-500'

@@ -60,7 +60,7 @@ export default function CartSummary({
         href={getCheckoutUrl('delivery')}
         variant='primary'
         width='full'
-        className='mt-6 h-12 text-sm lg:text-sm font-medium'
+        className='mt-6 h-15 text-sm lg:text-sm font-medium'
       >
         Till kassan
       </Link>

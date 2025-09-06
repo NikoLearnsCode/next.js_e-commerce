@@ -1,10 +1,8 @@
-// components/admin/AdminContextProvider.tsx
+// context/AdminContextProvider.tsx
 
 'use client';
 
 import {createContext, useContext, useEffect, useState} from 'react';
-import FormWrapper from '@/components/admin/FormWrapper';
-import ConfirmDialog from '@/components/shared/ConfirmDialog';
 import {Category, CategoryWithChildren} from '@/lib/types/category';
 import {Product} from '@/lib/types/db';
 import {ProductFormData, CategoryFormData} from '@/lib/form-validators';
@@ -19,7 +17,7 @@ import {
   updateCategory as updateCategoryAction,
   deleteCategory as deleteCategoryAction,
 } from '@/actions/admin/categories';
-import {toast, Toaster} from 'sonner';
+import {toast} from 'sonner';
 
 type CRUDOperationType = 'create' | 'update' | 'delete' | null;
 
@@ -32,6 +30,10 @@ type AdminContextType = {
   closeSidebar: () => void;
   editData: Category | Product | null;
   categories: CategoryWithChildren[];
+
+  // Admin sidebar state
+  isCollapsed: boolean;
+  toggleSidebar: () => void;
 
   // PRODUCTS
   createProduct: (data: ProductFormData, images: File[]) => Promise<void>;
@@ -81,6 +83,9 @@ export default function AdminContextProvider({
   >(null);
   const [editData, setEditData] = useState<Category | Product | null>(null);
 
+  // Admin sidebar state
+  const [isCollapsed, setIsCollapsed] = useState(true);
+
   // CRUD loading states
   const [isLoading, setIsLoading] = useState(false);
   const [operationType, setOperationType] = useState<CRUDOperationType>(null);
@@ -107,6 +112,10 @@ export default function AdminContextProvider({
   const closeSidebar = () => {
     setActiveSidebar(null);
     setEditData(null);
+  };
+
+  const toggleSidebar = () => {
+    setIsCollapsed(!isCollapsed);
   };
 
   // --------------------------------------------------------
@@ -214,7 +223,6 @@ export default function AdminContextProvider({
     } finally {
       setIsLoading(false);
       setOperationType(null);
-      
     }
   };
 
@@ -327,6 +335,10 @@ export default function AdminContextProvider({
         editData,
         categories,
 
+        // Admin sidebar state
+        isCollapsed,
+        toggleSidebar,
+
         // CRUD funktioner för produkter
         createProduct,
         updateProduct,
@@ -350,53 +362,7 @@ export default function AdminContextProvider({
         setTriggerElement,
       }}
     >
-      <div>
-        <div className='-mt-[54px] py-12 px-8'>{children}</div>
-        <FormWrapper onClose={closeSidebar} />
-
-        {/* Delete Confirmation Dialog */}
-        <ConfirmDialog
-          isOpen={deleteModalOpen}
-          title='Bekräfta borttagning'
-          message={
-            itemToDelete
-              ? `Är du säker på att du vill ta bort ${
-                  itemToDelete.type === 'product' ? 'produkten' : 'kategorin'
-                } "${itemToDelete.name}"?`
-              : ''
-          }
-        /*   description={
-            itemToDelete?.type === 'category'
-              ? 'Obs: Detta kommer att påverka alla produkter i denna kategori.'
-              : undefined
-          } */
-          confirmText='Ta bort'
-          cancelText='Avbryt'
-          variant='danger'
-          isLoading={isLoading && operationType === 'delete'}
-          triggerElement={triggerElement}
-          onConfirm={async () => {
-            if (!itemToDelete) return;
-            try {
-              if (itemToDelete.type === 'product') {
-                await deleteProduct(itemToDelete.id);
-              } else {
-                await deleteCategory(itemToDelete.id);
-              }
-            } catch (error) {
-              console.error('Delete error:', error);
-
-            }
-          }}
-          onCancel={() => {
-            if (isLoading) return; // Förhindra stängning under loading
-            setDeleteModalOpen(false);
-            setItemToDelete(null);
-            setTriggerElement(null);
-          }}
-        />
-      </div>
-      <Toaster />
+      {children}
     </AdminContext.Provider>
   );
 }

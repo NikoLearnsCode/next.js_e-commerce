@@ -130,7 +130,7 @@ export default function CategoryForm({mode, initialData}: CategoryFormProps) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className='space-y-5'>
-      <div className='flex-1 space-y-4 overflow-y-auto pt-8  pr-5 -mr-5'>
+      <div className='flex-1 space-y-4 overflow-y-auto pt-8 pb-16 scrollbar-hide pr-5 -mr-5'>
         {/* Select 1 - Kategori-typ */}
         <div>
           <label className='block text-sm sr-only font-medium text-gray-700 mb-1'>
@@ -215,15 +215,16 @@ export default function CategoryForm({mode, initialData}: CategoryFormProps) {
           label='Sorteringsordning'
           type='number'
           min='0'
+          className='mb-7'
           hasError={!!errors.displayOrder}
           errorMessage={errors.displayOrder?.message}
         />
 
         <CheckboxOption
-          svgClassName='w-5 h-5 '
-          className=' ml-0.5 w-10 h-6 '
+          svgClassName='w-4.5 h-4.5 '
+          className=' ml-0.5  w-10 h-6 '
           {...register('isActive')}
-          labelClassName={`font-medium text-sm normal-case  ${watch('isActive') ? 'text-black' : 'text-red-900/80'}`}
+          labelClassName={`font-medium text-sm ml-0.5 font-semibold font-syne normal-case  ${watch('isActive') ? 'text-black' : 'text-red-900/80'}`}
           id='category-is-active'
           label={watch('isActive') ? 'Aktiv' : 'Inaktiv'}
           checked={watch('isActive')}
@@ -236,7 +237,7 @@ export default function CategoryForm({mode, initialData}: CategoryFormProps) {
           disabled={
             isLoading /* || !isValid */ || (mode === 'edit' && !isDirty)
           }
-          className=' h-13 mt-0 w-full'
+          className=' h-14 mt-0 w-full'
         >
           {isLoading
             ? mode === 'edit'
@@ -251,7 +252,7 @@ export default function CategoryForm({mode, initialData}: CategoryFormProps) {
           variant='outline'
           onClick={closeSidebar}
           disabled={isLoading}
-          className='w-full h-13 mt-0'
+          className='w-full h-14 mt-0'
         >
           Avbryt
         </Button>

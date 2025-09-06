@@ -28,14 +28,14 @@ export default function AdminHeader({
 
   return (
     <div className='pr-4 pb-6 flex items-center justify-between'>
-      <h1 className='text-lg uppercase  font-semibold'>
+      <h1 className='text-[17px] uppercase  font-semibold'>
         {title} {count && `(${count})`}
       </h1>
 
       {buttonShow && formType && (
         <Button
           variant='secondary'
-          className='gap-1 m-0 rounded-full'
+          className='gap-1 m-0 rounded-full   '
           onClick={handleClick}
         >
           <PlusIcon className='w-4 h-4 ' />

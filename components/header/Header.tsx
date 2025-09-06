@@ -7,7 +7,7 @@ import HeaderFavoritesButton from './FavoritesButton';
 import HeaderCartDropdown from '@/components/cart/HeaderCartDropdown';
 import SearchDropdown from './SearchDropdown';
 import {NavLink} from '@/lib/types/category';
-import NavLinks from './NavLinks';
+import Navigation from './Navigation';
 import Logo from '../shared/Logo';
 
 export default function HeaderInteractive({navLinks}: {navLinks: NavLink[]}) {
@@ -22,7 +22,7 @@ export default function HeaderInteractive({navLinks}: {navLinks: NavLink[]}) {
       <div className='fixed w-full top-0 z-30 left-0 right-0 text-black bg-white flex justify-between items-center px-4 sm:px-8 h-14 gap-8'>
         {!isSearchExpanded && (
           <div className='flex gap-4 lg:gap-0 items-center'>
-            <NavLinks navLinks={navLinks} />
+            <Navigation navLinks={navLinks} />
             <div className='lg:absolute lg:left-1/2 lg:transform lg:-translate-x-1/2'>
               <Logo />
             </div>

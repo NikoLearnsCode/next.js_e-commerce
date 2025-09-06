@@ -3,5 +3,5 @@ interface NoResultsProps {
 }
 
 export default function NoResults({message}: NoResultsProps) {
-  return <div className='text-center items-center justify-center h-full text-gray-500'>{message}</div>;
+  return <div className='text-center pb-20 items-center justify-center min-h-screen text-gray-500'>{message}</div>;
 }

@@ -212,7 +212,7 @@ export default function DeliveryStep({onNext, initialData}: DeliveryStepProps) {
         <Button
           type='submit'
           disabled={isLoading || !selectedMethod}
-          className='w-full mt-0 h-13'
+          className='w-full mt-0 h-16'
         >
           {isLoading
             ? 'Sparar...'
