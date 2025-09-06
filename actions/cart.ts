@@ -20,7 +20,7 @@ import {eq, and, isNull, asc} from 'drizzle-orm';
 import {cookies} from 'next/headers';
 import Decimal from 'decimal.js';
 
-// --------------------------------------------------------
+
 // Hämtar cart items med produktdata via JOIN
 async function getCartItemsWithProducts(cartId: string) {
   const cartItems = await db
@@ -44,6 +44,7 @@ async function getCartItemsWithProducts(cartId: string) {
     .where(eq(cartItemsTable.cart_id, cartId))
     .orderBy(asc(cartItemsTable.created_at));
 
+
   return cartItems as CartItemWithProduct[];
 }
 
@@ -59,7 +60,7 @@ function calculateCartTotal(items: CartItemWithProduct[]): number {
   return total.toNumber();
 }
 
-// --------------------------------------------------------
+
 // Beräknar det totala antalet produkter i varukorgen
 function calculateItemCount(items: CartItemWithProduct[]): number {
   if (!items || items.length === 0) {
@@ -68,7 +69,7 @@ function calculateItemCount(items: CartItemWithProduct[]): number {
   return items.reduce((sum, item) => sum + item.quantity, 0);
 }
 
-// --------------------------------------------------------
+
 export async function getCart() {
   try {
     const session = await getServerSession(authOptions);
@@ -112,7 +113,7 @@ export async function getCart() {
   }
 }
 
-// --------------------------------------------------------
+
 export async function addToCart(newItem: NewCartItem) {
   try {
     const session = await getServerSession(authOptions);
@@ -179,7 +180,7 @@ export async function addToCart(newItem: NewCartItem) {
   }
 }
 
-// --------------------------------------------------------
+
 export async function removeFromCart(itemId: string) {
   try {
     const {cart} = await getCart();
@@ -215,7 +216,7 @@ export async function removeFromCart(itemId: string) {
   }
 }
 
-// --------------------------------------------------------
+
 export async function updateCartItemQuantity(itemId: string, quantity: number) {
   try {
     if (quantity <= 0) {
@@ -242,7 +243,7 @@ export async function updateCartItemQuantity(itemId: string, quantity: number) {
   }
 }
 
-// --------------------------------------------------------
+
 export async function clearCart() {
   try {
     const {cart} = await getCart();
@@ -261,7 +262,7 @@ export async function clearCart() {
   }
 }
 
-// --------------------------------------------------------
+
 export async function transferCartOnLogin(userId: string) {
   try {
     const sessionId = await getSessionId();

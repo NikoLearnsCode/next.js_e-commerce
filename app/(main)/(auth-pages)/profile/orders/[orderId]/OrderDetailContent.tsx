@@ -8,7 +8,7 @@ import type {DeliveryFormData} from '@/lib/validators';
 import AnimatedAuthContainer from '@/components/shared/AnimatedContainer';
 import Link from 'next/link';
 
-import {formatPrice} from '@/utils/helpers';
+import {formatPrice} from '@/utils/format';
 
 interface OrderDetailContentProps {
   order: OrderWithItems;

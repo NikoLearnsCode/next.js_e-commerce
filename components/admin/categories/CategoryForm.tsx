@@ -13,12 +13,12 @@ import {useEffect} from 'react';
 import {FloatingLabelInput} from '@/components/shared/ui/floatingLabelInput';
 import {Button} from '@/components/shared/ui/button';
 import {CheckboxOption} from '@/components/shared/ui/CheckboxOption';
-import {generateSlug} from '@/utils/slug-generator';
+import {generateSlug} from '@/components/admin/utils/slug-generator';
 import CustomSelect from '../shared/CustomSelect';
 import {
   findAllPossibleParentCategories,
   findCategoryById,
-} from '@/utils/category-helper';
+} from '@/components/admin/utils/category-form-helpers';
 
 type CategoryFormProps = {
   mode: 'create' | 'edit';

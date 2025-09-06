@@ -1,7 +1,7 @@
 'use client';
 
 import {useCart} from '@/context/CartProvider';
-import {formatPrice} from '@/utils/helpers';
+import {formatPrice} from '@/utils/format';
 
 export default function OrderTotals() {
   const {totalPrice} = useCart();

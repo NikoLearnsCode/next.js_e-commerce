@@ -1,6 +1,6 @@
 'use client';
 
-import FormWrapper from '@/components/admin/FormWrapper';
+import FormWrapper from '@/components/admin/AdminFormWrapper';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
 import {useAdmin} from '@/context/AdminContextProvider';

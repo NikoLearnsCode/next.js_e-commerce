@@ -10,78 +10,22 @@ import {
   FiCornerLeftUp,
 } from 'react-icons/fi';
 
-import AdminTable from '../shared/AdminTable';
+import AdminTable from '../shared/ReusableTable.tsx';
 import {CategoryWithChildren} from '@/lib/types/category';
 import {
   formatDateForAdmin,
   getAdminHeader,
-} from '@/components/admin/utils/admin.helpers';
+} from '@/components/admin/utils/admin-general-helpers';
 import {useAdmin} from '@/context/AdminContextProvider';
+import {
+  flattenCategoriesRecursive,
+  FlattenedCategory,
+  categoryConfig,
+  getAllCategoryIdsRecursive,
+} from '../utils/category-table-helpers';
 
 type CategoryManagerProps = {
   categories: CategoryWithChildren[];
-};
-
-type FlattenedCategory = CategoryWithChildren & {
-  level: number;
-  parentName?: string;
-};
-
-const flattenCategoriesRecursive = (
-  cats: CategoryWithChildren[],
-  expandedCategories: Set<number>,
-  level = 0,
-  parentName?: string
-): FlattenedCategory[] => {
-  const flattened: FlattenedCategory[] = [];
-  cats.forEach((cat) => {
-    flattened.push({...cat, level, parentName});
-    if (
-      expandedCategories.has(cat.id) &&
-      cat.children &&
-      cat.children.length > 0
-    ) {
-      flattened.push(
-        ...flattenCategoriesRecursive(
-          cat.children,
-          expandedCategories,
-          level + 1,
-          cat.name
-        )
-      );
-    }
-  });
-  return flattened;
-};
-
-const categoryConfig = {
-  'MAIN-CATEGORY': {
-    name: 'Huvudkategori',
-    className: 'text-black ',
-  },
-  'SUB-CATEGORY': {
-    name: 'Underkategori',
-    className: 'text-black font-medium',
-  },
-  COLLECTION: {
-    name: 'Collection',
-    className: 'text-red-900 font-syne uppercase  ',
-  },
-  CONTAINER: {
-    name: 'Container',
-    className: 'text-emerald-900 font-syne uppercase  ',
-  },
-};
-
-const getAllCategoryIdsRecursive = (cats: CategoryWithChildren[]): number[] => {
-  let ids: number[] = [];
-  for (const cat of cats) {
-    ids.push(cat.id);
-    if (cat.children && cat.children.length > 0) {
-      ids = ids.concat(getAllCategoryIdsRecursive(cat.children));
-    }
-  }
-  return ids;
 };
 
 export default function CategoryManager({categories}: CategoryManagerProps) {
@@ -249,7 +193,9 @@ export default function CategoryManager({categories}: CategoryManagerProps) {
       {
         header: getAdminHeader('isActive'),
         cell: (category: FlattenedCategory) => (
-          <div className={` text-sm  ${category.isActive ? 'text-black' : 'text-red-900'}`}>
+          <div
+            className={` text-sm  ${category.isActive ? 'text-black' : 'text-red-900'}`}
+          >
             {category.isActive ? 'Aktiv' : 'Inaktiv'}
           </div>
         ),

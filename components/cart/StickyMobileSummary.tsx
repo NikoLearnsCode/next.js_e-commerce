@@ -1,7 +1,7 @@
 'use client';
 
 import {motion} from 'framer-motion';
-import {formatPrice} from '@/utils/helpers';
+import {formatPrice} from '@/utils/format';
 import {Link} from '@/components/shared/ui/link';
 
 type StickyMobileSummaryProps = {

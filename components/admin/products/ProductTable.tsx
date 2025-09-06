@@ -1,13 +1,13 @@
 'use client';
 
 import {Product} from '@/lib/types/db';
-import AdminTable from '../shared/AdminTable';
+import AdminTable from '../shared/ReusableTable.tsx';
 import {FiEdit, FiTrash} from 'react-icons/fi';
 import {
   formatDateForAdmin,
   getAdminHeader,
-} from '@/components/admin/utils/admin.helpers';
-import {formatPrice} from '@/utils/helpers';
+} from '@/components/admin/utils/admin-general-helpers';
+import {formatPrice} from '@/utils/format';
 import {useAdmin} from '@/context/AdminContextProvider';
 
 type ProductManagerProps = {
@@ -34,7 +34,6 @@ export default function ProductManager({products}: ProductManagerProps) {
     header: getAdminHeader(header),
     cell: (product: Product) => {
       const value = product[header as keyof Product];
-
 
       if (header === 'created_at' || header === 'updated_at') {
         return <div>{formatDateForAdmin(value as Date)}</div>;

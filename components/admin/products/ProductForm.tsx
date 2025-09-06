@@ -10,8 +10,8 @@ import {useState, useEffect} from 'react';
 import {
   findAllAssignableSubCategories,
   DropdownOption,
-} from '@/utils/dropdown-helper';
-import {generateSlug} from '@/utils/slug-generator';
+} from '@/components/admin/utils/product-form-helpers';
+import {generateSlug} from '@/components/admin/utils/slug-generator';
 import Image from 'next/image';
 import {Product} from '@/lib/types/db';
 import {X} from 'lucide-react';

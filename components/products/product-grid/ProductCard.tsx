@@ -14,7 +14,7 @@ import {useNavigatedHistory} from '@/context/NavigatedHistoryProvider';
 
 import FavoriteButton from '@/components/favorites/FavoriteButton';
 import NewBadge from '@/components/shared/NewBadge';
-import {formatPrice} from '@/utils/helpers';
+import {formatPrice} from '@/utils/format';
 
 type ProductCardProps = {
   product: Product;

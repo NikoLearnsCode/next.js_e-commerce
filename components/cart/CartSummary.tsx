@@ -1,7 +1,7 @@
 'use client';
 
 import {Link} from '@/components/shared/ui/link';
-import {formatPrice} from '@/utils/helpers';
+import {formatPrice} from '@/utils/format';
 import {getCheckoutUrl} from '@/components/checkout/utils/steps';
 
 type CartSummaryProps = {

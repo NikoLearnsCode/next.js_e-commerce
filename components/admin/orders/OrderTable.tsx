@@ -1,9 +1,12 @@
 'use client';
 
 import {Order} from '@/lib/types/db';
-import AdminTable from '../shared/AdminTable';
-import {formatDateForAdmin,  getAdminHeader} from '@/components/admin/utils/admin.helpers';
-import {formatPrice} from '@/utils/helpers';
+import AdminTable from '../shared/ReusableTable.tsx';
+import {
+  formatDateForAdmin,
+  getAdminHeader,
+} from '@/components/admin/utils/admin-general-helpers';
+import {formatPrice} from '@/utils/format';
 
 type OrderTableProps = {
   orders: Order[];
