@@ -13,10 +13,7 @@ export default function FavoritesPage() {
       {/* Loading state */}
       {isLoading && (
         <div className='flex flex-col justify-center items-center min-h-[calc(100vh-310px)]'>
-          <SpinningLogo height='40' className='pb-4 opacity-50' />
-          <p className='text-xs pl-1 font-semibold uppercase font-syne text-gray-400'>
-            Laddar...
-          </p>
+          <SpinningLogo height='40' className='pb-20 opacity-30' />
         </div>
       )}
 

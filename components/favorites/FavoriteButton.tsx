@@ -49,7 +49,7 @@ export default function FavoriteButton({
       disabled={isUpdating}
       data-variant={variant}
       className={twMerge(
-        'cursor-pointer p-0.5 pl-3 inline-flex items-center justify-center transition-all duration-200 disabled:opacity-50',
+        'cursor-pointer  pl-3 inline-flex items-center justify-center transition-all duration-200 disabled:opacity-50',
         className
       )}
     >

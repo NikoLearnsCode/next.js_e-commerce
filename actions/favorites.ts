@@ -87,7 +87,7 @@ export async function addToFavorites(product: Product) {
     const sessionId = user ? null : await getOrCreateSessionId();
 
     // Check if product is already in favorites
-    let existingFavorite;
+    /*     let existingFavorite;
     if (user) {
       const existing = await db
         .select()
@@ -114,9 +114,9 @@ export async function addToFavorites(product: Product) {
         .limit(1);
       existingFavorite = existing[0] || null;
     }
-
+ */
     // If already in favorites, return current favorites
-  /*   if (existingFavorite) {
+    /*   if (existingFavorite) {
       const {favorites} = await getFavorites();
       return {
         success: true,

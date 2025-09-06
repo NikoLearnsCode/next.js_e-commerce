@@ -1,3 +1,4 @@
+// components/shared/cards/CartCard.tsx
 'use client';
 
 import Image from 'next/image';
@@ -7,59 +8,28 @@ import {motion} from 'framer-motion';
 import {formatPrice} from '@/utils/format';
 import SpinningLogo from '@/components/shared/ui/SpinningLogo';
 import type {CartItemWithProduct} from '@/lib/validators';
-import type {Favorite} from '@/lib/types/db';
 
-type ProductListItemProps = {
-  item: CartItemWithProduct | Favorite;
-  type: 'cart' | 'favorite';
+type CartCardProps = {
+  item: CartItemWithProduct;
+  onRemove: (cartItemId: string) => void;
+  onUpdateQuantity: (cartItemId: string, newQuantity: number) => void;
   isUpdating?: boolean;
   isRemoving?: boolean;
-  onRemove: (id: string) => void;
-  onUpdateQuantity?: (id: string, quantity: number) => void;
 };
 
-export default function ProductListItem({
+export default function CartCard({
   item,
-  type,
-  isUpdating = false,
-  isRemoving = false,
   onRemove,
   onUpdateQuantity,
-}: ProductListItemProps) {
-  const itemData = (() => {
-    if (type === 'cart') {
-      const cartItem = item as CartItemWithProduct;
-      return {
-        id: cartItem.id,
-        productId: cartItem.product_id,
-        name: cartItem.name,
-        price: cartItem.price,
-        slug: cartItem.slug,
-        images: cartItem.images,
-        brand: cartItem.brand,
-        color: cartItem.color,
-        quantity: cartItem.quantity,
-        size: cartItem.size,
-      };
-    } else {
-      const favItem = item as Favorite;
-      return {
-        id: favItem.id,
-        productId: favItem.product_id,
-        name: favItem.product.name,
-        price: favItem.product.price,
-        slug: favItem.product.slug,
-        images: favItem.product.images,
-        brand: favItem.product.brand,
-        color: favItem.product.color,
-      };
-    }
-  })();
+  isUpdating = false,
+  isRemoving = false,
+}: CartCardProps) {
+  const {id, name, price, slug, images, quantity, size, color, brand} = item;
 
   return (
     <motion.div
-      key={itemData.id}
-      className='flex flex-row sm:flex-col  pb-1 md:pb-0 overflow-hidden '
+      key={id}
+      className='flex flex-row sm:flex-col pb-1 md:pb-0 overflow-hidden'
       initial={{opacity: 0, y: 20}}
       animate={{opacity: 1, y: 0}}
       exit={{
@@ -80,11 +50,11 @@ export default function ProductListItem({
     >
       {/* Image section */}
       <div className='relative min-w-2/3 w-full h-full aspect-7/9'>
-        <Link tabIndex={-1} href={`/${itemData.slug}`}>
-          {itemData.images && itemData.images[0] ? (
+        <Link tabIndex={-1} href={`/${slug}`}>
+          {images && images[0] ? (
             <Image
-              src={itemData.images[0]}
-              alt={itemData.name}
+              src={images[0]}
+              alt={name}
               fill
               quality={90}
               priority
@@ -100,11 +70,7 @@ export default function ProductListItem({
 
         <button
           className='absolute top-0 right-0 z-1 hover:text-red-800 p-3 cursor-pointer'
-          onClick={() =>
-            type === 'cart'
-              ? onRemove(itemData.id)
-              : itemData.productId && onRemove(itemData.productId)
-          }
+          onClick={() => onRemove(id)}
           disabled={isRemoving || isUpdating}
         >
           {isRemoving || isUpdating ? (
@@ -116,30 +82,28 @@ export default function ProductListItem({
       </div>
 
       <div className='px-3 py-2 relative min-w-1/3 lg:pb-10 lg:px-3 flex flex-col mb-2'>
-        <div className='flex flex-col flex-1 gap-1 sm:gap-0 justify-center items-center sm:items-start text-sm '>
+        <div className='flex flex-col flex-1 gap-1 sm:gap-0 justify-center items-center sm:items-start text-sm'>
           <Link
-            href={`/${itemData.slug}`}
-            className='outline-none focus:underline focus:underline-offset-2 text-wrap text-break text-center  '
+            href={`/${slug}`}
+            className='outline-none focus:underline focus:underline-offset-2 text-wrap text-break text-center'
           >
-            {itemData.name}
+            {name}
           </Link>
-          <span className='text-black/80 text-sm '>
-            {typeof itemData.price === 'string'
-              ? formatPrice(Number(itemData.price))
-              : formatPrice(itemData.price || 0)}
+          <span className='text-black/80 text-sm'>
+            {typeof price === 'string'
+              ? formatPrice(Number(price))
+              : formatPrice(price || 0)}
           </span>
         </div>
 
         <div className='text-sm mt-1 gap-2 md:text-base flex flex-col sm:flex-row items-center'>
-          {type === 'cart' && onUpdateQuantity && itemData.quantity && (
+          {onUpdateQuantity && quantity && (
             <div className='flex items-center gap-2 pr-2 justify-center'>
               <button
-                onClick={() =>
-                  onUpdateQuantity(itemData.id, itemData.quantity! - 1)
-                }
-                disabled={isUpdating || itemData.quantity! <= 1}
+                onClick={() => onUpdateQuantity(id, quantity - 1)}
+                disabled={isUpdating || quantity <= 1}
                 className={`h-8 w-8 flex items-center justify-center ${
-                  itemData.quantity! <= 1
+                  quantity <= 1
                     ? 'pointer-events-none opacity-30'
                     : 'cursor-pointer'
                 }`}
@@ -150,12 +114,10 @@ export default function ProductListItem({
                 />
               </button>
 
-              <span className='text-[13px]'>{itemData.quantity}</span>
+              <span className='text-[13px]'>{quantity}</span>
 
               <button
-                onClick={() =>
-                  onUpdateQuantity(itemData.id, itemData.quantity! + 1)
-                }
+                onClick={() => onUpdateQuantity(id, quantity + 1)}
                 disabled={isUpdating}
                 className='h-8 w-8 flex items-center justify-center cursor-pointer'
               >
@@ -166,10 +128,10 @@ export default function ProductListItem({
               </button>
             </div>
           )}
-          <div className=' flex gap-4 text-[13px]'>
-            {type === 'cart' && itemData.size && <span>{itemData.size}</span>}
-            {itemData.brand && <span>{itemData.brand}</span>}
-            {itemData.color && <span>{itemData.color}</span>}
+          <div className='flex gap-4 text-[13px]'>
+            {size && <span>{size}</span>}
+            {brand && <span>{brand}</span>}
+            {color && <span>{color}</span>}
           </div>
         </div>
       </div>

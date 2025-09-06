@@ -5,7 +5,7 @@ import Link from 'next/link';
 import {AnimatePresence} from 'framer-motion';
 import {formatPrice} from '@/utils/format';
 import {useCart} from '@/context/CartProvider';
-import CartCard from '@/components/shared/CartFavoriteCard';
+import CartCard from '@/components/shared/cards/CartCard';
 type CartItemsProps = {
   compact?: boolean;
 };
@@ -108,7 +108,6 @@ export default function CartItems({compact = false}: CartItemsProps) {
             <CartCard
               key={item.id}
               item={item}
-              type='cart'
               isUpdating={isUpdating}
               isRemoving={isRemoving}
               onRemove={handleRemoveItem}

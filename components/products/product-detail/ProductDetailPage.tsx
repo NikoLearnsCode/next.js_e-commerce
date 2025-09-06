@@ -13,7 +13,7 @@ import dynamic from 'next/dynamic';
 import Carousel from '@/components/shared/Carousel';
 
 const ProductCard = dynamic(
-  () => import('@/components/products/product-grid/ProductCard')
+  () => import('@/components/shared/cards/CarouselCard')
 );
 
 type ProductPageProps = {
@@ -178,7 +178,7 @@ export default function ProductPage({
               <ProductCard
                 product={product}
                 priorityLoading={false}
-                interactionMode='carouselItem'
+
               />
             )}
             id='carousel-one'
@@ -198,7 +198,7 @@ export default function ProductPage({
               <ProductCard
                 product={product}
                 priorityLoading={false}
-                interactionMode='carouselItem'
+
               />
             )}
             id='carousel-two'
