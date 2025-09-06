@@ -37,7 +37,7 @@ const Carousel = <T,>({
   id = 'carousel',
   className = '',
   spaceBetween = 3,
-  slidesOffsetBefore = 0,
+
   breakpoints = {
     640: {
       slidesPerView: 2,
@@ -73,14 +73,19 @@ const Carousel = <T,>({
   }
 
   return (
-    <div className={twMerge('w-full mx-auto', className)}>
+    <div className={twMerge('', className)}>
       {/* Header with title and navigation */}
       {(title || showNavigation) && (
-        <div className={twMerge('flex justify-between items-center mb-4', titelDivClassName)}>
+        <div
+          className={twMerge(
+            'flex justify-between items-center mb-4',
+            titelDivClassName
+          )}
+        >
           {title && (
             <h2
               className={twMerge(
-                'text-base sm:text-lg text-gray-800 px-5 sm:px-4 font-medium',
+                'text-base sm:text-lg text-gray-800  font-medium',
                 titleClassName
               )}
             >
@@ -125,7 +130,6 @@ const Carousel = <T,>({
         modules={[Navigation]}
         spaceBetween={spaceBetween}
         slidesPerView={2}
-        slidesOffsetBefore={slidesOffsetBefore}
         breakpoints={breakpoints}
         navigation={{
           prevEl: `.${prevButtonClass}`,
@@ -133,10 +137,9 @@ const Carousel = <T,>({
         }}
         onSlideChange={handleSlideChange}
         onInit={handleSlideChange}
-        className='w-full'
       >
         {items.map((item, index) => (
-            <SwiperSlide className='w-full' key={index}>
+          <SwiperSlide className='w-full ' key={index}>
             {renderItem(item, index)}
           </SwiperSlide>
         ))}

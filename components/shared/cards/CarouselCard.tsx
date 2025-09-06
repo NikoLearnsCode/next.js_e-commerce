@@ -22,12 +22,12 @@ export default function CarouselProductCard({
   const hasImage = images && images.length > 0;
 
   return (
-    <div className='flex flex-col relative w-full h-full pb-6 group'>
+    <div className='flex flex-col relative w-full h-full pb-6 group '>
       <div className='w-full relative bg-white aspect-[7/9]'>
         <Link href={`/${slug}`} className='block h-full w-full' tabIndex={-1}>
           {hasImage ? (
             <Image
-              src={images[0]} // Alltid första bilden
+              src={images[0]}
               alt={name}
               fill
               quality={90}
@@ -43,7 +43,6 @@ export default function CarouselProductCard({
         </Link>
       </div>
 
-      {/* Info-sektion */}
       {isNew && (
         <div className='px-2.5 pt-0.5 flex items-center justify-between'>
           <NewBadge />

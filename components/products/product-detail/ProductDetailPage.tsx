@@ -108,10 +108,10 @@ export default function ProductPage({
             </div>
 
             {/* Size */}
-            <div className='flex flex-col mt-4 lg:mt-7 gap-2'>
-              <div className='h-4'>
+            <div className='flex flex-col  gap-2'>
+              <div className='h-5'>
                 {showSizeWarning && !selectedSize && (
-                  <p className='text-red-900 text-xs  font-semibold'>
+                  <p className='text-red-900 text-xs pt-2  font-semibold'>
                     Vänligen välj en storlek
                   </p>
                 )}
@@ -139,7 +139,7 @@ export default function ProductPage({
             </div>
 
             {/* Add to cart and favorites buttons */}
-            <div className='flex gap-1 mt-3 items-center'>
+            <div className='flex gap-1 mt-1 items-center'>
               <AddToCartButton
                 product={product}
                 quantity={1}
@@ -171,15 +171,10 @@ export default function ProductPage({
         <div className='mx-auto  pb-8'>
           <Carousel
             items={categoryProducts}
-            slidesOffsetBefore={isDesktop ? 30 : 20}
-            titelDivClassName='sm:px-4 px-0'
+            titelDivClassName='px-4 md:px-6'
             title='Liknande produkter'
             renderItem={(product) => (
-              <ProductCard
-                product={product}
-                priorityLoading={false}
-
-              />
+              <ProductCard product={product} priorityLoading={false} />
             )}
             id='carousel-one'
           />
@@ -192,14 +187,10 @@ export default function ProductPage({
           <Carousel
             items={genderProducts}
             title='Du kanske också gillar'
-            titelDivClassName='sm:px-4 px-0'
-            slidesOffsetBefore={isDesktop ? 30 : 20}
+            
+            titelDivClassName='px-4 md:px-6'
             renderItem={(product) => (
-              <ProductCard
-                product={product}
-                priorityLoading={false}
-
-              />
+              <ProductCard product={product} priorityLoading={false} />
             )}
             id='carousel-two'
           />

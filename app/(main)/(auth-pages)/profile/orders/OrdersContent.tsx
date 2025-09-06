@@ -62,7 +62,9 @@ export default function OrdersClientContent({
                 <Carousel
                   items={order.order_items}
                   title={formattedDate}
-                  titleClassName='text-sm  text-gray-600 px-3 lg:px-0 sm:text-base'
+
+                  slidesOffsetBefore={isDesktop ? 30 : 20}
+                  titleClassName='text-sm  text-gray-600 px-4 md:px-0 sm:text-base'
                   renderItem={(item, _index) => (
                     <div className='aspect-[7/9]'>
                       <Link
@@ -90,7 +92,11 @@ export default function OrdersClientContent({
                     640: {slidesPerView: 2, spaceBetween: 3},
                     768: {slidesPerView: 3, spaceBetween: 3},
                   }}
-                  showNavigation={isDesktop ? order.order_items.length > 3 : order.order_items.length > 2}
+                  showNavigation={
+                    isDesktop
+                      ? order.order_items.length > 3
+                      : order.order_items.length > 2
+                  }
                   id={`order-${order.id}`}
                 />
               </div>

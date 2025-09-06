@@ -89,7 +89,7 @@ export default function ProductCard({
       <div
         className={
           isListLayout
-            ? 'relative min-w-2/3 w-full h-full aspect-7/9'
+            ? 'relative min-w-2/3 w-full h-full aspect-[7/9]'
             : 'w-full relative bg-white aspect-[7/9]'
         }
       >
@@ -126,7 +126,7 @@ export default function ProductCard({
                       fill
                       quality={90}
                       priority={priorityLoading && idx === 0}
-                      className='object-cover'
+                      className='object-cover p-[1px]'
                       sizes='(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, 50vw'
                     />
                   </Link>

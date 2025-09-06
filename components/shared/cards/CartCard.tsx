@@ -71,9 +71,9 @@ export default function CartCard({
         <button
           className='absolute top-0 right-0 z-1 hover:text-red-800 p-3 cursor-pointer'
           onClick={() => onRemove(id)}
-          disabled={isRemoving || isUpdating}
+          disabled={isRemoving}
         >
-          {isRemoving || isUpdating ? (
+          {isRemoving ? (
             <SpinningLogo width='24' height='17' />
           ) : (
             <X size={16} strokeWidth={1.5} />

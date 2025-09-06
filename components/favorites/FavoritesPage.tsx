@@ -1,12 +1,12 @@
 'use client';
 
 import {useFavorites} from '@/context/FavoritesProvider';
-import FavoritesItems from './FavoritesItems';
+import FavoritesItems from './FavoritesGrid';
 import EmptyFavorites from './EmptyFavorites';
 import SpinningLogo from '@/components/shared/ui/SpinningLogo';
 
 export default function FavoritesPage() {
-  const {favorites, loading: isLoading, favoriteCount} = useFavorites();
+  const { loading: isLoading, favoriteCount} = useFavorites();
 
   return (
     <div className='w-full h-full mx-auto z-1'>
@@ -18,10 +18,10 @@ export default function FavoritesPage() {
       )}
 
       {/* Empty favorites state */}
-      {!isLoading && favorites.length === 0 && <EmptyFavorites />}
+      {!isLoading && favoriteCount === 0 && <EmptyFavorites />}
 
       {/* Favorites with items */}
-      {favorites.length > 0 && (
+      {favoriteCount > 0 && (
         <div className='space-y-5 py-2'>
           <div className=' px-4 sm:px-6'>
             <h1 className='text-sm sm:text-base uppercase '>
