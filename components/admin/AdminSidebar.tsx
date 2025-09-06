@@ -15,10 +15,10 @@ const LetterIcon = ({
   isActive: boolean;
 }) => (
   <div
-    className={`h-7 w-7 shrink-0 font-arimo flex items-center justify-center rounded  text-sm ${
+    className={`h-7 w-7 shrink-0 font-arimo font-bold flex items-center justify-center rounded  text-sm ${
       isActive
-        ? 'bg-gray-200 text-black'
-        : 'bg-gray-100 hover:bg-gray-200 text-gray-800'
+        ? 'bg-gray-700 text-white'
+        : 'bg-gray-50 hover:bg-gray-100 text-gray-700'
     }`}
   >
     {letter}
@@ -44,7 +44,7 @@ export default function AdminSidebar() {
 
   return (
     <motion.div
-      className='fixed inset-y-0 left-0 z-20 border-r  bg-gray-50/80 border-gray-200 '
+      className='fixed inset-y-0 left-0 z-20 border-r   border-gray-200 '
       animate={{
         width: isCollapsed ? '3.25rem' : '11rem',
       }}
@@ -58,10 +58,10 @@ export default function AdminSidebar() {
         <div className='flex h-16 shrink-0 items-center justify-end'>
           <button
             onClick={toggleSidebar}
-            className=' px-3.5 py-6 cursor-pointer rounded-md relative flex flex-col justify-center items-center gap-1'
+            className=' px-3 py-6 cursor-pointer rounded-md relative flex flex-col justify-center items-center gap-1'
           >
             <motion.span
-              className='inline-flex border-t w-5 border-black'
+              className={`inline-flex border-t-[1.5px] w-5.5  ${isCollapsed ? 'border-gray-800' : 'border-gray-600'}`}
               animate={{
                 rotate: isCollapsed ? 0 : 45,
                 y: isCollapsed ? 0 : 2.5,
@@ -69,7 +69,7 @@ export default function AdminSidebar() {
               transition={{duration: 0.2}}
             />
             <motion.span
-              className='inline-flex border-t w-5 border-black'
+              className={`inline-flex border-t-[1.5px] w-5.5  ${isCollapsed ? 'border-gray-800' : 'border-gray-600'}`}
               animate={{
                 rotate: isCollapsed ? 0 : -45,
                 y: isCollapsed ? 0 : -2.5,
@@ -91,9 +91,9 @@ export default function AdminSidebar() {
                       <Link
                         href={item.href}
                         className={`
-                          group flex  text-gray-800 uppercase text-xs items-center rounded-[10px] p-2 leading-6  transition-all duration-200
-                          ${isCollapsed ? '' : 'gap-x-3 hover:bg-gray-100'}
-                          ${item.name === 'Beställningar' ? 'font-medium' : 'font-syne font-semibold'}
+                          group flex font-bold text-gray-700 uppercase text-[11px] items-center rounded-[10px] py-1 px-2 leading-6  transition-all duration-200
+                          ${isCollapsed ? '' : 'gap-x-3 hover:bg-gray-50'}
+                         
 
 
                         `}
@@ -124,7 +124,7 @@ export default function AdminSidebar() {
           <Link
             href='/'
             className={`
-              group flex items-center uppercase rounded-[10px] p-1 py-3 font-syne leading-6 font-semibold text-xs text-gray-800 hover:bg-gray-100 transition-all duration-200
+              group flex items-center uppercase rounded-[10px] p-1 py-3  leading-6 font-bold text-[11px] text-gray-700 hover:bg-gray-50 transition-all duration-200
               ${isCollapsed ? '' : 'gap-x-3'}
             `}
             title={isCollapsed ? 'Tillbaka till butik' : undefined}
