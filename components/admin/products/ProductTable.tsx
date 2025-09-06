@@ -6,7 +6,7 @@ import {FiEdit, FiTrash} from 'react-icons/fi';
 import {
   formatDateForAdmin,
   getAdminHeader,
-} from '@/components/admin/utils/admin-general-helpers';
+} from '@/components/admin/utils/admin-helpers';
 import {formatPrice} from '@/utils/format';
 import {useAdmin} from '@/context/AdminContextProvider';
 

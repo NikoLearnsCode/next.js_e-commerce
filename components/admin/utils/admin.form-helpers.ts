@@ -1,40 +1,44 @@
 import {CategoryWithChildren} from '@/lib/types/category';
 
-export type DropdownOption = {
+// Du behöver fortfarande din DropdownOption-typ
+export interface DropdownOption {
   value: number;
   slug: string;
   label: string;
-};
+}
 
 /**
- * Hittar alla kategorier som kan agera som en FÖRÄLDER till en annan kategori.
- * Enligt reglerna kan endast 'MAIN-CATEGORY' och 'CONTAINER' vara föräldrar.
- * Funktionen bygger en lista med alternativ för en dropdown-meny i admin-gränssnittet.
+ * Hittar och formaterar kategorier från ett träd för att användas i en dropdown.
+ * Funktionen filtrerar resultatet baserat på en lista av tillåtna kategorityper.
  *
  * @param nodes - En array av hela kategoriträdet.
- * @param parentName - Används för rekursion för att bygga en tydlig label (t.ex. "Accessoarer - Herr").
- * @returns En array av DropdownOption som kan användas i en <select>-lista.
+ * @param allowedTypes - En array av kategorityper som ska inkluderas (t.ex. ['MAIN-CATEGORY', 'CONTAINER']).
+ * @param parentName - Används internt för att bygga hierarkiska etiketter.
+ * @returns En array av DropdownOption.
  */
-export function findAllPossibleParentCategories(
+export function findCategoriesForDropdown(
   nodes: CategoryWithChildren[],
+  allowedTypes: string[],
   parentName: string | null = null
 ): DropdownOption[] {
   let options: DropdownOption[] = [];
 
   for (const node of nodes) {
-    if (node.type === 'MAIN-CATEGORY' || node.type === 'CONTAINER') {
+    // Steg 1: Kontrollera om nodens typ är tillåten.
+    if (allowedTypes.includes(node.type)) {
       options.push({
         value: node.id,
         slug: node.slug,
-        label: parentName
-          ? `${node.name} - (${parentName.toLowerCase()} - ${node.type.toLowerCase()})`
-          : `1. ${node.name.toUpperCase()}`,
+        // Steg 2: Använd en standardiserad etikett.
+        // Skapar "Kategori" eller "Kategori - Förälder"
+        label: parentName ? `${node.name} - ${parentName}` : node.name,
       });
     }
 
+    // Rekursivt anrop för att gå igenom alla barn.
     if (node.children && node.children.length > 0) {
       options = options.concat(
-        findAllPossibleParentCategories(node.children, node.name)
+        findCategoriesForDropdown(node.children, allowedTypes, node.name)
       );
     }
   }

@@ -15,14 +15,14 @@ import {CategoryWithChildren} from '@/lib/types/category';
 import {
   formatDateForAdmin,
   getAdminHeader,
-} from '@/components/admin/utils/admin-general-helpers';
+} from '@/components/admin/utils/admin-helpers';
 import {useAdmin} from '@/context/AdminContextProvider';
 import {
   flattenCategoriesRecursive,
   FlattenedCategory,
   categoryConfig,
   getAllCategoryIdsRecursive,
-} from '../utils/category-table-helpers';
+} from '../utils/admin.table-helpers';
 
 type CategoryManagerProps = {
   categories: CategoryWithChildren[];

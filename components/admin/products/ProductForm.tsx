@@ -8,9 +8,9 @@ import {FloatingLabelInput} from '@/components/shared/ui/floatingLabelInput';
 import {useAdmin} from '@/context/AdminContextProvider';
 import {useState, useEffect} from 'react';
 import {
-  findAllAssignableSubCategories,
   DropdownOption,
-} from '@/components/admin/utils/product-form-helpers';
+  findCategoriesForDropdown,
+} from '@/components/admin/utils/admin.form-helpers';
 import {generateSlug} from '@/components/admin/utils/slug-generator';
 import Image from 'next/image';
 import {Product} from '@/lib/types/db';
@@ -134,9 +134,10 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
     );
 
     if (selectedMainCategory && selectedMainCategory.children) {
-      const options = findAllAssignableSubCategories(
-        selectedMainCategory.children
-      );
+      const options = findCategoriesForDropdown(selectedMainCategory.children, [
+        'MAIN-CATEGORY',
+        'SUB-CATEGORY',
+      ]);
       setSubCategoryOptions(options);
     } else {
       setSubCategoryOptions([]);

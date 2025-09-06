@@ -5,7 +5,7 @@ import AdminTable from '../shared/ReusableTable.tsx';
 import {
   formatDateForAdmin,
   getAdminHeader,
-} from '@/components/admin/utils/admin-general-helpers';
+} from '@/components/admin/utils/admin-helpers';
 import {formatPrice} from '@/utils/format';
 
 type OrderTableProps = {

@@ -16,9 +16,9 @@ import {CheckboxOption} from '@/components/shared/ui/CheckboxOption';
 import {generateSlug} from '@/components/admin/utils/slug-generator';
 import CustomSelect from '../shared/CustomSelect';
 import {
-  findAllPossibleParentCategories,
+  findCategoriesForDropdown,
   findCategoryById,
-} from '@/components/admin/utils/category-form-helpers';
+} from '@/components/admin/utils/admin.form-helpers';
 
 type CategoryFormProps = {
   mode: 'create' | 'edit';
@@ -103,7 +103,10 @@ export default function CategoryForm({mode, initialData}: CategoryFormProps) {
     if (!watchedType || watchedType === 'MAIN-CATEGORY') {
       return [];
     }
-    const allPossibleParents = findAllPossibleParentCategories(categories);
+    const allPossibleParents = findCategoriesForDropdown(categories, [
+      'MAIN-CATEGORY',
+      'CONTAINER',
+    ]);
     let filteredParents = allPossibleParents;
     if (watchedType === 'CONTAINER') {
       filteredParents = allPossibleParents.filter((parent) => {
