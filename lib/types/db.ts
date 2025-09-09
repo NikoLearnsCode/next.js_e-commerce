@@ -1,32 +1,42 @@
 import {
   productsTable,
-  ordersTable,
-  orderItemsTable,
   favoritesTable,
+  cartsTable,
+  cartItemsTable,
 } from '@/drizzle/db/schema';
 
-export type Product = typeof productsTable.$inferSelect & {
+export type Product = Partial<typeof productsTable.$inferSelect> & {
+  id: string;
+  name: string;
+  price: string;
+  images: string[];
+  brand: string;
+  sizes: string[];
+  color: string;
+  slug: string;
+  created_at: Date | null;
   isNew?: boolean;
 };
-export type NewProduct = typeof productsTable.$inferInsert;
 
-export type Order = typeof ordersTable.$inferSelect;
-export type NewOrder = typeof ordersTable.$inferInsert;
-
-export type OrderItem = typeof orderItemsTable.$inferSelect;
-export type NewOrderItem = typeof orderItemsTable.$inferInsert;
-
-export type OrderWithItems = Order & {
-  order_items: OrderItem[];
-};
-
-export type Favorite = {
-  id: string;
-  user_id: string | null;
-  session_id: string | null;
-  product_id: string;
-  created_at: Date | null;
-  product: typeof productsTable.$inferSelect;
-};
+export type Favorite = typeof favoritesTable.$inferSelect;
 
 export type NewFavorite = typeof favoritesTable.$inferInsert;
+
+export type FavoriteWithProduct = Favorite & {
+  product: Product;
+};
+
+export type NewCart = typeof cartsTable.$inferInsert;
+
+export type NewCartItem = typeof cartItemsTable.$inferInsert;
+
+export type AddToCartItem = Omit<NewCartItem, 'cart_id'>;
+
+export type CartItemWithProduct = typeof cartItemsTable.$inferSelect & {
+  name: string;
+  price: string;
+  brand: string;
+  color: string;
+  slug: string;
+  images: string[];
+};

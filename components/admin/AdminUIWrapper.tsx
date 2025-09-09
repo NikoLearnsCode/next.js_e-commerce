@@ -72,7 +72,7 @@ export default function AdminUIWrapper({children}: AdminUIWrapperProps) {
           }
         }}
         onCancel={() => {
-          if (isLoading) return; // Förhindra stängning under loading
+          if (isLoading) return;
           setDeleteModalOpen(false);
           setItemToDelete(null);
           setTriggerElement(null);

@@ -3,14 +3,13 @@
 import {getServerSession} from 'next-auth';
 import {authOptions} from '@/lib/auth';
 import {getSessionId} from '@/utils/cookies';
-import {CartItemWithProduct, DeliveryFormData} from '@/lib/validators';
+import {CartItemWithProduct} from '@/lib/types/db';
+import {DeliveryFormData} from '@/lib/validators';
 import {db} from '@/drizzle/index';
 import {ordersTable, orderItemsTable} from '@/drizzle/db/schema';
 import {eq, desc, inArray} from 'drizzle-orm';
-
 import {PaymentInfo} from '@/lib/types/query';
 
-/* ------------------------------------------------- */
 export async function createOrder(
   cartItems: CartItemWithProduct[],
   deliveryInfo: DeliveryFormData,
@@ -18,7 +17,6 @@ export async function createOrder(
   totalPrice: number
 ) {
   try {
-    // Check if user is logged in with NextAuth
     const session = await getServerSession(authOptions);
     const user = session?.user;
 
@@ -57,10 +55,9 @@ export async function createOrder(
     return {success: false, error: 'Failed to create order'};
   }
 }
-/* ------------------------------------------------- */
+
 export async function getOrder(orderId: string) {
   try {
-    // Get the order first
     const orderResult = await db
       .select()
       .from(ordersTable)
@@ -73,13 +70,11 @@ export async function getOrder(orderId: string) {
 
     const order = orderResult[0];
 
-    // Get order items separately
     const orderItems = await db
       .select()
       .from(orderItemsTable)
       .where(eq(orderItemsTable.order_id, orderId));
 
-    // Combine order with items
     const orderWithItems = {
       ...order,
       order_items: orderItems,
@@ -92,11 +87,9 @@ export async function getOrder(orderId: string) {
   }
 }
 
-/* ------------------------------------------------- */
 // TODO - relations api
 export async function getUserOrders() {
   try {
-    // Check if user is logged in with NextAuth
     const session = await getServerSession(authOptions);
     const user = session?.user;
 
@@ -104,7 +97,6 @@ export async function getUserOrders() {
       console.error(
         'Authentication error fetching user orders: User not authenticated'
       );
-      // If not logged in, return empty array or handle as needed
       return {success: false, error: 'User not authenticated', orders: []};
     }
 

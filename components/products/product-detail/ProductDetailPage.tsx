@@ -7,10 +7,11 @@ import {Product} from '@/lib/types/db';
 import {useState} from 'react';
 import Newsletter from '@/components/shared/Newsletter';
 import FavoriteButton from '@/components/favorites/FavoriteButton';
-import {useMediaQuery} from '@/hooks/useMediaQuery';
+
 import MobileImageSwiper from './MobileImageSwiper';
 import dynamic from 'next/dynamic';
 import Carousel from '@/components/shared/Carousel';
+import NewBadge from '@/components/shared/NewBadge';
 
 const ProductCard = dynamic(
   () => import('@/components/shared/cards/CarouselCard')
@@ -37,8 +38,6 @@ export default function ProductPage({
   const handleAddToCartSuccess = () => {
     setSelectedSize(null);
   };
-
-  const isDesktop = useMediaQuery('(min-width: 1024px)');
 
   return (
     <>
@@ -87,10 +86,11 @@ export default function ProductPage({
           {/* Right column - product info */}
           <div className='flex  flex-col lg:pt-12 px-5 lg:px-0 2xl:px-4 lg:mr-7 sticky top-18 h-full   gap-3 lg:gap-1 mb-10   lg:w-[35%] transition-all duration-300'>
             {/* Product name */}
-            <div>
+            <div className='flex relative items-center justify-between gap-1'>
               <h1 className='text-lg sm:text-xl mt-2 lg:mt-4 font-medium'>
                 {product.name}
               </h1>
+              <span className='absolute -top-2 left-0'>{product.isNew && <NewBadge />}</span>
               {/* <p className='text-gray-700 font-semibold uppercase font-syne text-sm'>
                 {product.brand}
               </p> */}
@@ -187,7 +187,6 @@ export default function ProductPage({
           <Carousel
             items={genderProducts}
             title='Du kanske också gillar'
-            
             titelDivClassName='px-4 md:px-6'
             renderItem={(product) => (
               <ProductCard product={product} priorityLoading={false} />

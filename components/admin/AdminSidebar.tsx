@@ -17,7 +17,7 @@ const LetterIcon = ({
   <div
     className={`h-7 w-7 shrink-0 font-arimo font-bold flex items-center justify-center rounded  text-sm ${
       isActive
-        ? 'bg-gray-700 text-white'
+        ? 'bg-gray-100 border  text-black'
         : 'bg-gray-50 hover:bg-gray-100 text-gray-700'
     }`}
   >
@@ -44,7 +44,7 @@ export default function AdminSidebar() {
 
   return (
     <motion.div
-      className='fixed inset-y-0 left-0 z-20 border-r   border-gray-200 '
+      className='fixed inset-y-0 bg-white left-0 z-20 border-r border-gray-200 '
       animate={{
         width: isCollapsed ? '3.25rem' : '11rem',
       }}
@@ -61,7 +61,7 @@ export default function AdminSidebar() {
             className=' px-3 py-6 cursor-pointer rounded-md relative flex flex-col justify-center items-center gap-1'
           >
             <motion.span
-              className={`inline-flex border-t-[1.5px] w-5.5  ${isCollapsed ? 'border-gray-800' : 'border-gray-600'}`}
+              className={`inline-flex border-t-[1.5px] w-5  ${isCollapsed ? 'border-gray-800' : 'border-gray-600'}`}
               animate={{
                 rotate: isCollapsed ? 0 : 45,
                 y: isCollapsed ? 0 : 2.5,
@@ -69,7 +69,7 @@ export default function AdminSidebar() {
               transition={{duration: 0.2}}
             />
             <motion.span
-              className={`inline-flex border-t-[1.5px] w-5.5  ${isCollapsed ? 'border-gray-800' : 'border-gray-600'}`}
+              className={`inline-flex border-t-[1.5px] w-5  ${isCollapsed ? 'border-gray-800' : 'border-gray-600'}`}
               animate={{
                 rotate: isCollapsed ? 0 : -45,
                 y: isCollapsed ? 0 : -2.5,
@@ -91,7 +91,7 @@ export default function AdminSidebar() {
                       <Link
                         href={item.href}
                         className={`
-                          group flex font-bold text-gray-700 uppercase text-[11px] items-center rounded-[10px] py-1 px-2 leading-6  transition-all duration-200
+                          group flex font-semibold text-gray-700 uppercase text-[12px] items-center rounded-[10px] py-1 px-2 leading-6  transition-all duration-200
                           ${isCollapsed ? '' : 'gap-x-3 hover:bg-gray-50'}
                          
 
@@ -124,7 +124,7 @@ export default function AdminSidebar() {
           <Link
             href='/'
             className={`
-              group flex items-center uppercase rounded-[10px] p-1 py-3  leading-6 font-bold text-[11px] text-gray-700 hover:bg-gray-50 transition-all duration-200
+              group flex items-center uppercase rounded-[10px] p-1 py-3  leading-6 font-semibold text-[12px] text-gray-700 hover:bg-gray-50 transition-all duration-200
               ${isCollapsed ? '' : 'gap-x-3'}
             `}
             title={isCollapsed ? 'Tillbaka till butik' : undefined}

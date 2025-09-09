@@ -3,7 +3,7 @@
 import {useState} from 'react';
 import {Button} from '@/components/shared/ui/button';
 import {Product} from '@/lib/types/db';
-import {NewCartItem} from '@/lib/validators';
+import {AddToCartItem} from '@/lib/types/db';
 import {useCart} from '@/context/CartProvider';
 
 type AddToCartButtonProps = {
@@ -34,7 +34,7 @@ export default function AddToCartButton({
 
     setIsLoading(true);
     try {
-      const itemToAdd: NewCartItem = {
+      const itemToAdd: AddToCartItem = {
         product_id: product.id,
         quantity: quantity,
         size: selectedSize,
@@ -57,7 +57,7 @@ export default function AddToCartButton({
       disabled={isLoading}
       className={className}
     >
-      {isLoading ? 'Lägger till...' : 'Lägg till i varukorg'}
+      {isLoading ? 'Lägger till...' : 'Lägg till'}
     </Button>
   );
 }

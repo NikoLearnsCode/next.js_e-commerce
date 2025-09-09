@@ -15,7 +15,7 @@ import {
   updateCartItemQuantity,
   clearCart,
 } from '@/actions/cart';
-import {NewCartItem, CartItemWithProduct} from '@/lib/validators';
+import {AddToCartItem, CartItemWithProduct} from '@/lib/types/db';
 import {useAuth} from '@/hooks/useAuth';
 
 interface CartContextType {
@@ -27,7 +27,7 @@ interface CartContextType {
   updatingItems: Record<string, boolean>;
   removingItems: Record<string, boolean>;
   refreshCart: () => Promise<void>;
-  addItem: (item: NewCartItem) => Promise<void>;
+  addItem: (item: AddToCartItem) => Promise<void>;
   removeItem: (itemId: string) => Promise<void>;
   updateItemQuantity: (itemId: string, quantity: number) => Promise<void>;
   clearCart: () => Promise<void>;
@@ -91,7 +91,7 @@ export function CartProvider({children}: {children: React.ReactNode}) {
   );
 
   const addItem = useCallback(
-    async (item: NewCartItem) => {
+    async (item: AddToCartItem) => {
       try {
         setUpdatingItems((prev) => ({...prev, [item.product_id]: true}));
         const result = await addToCart(item);

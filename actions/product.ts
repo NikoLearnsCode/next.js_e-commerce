@@ -54,7 +54,12 @@ export async function getProductSlugAndRelatedProducts(slug: string): Promise<{
     // Same category + gender
     db
       .select({
-        ...getTableColumns(productsTable),
+        id: productsTable.id,
+        name: productsTable.name,
+        price: productsTable.price,
+        images: productsTable.images,
+        slug: productsTable.slug,
+        created_at: productsTable.created_at,
         isNew:
           sql<boolean>`${productsTable.created_at} > NOW() - INTERVAL '${sql.raw(NEW_PRODUCT_DAYS.toString())} days'`.as(
             'isNew'
@@ -72,7 +77,12 @@ export async function getProductSlugAndRelatedProducts(slug: string): Promise<{
     // Same gender, different category
     db
       .select({
-        ...getTableColumns(productsTable),
+        id: productsTable.id,
+        name: productsTable.name,
+        price: productsTable.price,
+        images: productsTable.images,
+        slug: productsTable.slug,
+        created_at: productsTable.created_at,
         isNew:
           sql<boolean>`${productsTable.created_at} > NOW() - INTERVAL '${sql.raw(NEW_PRODUCT_DAYS.toString())} days'`.as(
             'isNew'
@@ -91,8 +101,8 @@ export async function getProductSlugAndRelatedProducts(slug: string): Promise<{
 
   return {
     product: product,
-    categoryProducts: sameCategoryProducts,
-    genderProducts: sameGenderProducts,
+    categoryProducts: sameCategoryProducts as Product[],
+    genderProducts: sameGenderProducts as Product[],
   };
 }
 
@@ -359,25 +369,17 @@ export async function getInitialProducts({
     const whereClause =
       allConditions.length > 0 ? and(...allConditions) : undefined;
     const orderByFields = createSortOrderClause(sort, order);
-
-    // Debug logging
-    console.log('Query params:', {
-      sort,
-      order,
-      category,
-      gender,
-      hasQuery: !!query,
-      colorCount: color.length,
-      sizeCount: sizes.length,
-      metadata,
-    });
-
     // Execute queries in parallel
     const [countResult, productsData] = await Promise.all([
       db.select({count: count()}).from(productsTable).where(whereClause),
       db
         .select({
-          ...getTableColumns(productsTable),
+          id: productsTable.id,
+          name: productsTable.name,
+          price: productsTable.price,
+          images: productsTable.images,
+          slug: productsTable.slug,
+          created_at: productsTable.created_at,
           isNew:
             sql<boolean>`${productsTable.created_at} > NOW() - INTERVAL '${sql.raw(NEW_PRODUCT_DAYS.toString())} days'`.as(
               'isNew'

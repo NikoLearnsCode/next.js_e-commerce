@@ -9,8 +9,6 @@ import path from 'path';
 import fs from 'fs/promises';
 import {revalidatePath} from 'next/cache';
 
-// --------------------------------------------------------
-
 export async function getAllProducts() {
   const products = await db
     .select()
@@ -19,7 +17,7 @@ export async function getAllProducts() {
   return products;
 }
 
-// --------------------------------------------------------
+
 
 export async function createProduct(
   data: ProductFormData & {images: string[]}
@@ -76,8 +74,8 @@ export async function createProduct(
         gender: data.gender,
         category: data.category,
         color: data.color,
-        sizes: sizesArray, // Transformed array
-        specs: specsArray, // Transformed array
+        sizes: sizesArray,
+        specs: specsArray,
         images: data.images,
       })
       .returning();
@@ -108,7 +106,6 @@ export async function createProduct(
   }
 }
 
-// --------------------------------------------------------
 
 export async function updateProduct(
   id: string,
@@ -148,7 +145,7 @@ export async function updateProduct(
           .filter((s) => s)
       : [];
 
-    const updateData: any = {
+    const updateData: Partial<typeof productsTable.$inferInsert> = {
       name: data.name,
       slug: data.slug,
       description: data.description,
@@ -157,8 +154,8 @@ export async function updateProduct(
       gender: data.gender,
       category: data.category,
       color: data.color,
-      sizes: sizesArray, // Transformed array
-      specs: specsArray, // Transformed array
+      sizes: sizesArray,
+      specs: specsArray,
     };
 
     if (data.images && data.images.length > 0) {
@@ -225,7 +222,6 @@ export async function deleteProduct(id: string): Promise<ActionResult> {
       }
     }
 
-    // Delete product from database
     await db.delete(productsTable).where(eq(productsTable.id, id));
 
     revalidatePath('/admin/products');

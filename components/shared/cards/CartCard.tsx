@@ -7,7 +7,7 @@ import {X, Minus, Plus} from 'lucide-react';
 import {motion} from 'framer-motion';
 import {formatPrice} from '@/utils/format';
 import SpinningLogo from '@/components/shared/ui/SpinningLogo';
-import type {CartItemWithProduct} from '@/lib/validators';
+import type {CartItemWithProduct} from '@/lib/types/db';
 
 type CartCardProps = {
   item: CartItemWithProduct;
@@ -69,7 +69,7 @@ export default function CartCard({
         </Link>
 
         <button
-          className='absolute top-0 right-0 z-1 hover:text-red-800 p-3 cursor-pointer'
+          className='absolute bg-white/60 top-2 right-2 z-1 hover:text-red-900 p-2 cursor-pointer'
           onClick={() => onRemove(id)}
           disabled={isRemoving}
         >
@@ -130,6 +130,7 @@ export default function CartCard({
           )}
           <div className='flex gap-4 text-[13px]'>
             {size && <span>{size}</span>}
+
             {brand && <span>{brand}</span>}
             {color && <span>{color}</span>}
           </div>

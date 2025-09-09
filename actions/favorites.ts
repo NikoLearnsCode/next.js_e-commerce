@@ -6,19 +6,18 @@ import {getOrCreateSessionId, getSessionId} from '@/utils/cookies';
 import type {NewFavorite, Product} from '@/lib/types/db';
 import {db} from '@/drizzle/index';
 import {favoritesTable, productsTable} from '@/drizzle/db/schema';
-import {eq, and, isNull} from 'drizzle-orm';
+import {eq, and, isNull, sql} from 'drizzle-orm';
+import {NEW_PRODUCT_DAYS} from '@/lib/constants';
+import {FavoriteWithProduct} from '@/lib/types/db';
 
-/* ------------------------------------------------- */
 export async function getFavorites() {
   try {
-    // Check if user is logged in with NextAuth
     const session = await getServerSession(authOptions);
     const user = session?.user;
 
-    let favorites;
+    let favorites: FavoriteWithProduct[];
 
     if (user) {
-      // If logged in, find user's favorites with product data via join
       favorites = await db
         .select({
           id: favoritesTable.id,
@@ -26,7 +25,22 @@ export async function getFavorites() {
           session_id: favoritesTable.session_id,
           product_id: favoritesTable.product_id,
           created_at: favoritesTable.created_at,
-          product: productsTable,
+          // Product data via join
+          product: {
+            id: productsTable.id,
+            name: productsTable.name,
+            price: productsTable.price,
+            brand: productsTable.brand,
+            color: productsTable.color,
+            sizes: productsTable.sizes,
+            images: productsTable.images,
+            slug: productsTable.slug,
+            created_at: productsTable.created_at,
+            isNew:
+              sql<boolean>`${productsTable.created_at} > NOW() - INTERVAL '${sql.raw(NEW_PRODUCT_DAYS.toString())} days'`.as(
+                'isNew'
+              ),
+          },
         })
         .from(favoritesTable)
         .innerJoin(
@@ -35,15 +49,12 @@ export async function getFavorites() {
         )
         .where(eq(favoritesTable.user_id, user.id));
     } else {
-      // If not logged in, check if there is a session_id
       const sessionId = await getSessionId();
 
-      // If no session_id, return empty favorites
       if (!sessionId) {
         return {favorites: []};
       }
 
-      // Otherwise get favorites associated with session_id with product data via join
       favorites = await db
         .select({
           id: favoritesTable.id,
@@ -51,7 +62,23 @@ export async function getFavorites() {
           session_id: favoritesTable.session_id,
           product_id: favoritesTable.product_id,
           created_at: favoritesTable.created_at,
-          product: productsTable,
+          // Product data via join
+          product: {
+            id: productsTable.id,
+            name: productsTable.name,
+            price: productsTable.price,
+            brand: productsTable.brand,
+            color: productsTable.color,
+            sizes: productsTable.sizes,
+
+            images: productsTable.images,
+            slug: productsTable.slug,
+            created_at: productsTable.created_at,
+            isNew:
+              sql<boolean>`${productsTable.created_at} > NOW() - INTERVAL '${sql.raw(NEW_PRODUCT_DAYS.toString())} days'`.as(
+                'isNew'
+              ),
+          },
         })
         .from(favoritesTable)
         .innerJoin(
@@ -76,86 +103,12 @@ export async function getFavorites() {
   }
 }
 
-/* ------------------------------------------------- */
-export async function addToFavorites(product: Product) {
-  try {
-    // Check if user is logged in with NextAuth
-    const session = await getServerSession(authOptions);
-    const user = session?.user;
-
-    // Get or create session_id (only if user is not logged in)
-    const sessionId = user ? null : await getOrCreateSessionId();
-
-    // Check if product is already in favorites
-    /*     let existingFavorite;
-    if (user) {
-      const existing = await db
-        .select()
-        .from(favoritesTable)
-        .where(
-          and(
-            eq(favoritesTable.user_id, user.id),
-            eq(favoritesTable.product_id, product.id)
-          )
-        )
-        .limit(1);
-      existingFavorite = existing[0] || null;
-    } else if (sessionId) {
-      const existing = await db
-        .select()
-        .from(favoritesTable)
-        .where(
-          and(
-            eq(favoritesTable.session_id, sessionId),
-            eq(favoritesTable.product_id, product.id),
-            isNull(favoritesTable.user_id)
-          )
-        )
-        .limit(1);
-      existingFavorite = existing[0] || null;
-    }
- */
-    // If already in favorites, return current favorites
-    /*   if (existingFavorite) {
-      const {favorites} = await getFavorites();
-      return {
-        success: true,
-        favorites,
-        message: 'Product already in favorites',
-      };
-    } */
-
-    // Add to favorites - only store the relationship, no product data duplication
-    const newFavorite: NewFavorite = {
-      user_id: user?.id || null,
-      session_id: user ? null : sessionId,
-      product_id: product.id,
-    };
-
-    await db.insert(favoritesTable).values(newFavorite);
-
-    // Return updated favorites
-    const {favorites} = await getFavorites();
-    return {
-      success: true,
-      favorites,
-      message: 'Added to favorites',
-    };
-  } catch (error) {
-    console.error('Error adding to favorites:', error);
-    return {success: false, error: 'Failed to add item to favorites'};
-  }
-}
-
-/* ------------------------------------------------- */
 export async function removeFromFavorites(productId: string) {
   try {
-    // Check if user is logged in with NextAuth
     const session = await getServerSession(authOptions);
     const user = session?.user;
 
     if (user) {
-      // Remove from user's favorites
       await db
         .delete(favoritesTable)
         .where(
@@ -165,7 +118,6 @@ export async function removeFromFavorites(productId: string) {
           )
         );
     } else {
-      // Remove from session favorites
       const sessionId = await getSessionId();
       if (sessionId) {
         await db
@@ -180,7 +132,6 @@ export async function removeFromFavorites(productId: string) {
       }
     }
 
-    // Return updated favorites
     const {favorites} = await getFavorites();
     return {success: true, favorites};
   } catch (error) {
@@ -189,64 +140,76 @@ export async function removeFromFavorites(productId: string) {
   }
 }
 
-/* ------------------------------------------------- */
 export async function toggleFavorite(product: Product) {
   try {
-    // Check if user is logged in with NextAuth
     const session = await getServerSession(authOptions);
     const user = session?.user;
 
-    // Check if product is already in favorites
-    let existingFavorite;
     if (user) {
-      const existing = await db
-        .select()
-        .from(favoritesTable)
+      const deleteResult = await db
+        .delete(favoritesTable)
         .where(
           and(
             eq(favoritesTable.user_id, user.id),
             eq(favoritesTable.product_id, product.id)
           )
-        )
-        .limit(1);
-      existingFavorite = existing[0] || null;
+        );
+
+      if (deleteResult.rowCount === 0) {
+        const newFavorite: NewFavorite = {
+          user_id: user.id,
+          session_id: null,
+          product_id: product.id,
+        };
+        await db.insert(favoritesTable).values(newFavorite);
+      }
     } else {
       const sessionId = await getSessionId();
-      if (sessionId) {
-        const existing = await db
-          .select()
-          .from(favoritesTable)
+      if (!sessionId) {
+        const newSessionId = await getOrCreateSessionId();
+        const newFavorite: NewFavorite = {
+          user_id: null,
+          session_id: newSessionId,
+          product_id: product.id,
+        };
+        await db.insert(favoritesTable).values(newFavorite);
+      } else {
+        const deleteResult = await db
+          .delete(favoritesTable)
           .where(
             and(
               eq(favoritesTable.session_id, sessionId),
               eq(favoritesTable.product_id, product.id),
               isNull(favoritesTable.user_id)
             )
-          )
-          .limit(1);
-        existingFavorite = existing[0] || null;
+          );
+
+        if (deleteResult.rowCount === 0) {
+          const newFavorite: NewFavorite = {
+            user_id: null,
+            session_id: sessionId,
+            product_id: product.id,
+          };
+          await db.insert(favoritesTable).values(newFavorite);
+        }
       }
     }
 
-    if (existingFavorite) {
-      // Remove from favorites
-      return await removeFromFavorites(product.id);
-    } else {
-      // Add to favorites
-      return await addToFavorites(product);
-    }
+    const {favorites} = await getFavorites();
+    return {
+      success: true,
+      favorites,
+    };
   } catch (error) {
     console.error('Error toggling favorite:', error);
     return {success: false, error: 'Failed to toggle favorite'};
   }
 }
 
-/* ------------------------------------------------- */
 export async function transferFavoritesOnLogin(userId: string) {
   try {
     const sessionId = await getSessionId();
 
-    // If no session_id, do nothing
     if (!sessionId) {
       console.log('No session_id found, nothing to transfer');
       return {success: true, message: 'No session_id found'};
@@ -259,7 +222,6 @@ export async function transferFavoritesOnLogin(userId: string) {
       userId
     );
 
-    // Find favorites associated with current session_id
     const sessionFavorites = await db
       .select()
       .from(favoritesTable)
@@ -270,13 +232,11 @@ export async function transferFavoritesOnLogin(userId: string) {
         )
       );
 
-    // If no anonymous favorites found, do nothing
     if (!sessionFavorites.length) {
       console.log('No session favorites found');
       return {success: true, message: 'No session favorites found'};
     }
 
-    // Get user's existing favorites
     const userFavorites = await db
       .select()
       .from(favoritesTable)
@@ -286,10 +246,8 @@ export async function transferFavoritesOnLogin(userId: string) {
       userFavorites.map((fav) => fav.product_id)
     );
 
-    // Transfer non-duplicate favorites
     for (const sessionFav of sessionFavorites) {
       if (!existingProductIds.has(sessionFav.product_id)) {
-        // Transfer this favorite to the user
         await db
           .update(favoritesTable)
           .set({
@@ -298,7 +256,6 @@ export async function transferFavoritesOnLogin(userId: string) {
           })
           .where(eq(favoritesTable.id, sessionFav.id));
       } else {
-        // Delete duplicate session favorite
         await db
           .delete(favoritesTable)
           .where(eq(favoritesTable.id, sessionFav.id));
@@ -313,49 +270,5 @@ export async function transferFavoritesOnLogin(userId: string) {
   } catch (error) {
     console.error('Unexpected error transferring favorites on login:', error);
     return {success: false, error, message: 'Failed to transfer favorites'};
-  }
-}
-
-/* ------------------------------------------------- */
-export async function isFavorite(productId: string): Promise<boolean> {
-  try {
-    // Check if user is logged in with NextAuth
-    const session = await getServerSession(authOptions);
-    const user = session?.user;
-
-    if (user) {
-      const existing = await db
-        .select()
-        .from(favoritesTable)
-        .where(
-          and(
-            eq(favoritesTable.user_id, user.id),
-            eq(favoritesTable.product_id, productId)
-          )
-        )
-        .limit(1);
-      return existing.length > 0;
-    } else {
-      const sessionId = await getSessionId();
-      if (sessionId) {
-        const existing = await db
-          .select()
-          .from(favoritesTable)
-          .where(
-            and(
-              eq(favoritesTable.session_id, sessionId),
-              eq(favoritesTable.product_id, productId),
-              isNull(favoritesTable.user_id)
-            )
-          )
-          .limit(1);
-        return existing.length > 0;
-      }
-    }
-
-    return false;
-  } catch (error) {
-    console.error('Error checking if favorite:', error);
-    return false;
   }
 }

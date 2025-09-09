@@ -11,20 +11,17 @@ import {
 } from 'react';
 import {
   getFavorites,
-  addToFavorites,
   removeFromFavorites,
   toggleFavorite,
 } from '@/actions/favorites';
-import {Favorite, Product} from '@/lib/types/db';
+import {FavoriteWithProduct, Product} from '@/lib/types/db';
 import {useAuth} from '@/hooks/useAuth';
 
 interface FavoritesContextType {
-  favorites: Favorite[];
-
+  favorites: FavoriteWithProduct[];
   favoriteCount: number;
   loading: boolean;
   refreshFavorites: () => Promise<void>;
-  addFavorite: (product: Product) => Promise<void>;
   removeFavorite: (productId: string) => Promise<void>;
   toggleFavoriteItem: (product: Product) => Promise<void>;
   isFavorite: (productId: string) => boolean;
@@ -36,7 +33,6 @@ const FavoritesContext = createContext<FavoritesContextType>({
   favoriteCount: 0,
   loading: true,
   refreshFavorites: async () => {},
-  addFavorite: async () => {},
   removeFavorite: async () => {},
   toggleFavoriteItem: async () => {},
   isFavorite: () => false,
@@ -44,7 +40,7 @@ const FavoritesContext = createContext<FavoritesContextType>({
 });
 
 export function FavoritesProvider({children}: {children: React.ReactNode}) {
-  const [favorites, setFavorites] = useState<Favorite[]>([]);
+  const [favorites, setFavorites] = useState<FavoriteWithProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [updatingItems, setUpdatingItems] = useState<Record<string, boolean>>(
     {}
@@ -76,27 +72,6 @@ export function FavoritesProvider({children}: {children: React.ReactNode}) {
       isRefreshing.current = false;
     }
   }, []);
-
-  const addFavorite = useCallback(
-    async (product: Product) => {
-      try {
-        setUpdatingItems((prev) => ({...prev, [product.id]: true}));
-        const result = await addToFavorites(product);
-        if (result.success) {
-          setFavorites(result.favorites || []);
-        } else {
-          // Handle error silently and refresh favorites
-          await refreshFavorites();
-        }
-      } catch (error) {
-        console.error('Error adding favorite:', error);
-        await refreshFavorites();
-      } finally {
-        setUpdatingItems((prev) => ({...prev, [product.id]: false}));
-      }
-    },
-    [refreshFavorites]
-  );
 
   const removeFavorite = useCallback(
     async (productId: string) => {
@@ -166,7 +141,6 @@ export function FavoritesProvider({children}: {children: React.ReactNode}) {
         favoriteCount,
         loading,
         refreshFavorites,
-        addFavorite,
         removeFavorite,
         toggleFavoriteItem,
         isFavorite,

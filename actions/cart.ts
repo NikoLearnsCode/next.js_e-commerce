@@ -8,11 +8,11 @@ import {
   getSessionId,
 } from '@/utils/cookies';
 import type {
-  NewCartItem,
-  CartItemWithProduct,
   NewCart,
-  NewDbCartItem,
-} from '@/lib/validators';
+  NewCartItem,
+  AddToCartItem,
+  CartItemWithProduct,
+} from '@/lib/types/db';
 
 import {db} from '@/drizzle/index';
 import {cartsTable, cartItemsTable, productsTable} from '@/drizzle/db/schema';
@@ -21,17 +21,18 @@ import {cookies} from 'next/headers';
 import Decimal from 'decimal.js';
 
 
-// Hämtar cart items med produktdata via JOIN
 async function getCartItemsWithProducts(cartId: string) {
   const cartItems = await db
     .select({
       // Cart item fields
       id: cartItemsTable.id,
       cart_id: cartItemsTable.cart_id,
+      product_id: cartItemsTable.product_id,
       quantity: cartItemsTable.quantity,
       size: cartItemsTable.size,
-      // Product fields via JOIN
-      product_id: productsTable.id,
+      created_at: cartItemsTable.created_at,
+      updated_at: cartItemsTable.updated_at,
+      // Product fields via JOIN 
       name: productsTable.name,
       price: productsTable.price,
       brand: productsTable.brand,
@@ -40,15 +41,14 @@ async function getCartItemsWithProducts(cartId: string) {
       images: productsTable.images,
     })
     .from(cartItemsTable)
-    .leftJoin(productsTable, eq(cartItemsTable.product_id, productsTable.id))
+    .innerJoin(productsTable, eq(cartItemsTable.product_id, productsTable.id))
     .where(eq(cartItemsTable.cart_id, cartId))
     .orderBy(asc(cartItemsTable.created_at));
 
-
-  return cartItems as CartItemWithProduct[];
+  return cartItems;
 }
 
-// Beräknar varukorgens totalpris med Decimal.js för exakthet
+
 function calculateCartTotal(items: CartItemWithProduct[]): number {
   if (!items || items.length === 0) {
     return 0;
@@ -59,16 +59,14 @@ function calculateCartTotal(items: CartItemWithProduct[]): number {
   }, new Decimal(0));
   return total.toNumber();
 }
+ 
 
-
-// Beräknar det totala antalet produkter i varukorgen
 function calculateItemCount(items: CartItemWithProduct[]): number {
   if (!items || items.length === 0) {
     return 0;
   }
   return items.reduce((sum, item) => sum + item.quantity, 0);
 }
-
 
 export async function getCart() {
   try {
@@ -113,8 +111,7 @@ export async function getCart() {
   }
 }
 
-
-export async function addToCart(newItem: NewCartItem) {
+export async function addToCart(newItem: AddToCartItem) {
   try {
     const session = await getServerSession(authOptions);
     const user = session?.user;
@@ -159,13 +156,13 @@ export async function addToCart(newItem: NewCartItem) {
         .where(eq(cartItemsTable.id, existingItem[0].id));
     } else {
       // Lägg till nytt item
-      const newDbCartItem: NewDbCartItem = {
+      const newCartItem: NewCartItem = {
         cart_id: cart.id,
         product_id: newItem.product_id,
         quantity: newItem.quantity,
         size: newItem.size,
       };
-      await db.insert(cartItemsTable).values(newDbCartItem);
+      await db.insert(cartItemsTable).values(newCartItem);
     }
 
     // Hämta uppdaterade data
@@ -179,7 +176,6 @@ export async function addToCart(newItem: NewCartItem) {
     return {success: false, error: 'Failed to add item to cart'};
   }
 }
-
 
 export async function removeFromCart(itemId: string) {
   try {
@@ -216,7 +212,6 @@ export async function removeFromCart(itemId: string) {
   }
 }
 
-
 export async function updateCartItemQuantity(itemId: string, quantity: number) {
   try {
     if (quantity <= 0) {
@@ -243,7 +238,6 @@ export async function updateCartItemQuantity(itemId: string, quantity: number) {
   }
 }
 
-
 export async function clearCart() {
   try {
     const {cart} = await getCart();
@@ -261,7 +255,6 @@ export async function clearCart() {
     return {success: false, error: 'Failed to clear cart'};
   }
 }
-
 
 export async function transferCartOnLogin(userId: string) {
   try {

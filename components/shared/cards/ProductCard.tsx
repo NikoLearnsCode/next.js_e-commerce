@@ -31,7 +31,7 @@ export default function ProductCard({
   layout = 'grid',
 }: ProductCardProps) {
   const [isMobile, setIsMobile] = useState(false);
-  const {name, price, images, slug, isNew, id} = product;
+  const {name, price, images, slug, isNew, id, brand, color} = product;
   const {removeFavorite, updatingItems} = useFavorites();
 
   // Handler for removing items from favorites (only used in list layout)
@@ -180,7 +180,7 @@ export default function ProductCard({
         {/* Remove button for list layout */}
         {isListLayout && (
           <button
-            className='absolute top-0 right-0 z-1 hover:text-red-800 p-3 cursor-pointer'
+            className='absolute bg-white/60 top-2 right-2 z-1 hover:text-red-900 p-2 cursor-pointer'
             onClick={() => handleRemoveItem(id)}
             disabled={isUpdating}
           >
@@ -199,16 +199,18 @@ export default function ProductCard({
           <div className='flex flex-col flex-1 gap-1 sm:gap-0 justify-center items-center sm:items-start text-sm'>
             <Link
               href={`/${slug}`}
-              className='outline-none focus:underline focus:underline-offset-2 text-wrap text-break text-center'
+              className='outline-none focus:underline focus:underline-offset-2 text-wrap text-break text-center sm:text-start '
             >
+              {isNew && <NewBadge />}
               {name}
             </Link>
+
             <span className='text-black/80 text-sm'>{formatPrice(price)}</span>
           </div>
           <div className='text-sm mt-1 gap-2 md:text-base flex flex-col sm:flex-row items-center'>
             <div className='flex gap-4 text-[13px]'>
-              {product.brand && <span>{product.brand}</span>}
-              {product.color && <span>{product.color}</span>}
+              {brand && <span>{brand}</span>}
+              {color && <span>{color}</span>}
             </div>
           </div>
         </div>

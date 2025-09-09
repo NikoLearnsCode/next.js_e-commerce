@@ -15,11 +15,8 @@ import {
   pgEnum,
 } from 'drizzle-orm/pg-core';
 import {relations} from 'drizzle-orm';
-
 import type {DeliveryFormData} from '@/lib/validators';
 import type {AdapterAccount} from '@/lib/types/auth';
-
-// ----------------------------------------------------------------
 
 // LAGRAR INFO OM ANVÄNDARE
 export const usersTable = pgTable('users', {
@@ -79,8 +76,7 @@ export const productsTable = pgTable('products', {
   updated_at: timestamp('updated_at').defaultNow(),
 });
 
-// CARTS (Uppdaterad)
-// Nu håller den bara övergripande information om varukorgen.
+// CARTS
 export const cartsTable = pgTable('carts', {
   id: uuid('id').primaryKey().defaultRandom(),
   user_id: uuid('user_id').references(() => usersTable.id, {
@@ -91,8 +87,7 @@ export const cartsTable = pgTable('carts', {
   updated_at: timestamp('updated_at').defaultNow(),
 });
 
-// CART ITEMS (Ny tabell)
-// Varje rad är en produkt i en specifik varukorg.
+// CART ITEMS
 export const cartItemsTable = pgTable('cart_items', {
   id: uuid('id').primaryKey().defaultRandom(),
   cart_id: uuid('cart_id')
@@ -142,26 +137,34 @@ export const orderItemsTable = pgTable('order_items', {
 });
 
 // FAVORITES
-export const favoritesTable = pgTable('favorites', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  user_id: uuid('user_id').references(() => usersTable.id, {
-    onDelete: 'cascade',
-  }),
-  session_id: varchar('session_id', {length: 255}),
-  product_id: uuid('product_id')
-    .references(() => productsTable.id, {
+export const favoritesTable = pgTable(
+  'favorites',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    user_id: uuid('user_id').references(() => usersTable.id, {
       onDelete: 'cascade',
-    })
-    .notNull(),
-  created_at: timestamp('created_at').defaultNow(),
-});
+    }),
+    session_id: varchar('session_id', {length: 255}),
+    product_id: uuid('product_id')
+      .references(() => productsTable.id, {
+        onDelete: 'cascade',
+      })
+      .notNull(),
+    created_at: timestamp('created_at').defaultNow(),
+  },
+  (table) => [
+    // Ensure unique favorites per user/session + product combination
+    unique('user_product_unique').on(table.user_id, table.product_id),
+    unique('session_product_unique').on(table.session_id, table.product_id),
+  ]
+);
 
 // CATEGORIES
 export const categoryTypeEnum = pgEnum('category_type', [
-  'MAIN-CATEGORY', // En huvudkategori på toppnivå (t.ex. "Dam", "Herr")
-  'SUB-CATEGORY', // En underkategori som produkter kan tillhöra (t.ex. "Byxor")
-  'CONTAINER', // En strukturell mapp, syns INTE i URL:en (t.ex. "Plagg")
-  'COLLECTION', // En specialsida som samlar innehåll (t.ex. "Nyheter")
+  'MAIN-CATEGORY',
+  'SUB-CATEGORY',
+  'CONTAINER',
+  'COLLECTION',
 ]);
 
 export const categories = pgTable('categories', {
@@ -183,11 +186,12 @@ export const categoriesSlugParentUniqueIndex = unique(
   'slug_parent_unique_idx'
 ).on(categories.slug, categories.parentId);
 
-export const categoriesNameParentUniqueIndex = unique(
-  'name_unique_idx'
-).on(categories.name, categories.parentId);
+export const categoriesNameParentUniqueIndex = unique('name_unique_idx').on(
+  categories.name,
+  categories.parentId
+);
 
-// Relations för nya cart-strukturen
+/* // Relations för nya cart-strukturen
 export const cartsRelations = relations(cartsTable, ({one, many}) => ({
   user: one(usersTable, {
     fields: [cartsTable.user_id],
@@ -205,14 +209,14 @@ export const cartItemsRelations = relations(cartItemsTable, ({one}) => ({
     fields: [cartItemsTable.product_id],
     references: [productsTable.id],
   }),
-}));
+})); */
 
-export const productsRelations = relations(productsTable, ({many}) => ({
+/* export const productsRelations = relations(productsTable, ({many}) => ({
   orderItems: many(orderItemsTable),
   cartItems: many(cartItemsTable),
   favorites: many(favoritesTable),
 }));
-
+ */
 export const ordersRelations = relations(ordersTable, ({one, many}) => ({
   user: one(usersTable, {
     fields: [ordersTable.user_id],
@@ -232,17 +236,18 @@ export const orderItemsRelations = relations(orderItemsTable, ({one}) => ({
   }),
 }));
 
-// export const favoritesRelations = relations(favoritesTable, ({one}) => ({
-//   user: one(usersTable, {
-//     fields: [favoritesTable.user_id],
-//     references: [usersTable.id],
-//   }),
-//   product: one(productsTable, {
-//     fields: [favoritesTable.product_id],
-//     references: [productsTable.id],
-//   }),
-// }));
+/* export const favoritesRelations = relations(favoritesTable, ({one}) => ({
+  user: one(usersTable, {
+    fields: [favoritesTable.user_id],
+    references: [usersTable.id],
+  }),
+  product: one(productsTable, {
+    fields: [favoritesTable.product_id],
+    references: [productsTable.id],
+  }),
+}));
 
-
-
-
+export const usersRelations = relations(usersTable, ({many}) => ({
+  favorites: many(favoritesTable),
+}));
+ */

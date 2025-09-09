@@ -20,7 +20,7 @@ export async function getOrCreateSessionId(): Promise<string> {
 
   const newSessionId = uuidv4();
   cookieStore.set(CART_SESSION_COOKIE, newSessionId, {
-    maxAge: 60 * 60 * 24 * 7,
+    maxAge: 60 * 60 * 24 * 30,
     path: '/',
     httpOnly: true,
     sameSite: 'lax',
