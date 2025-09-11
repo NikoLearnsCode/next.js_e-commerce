@@ -4,7 +4,6 @@ import Image from 'next/image';
 import {ArrowLeft} from 'lucide-react';
 
 import type {OrderWithItems} from '@/lib/types/db';
-import type {DeliveryFormData} from '@/lib/validators';
 import AnimatedAuthContainer from '@/components/shared/AnimatedContainer';
 import Link from 'next/link';
 
@@ -15,8 +14,6 @@ interface OrderDetailContentProps {
 }
 
 export default function OrderDetailContent({order}: OrderDetailContentProps) {
-  // Type assertion för delivery_info eftersom det kommer som unknown från databasen, tillfällig fix
-  const deliveryInfo = order.delivery_info as DeliveryFormData;
   return (
     <AnimatedAuthContainer direction='right' className='max-w-5xl w-full'>
       {/* Header */}
@@ -61,21 +58,26 @@ export default function OrderDetailContent({order}: OrderDetailContentProps) {
             </div>
 
             {/* Delivery Information */}
-            {deliveryInfo && (
+            {order.delivery_info && (
               <div>
                 <h2 className='text-base font-medium mb-2 text-gray-900'>
                   LEVERANSUPPGIFTER
                 </h2>
                 <div className='space-y-1 text-[15px]   text-gray-800'>
                   <p>
-                    {deliveryInfo.firstName} {deliveryInfo.lastName}
+                    {order.delivery_info.firstName}{' '}
+                    {order.delivery_info.lastName}
                   </p>
-                  <p>{deliveryInfo.address}</p>
+                  <p>{order.delivery_info.address}</p>
                   <p>
-                    {deliveryInfo.postalCode} {deliveryInfo.city}
+                    {order.delivery_info.postalCode} {order.delivery_info.city}
                   </p>
-                  {deliveryInfo.phone && <p>{deliveryInfo.phone}</p>}
-                  {deliveryInfo.email && <p>{deliveryInfo.email}</p>}
+                  {order.delivery_info.phone && (
+                    <p>{order.delivery_info.phone}</p>
+                  )}
+                  {order.delivery_info.email && (
+                    <p>{order.delivery_info.email}</p>
+                  )}
                 </div>
               </div>
             )}
@@ -87,11 +89,12 @@ export default function OrderDetailContent({order}: OrderDetailContentProps) {
               ARTIKLAR ({order.order_items.length})
             </h2>
             <div className='space-y-1'>
-              {order.order_items.map((item, index) => (
-                <div
+              {order.order_items.map((item) => (
+                /*   <div
                   key={`${item.product_id}-${item.size || index}`}
                   className='flex '
-                >
+                > */
+                <div key={`${item.id}`} className='flex '>
                   {/* Product Image */}
                   <div className='relative aspect-[7/9] min-w-2/3'>
                     {item.image ? (

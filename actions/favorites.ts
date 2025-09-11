@@ -10,6 +10,8 @@ import {eq, and, isNull, sql} from 'drizzle-orm';
 import {NEW_PRODUCT_DAYS} from '@/lib/constants';
 import {FavoriteWithProduct} from '@/lib/types/db';
 
+
+
 export async function getFavorites() {
   try {
     const session = await getServerSession(authOptions);

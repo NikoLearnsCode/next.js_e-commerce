@@ -3,9 +3,9 @@ import {redirect} from 'next/navigation';
 import {notFound} from 'next/navigation';
 import {Metadata} from 'next';
 import {authOptions} from '@/lib/auth';
-import {getOrder} from '@/actions/orders';
+
 import OrderDetailContent from './OrderDetailContent';
-import {OrderWithItems} from '@/lib/types/db';
+import {getUserOrderById} from '@/actions/orders';
 
 type Props = {
   params: Promise<{
@@ -28,7 +28,9 @@ export default async function OrderDetailPage({params}: Props) {
     return redirect('/sign-in?next=/profile/orders');
   }
 
-  const {success, order, error} = await getOrder(resolvedParams.orderId);
+  const {success, order, error} = await getUserOrderById(
+    resolvedParams.orderId
+  );
 
   if (!success || error || !order) {
     console.error('Error fetching order for page:', error);
@@ -40,5 +42,5 @@ export default async function OrderDetailPage({params}: Props) {
     return notFound();
   }
 
-  return <OrderDetailContent order={order as OrderWithItems} />;
+  return <OrderDetailContent order={order} />;
 }

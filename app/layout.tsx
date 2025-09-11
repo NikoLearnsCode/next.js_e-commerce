@@ -5,7 +5,7 @@ import {Arimo, Syne} from 'next/font/google';
 import AuthProvider from '@/context/AuthProvider';
 import {CartProvider} from '@/context/CartProvider';
 import {FavoritesProvider} from '@/context/FavoritesProvider';
-import {SpeedInsights} from '@vercel/speed-insights/next';
+
 import QueryProvider from '@/context/QueryProvider';
 import {getServerSession} from 'next-auth';
 import {authOptions} from '@/lib/auth';
@@ -49,7 +49,6 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Get server-side session for hydration
   const session = await getServerSession(authOptions);
   // console.log('RootLayout - Server session:', session?.user?.id);
 
@@ -62,10 +61,7 @@ export default async function RootLayout({
           <AuthProvider session={session}>
             <CartProvider>
               <FavoritesProvider>
-                <NavigatedHistoryProvider>
-                  <SpeedInsights />
-                  {children}
-                </NavigatedHistoryProvider>
+                <NavigatedHistoryProvider>{children}</NavigatedHistoryProvider>
               </FavoritesProvider>
             </CartProvider>
           </AuthProvider>

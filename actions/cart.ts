@@ -81,6 +81,7 @@ export async function getCart() {
         .where(eq(cartsTable.user_id, user.id))
         .limit(1);
       cart = cartData[0] || null;
+
     } else {
       const sessionId = await getSessionId();
       if (!sessionId) {

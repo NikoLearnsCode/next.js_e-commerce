@@ -3,6 +3,8 @@ import {
   favoritesTable,
   cartsTable,
   cartItemsTable,
+  ordersTable,
+  orderItemsTable,
 } from '@/drizzle/db/schema';
 
 export type Product = Partial<typeof productsTable.$inferSelect> & {
@@ -14,7 +16,7 @@ export type Product = Partial<typeof productsTable.$inferSelect> & {
   sizes: string[];
   color: string;
   slug: string;
-  created_at: Date | null;
+  // created_at: Date | null;
   isNew?: boolean;
 };
 
@@ -24,6 +26,18 @@ export type NewFavorite = typeof favoritesTable.$inferInsert;
 
 export type FavoriteWithProduct = Favorite & {
   product: Product;
+};
+
+export type Order = typeof ordersTable.$inferSelect;
+
+export type OrderItem = typeof orderItemsTable.$inferSelect;
+
+export type OrderWithItems = Order & {
+  order_items: OrderItem[];
+};
+
+export type OrderSummary = Pick<OrderWithItems, 'id' | 'created_at'> & {
+  order_items: Pick<OrderItem, 'order_id' | 'image' | 'name'>[];
 };
 
 export type NewCart = typeof cartsTable.$inferInsert;

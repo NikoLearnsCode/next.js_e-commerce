@@ -8,6 +8,7 @@ import {Product} from '@/lib/types/db';
 import FavoriteButton from '@/components/favorites/FavoriteButton';
 import NewBadge from '@/components/shared/NewBadge';
 import {formatPrice} from '@/utils/format';
+import {useNavigatedHistory} from '@/context/NavigatedHistoryProvider';
 
 type CarouselProductCardProps = {
   product: Product;
@@ -20,11 +21,16 @@ export default function CarouselProductCard({
 }: CarouselProductCardProps) {
   const {name, price, images, slug, isNew} = product;
   const hasImage = images && images.length > 0;
-
+  const {handleSaveNavigated} = useNavigatedHistory();
   return (
     <div className='flex flex-col relative w-full h-full pb-6 group '>
       <div className='w-full relative bg-white aspect-[7/9]'>
-        <Link href={`/${slug}`} className='block h-full w-full' tabIndex={-1}>
+        <Link
+          href={`/${slug}`}
+          className='block h-full w-full'
+          tabIndex={-1}
+          onClick={() => handleSaveNavigated({slug, image: images[0], name})}
+        >
           {hasImage ? (
             <Image
               src={images[0]}
@@ -55,6 +61,7 @@ export default function CarouselProductCard({
           <Link
             href={`/${slug}`}
             className='outline-none  focus:underline focus:underline-offset-2'
+            onClick={() => handleSaveNavigated({slug, image: images[0], name})}
           >
             <h2 className='text-xs sm:text-sm font-medium'>{name}</h2>
           </Link>

@@ -12,11 +12,13 @@ import {twMerge} from 'tailwind-merge';
 import 'swiper/css';
 import 'swiper/css/navigation';
 
+
 import FavoriteButton from '@/components/favorites/FavoriteButton';
 import NewBadge from '@/components/shared/NewBadge';
 import {formatPrice} from '@/utils/format';
 import {useFavorites} from '@/context/FavoritesProvider';
 import SpinningLogo from '@/components/shared/ui/SpinningLogo';
+import { useNavigatedHistory } from '@/context/NavigatedHistoryProvider';
 
 type ProductCardProps = {
   product: Product;
@@ -33,7 +35,7 @@ export default function ProductCard({
   const [isMobile, setIsMobile] = useState(false);
   const {name, price, images, slug, isNew, id, brand, color} = product;
   const {removeFavorite, updatingItems} = useFavorites();
-
+  const {handleSaveNavigated} = useNavigatedHistory();
   // Handler for removing items from favorites (only used in list layout)
   const handleRemoveItem = async (productId: string) => {
     try {
@@ -119,6 +121,9 @@ export default function ProductCard({
                     href={`/${slug}`}
                     className='block h-full w-full'
                     tabIndex={-1}
+                    onClick={() =>
+                      handleSaveNavigated({slug, image: imgSrc, name})
+                    }
                   >
                     <Image
                       src={imgSrc}
@@ -200,6 +205,7 @@ export default function ProductCard({
             <Link
               href={`/${slug}`}
               className='outline-none focus:underline focus:underline-offset-2 text-wrap text-break text-center sm:text-start '
+              onClick={() => handleSaveNavigated({slug, image: images[0], name})}
             >
               {isNew && <NewBadge />}
               {name}
@@ -228,6 +234,7 @@ export default function ProductCard({
               <Link
                 href={`/${slug}`}
                 className='outline-none focus:underline focus:underline-offset-2'
+                onClick={() => handleSaveNavigated({slug, image: images[0], name})}
               >
                 <h2 className='text-xs sm:text-sm font-medium'>{name}</h2>
               </Link>

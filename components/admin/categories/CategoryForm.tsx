@@ -59,6 +59,7 @@ export default function CategoryForm({mode, initialData}: CategoryFormProps) {
           | 'MAIN-CATEGORY'
           | 'SUB-CATEGORY'
           | 'CONTAINER',
+
         displayOrder: initialData.displayOrder,
         isActive: initialData.isActive,
         parentId: initialData.parentId || null,

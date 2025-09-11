@@ -83,7 +83,7 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
   // Separat useEffect för att hantera select-fält i edit mode (timing-fix)
   useEffect(() => {
     if (mode === 'edit' && initialData) {
-      setValue('gender', initialData.gender);
+      setValue('gender', initialData.gender || '');
     }
   }, [mode, initialData, setValue]);
 
@@ -95,7 +95,7 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
       );
 
       if (categoryExists) {
-        setValue('category', initialData.category);
+        setValue('category', initialData.category || '');
       }
     }
   }, [mode, initialData, subCategoryOptions, setValue]);

@@ -50,11 +50,11 @@ export const categoryFormSchema = z
     name: z
       .string()
       .min(1, 'Kategorinamn får inte vara tomt.')
-      .max(100, 'Kategorinamn får inte vara längre än 100 tecken.'),
+      .max(20, 'Kategorinamn får inte vara längre än 20 tecken.'),
     slug: z
       .string()
       .min(1, 'Slug får inte vara tom.')
-      .max(100, 'Slug får inte vara längre än 100 tecken.')
+      .max(20, 'Slug får inte vara längre än 20 tecken.')
       .regex(
         /^[a-z0-9-]+$/,
         'Slug får endast innehålla små bokstäver, siffror och bindestreck.'

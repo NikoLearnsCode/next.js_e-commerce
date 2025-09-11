@@ -3,14 +3,14 @@
 import Image from 'next/image';
 import {ArrowRight} from 'lucide-react';
 
-import type {OrderWithItems} from '@/lib/types/db';
+import type {OrderSummary} from '@/lib/types/db';
 import AnimatedAuthContainer from '@/components/shared/AnimatedContainer';
 import {Link} from '@/components/shared/ui/link';
 import Carousel from '@/components/shared/Carousel';
 import {useMediaQuery} from '@/hooks/useMediaQuery';
 
 interface OrdersClientContentProps {
-  orders: OrderWithItems[];
+  orders: OrderSummary[];
 }
 
 export default function OrdersClientContent({
@@ -62,7 +62,6 @@ export default function OrdersClientContent({
                 <Carousel
                   items={order.order_items}
                   title={formattedDate}
-
                   slidesOffsetBefore={isDesktop ? 30 : 20}
                   titleClassName='text-sm  text-gray-600 px-4 md:px-0 sm:text-base'
                   renderItem={(item, _index) => (

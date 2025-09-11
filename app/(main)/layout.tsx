@@ -12,8 +12,6 @@ export default async function MainLayout({
 }) {
   const navLinks = await getNavigationData();
 
-  // console.log('NAVLINKS', navLinks)
-
   return (
     <div className='min-h-[calc(100vh-250px)] w-full flex flex-col'>
       <main className='flex-1 w-full'>

@@ -153,7 +153,6 @@ export const favoritesTable = pgTable(
     created_at: timestamp('created_at').defaultNow(),
   },
   (table) => [
-    // Ensure unique favorites per user/session + product combination
     unique('user_product_unique').on(table.user_id, table.product_id),
     unique('session_product_unique').on(table.session_id, table.product_id),
   ]
@@ -222,7 +221,7 @@ export const ordersRelations = relations(ordersTable, ({one, many}) => ({
     fields: [ordersTable.user_id],
     references: [usersTable.id],
   }),
-  orderItems: many(orderItemsTable),
+  order_items: many(orderItemsTable),
 }));
 
 export const orderItemsRelations = relations(orderItemsTable, ({one}) => ({
@@ -235,19 +234,3 @@ export const orderItemsRelations = relations(orderItemsTable, ({one}) => ({
     references: [productsTable.id],
   }),
 }));
-
-/* export const favoritesRelations = relations(favoritesTable, ({one}) => ({
-  user: one(usersTable, {
-    fields: [favoritesTable.user_id],
-    references: [usersTable.id],
-  }),
-  product: one(productsTable, {
-    fields: [favoritesTable.product_id],
-    references: [productsTable.id],
-  }),
-}));
-
-export const usersRelations = relations(usersTable, ({many}) => ({
-  favorites: many(favoritesTable),
-}));
- */

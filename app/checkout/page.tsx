@@ -24,7 +24,6 @@ export default async function Checkout({
   const isGuestCheckout = params.guest === 'true';
   const session_id = await getSessionId();
 
-  // Check if user is logged in with NextAuth
   const session = await getServerSession(authOptions);
   const user = session?.user;
 

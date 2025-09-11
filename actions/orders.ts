@@ -56,39 +56,27 @@ export async function createOrder(
   }
 }
 
-export async function getOrder(orderId: string) {
+export async function getUserOrderById(orderId: string) {
   try {
-    const orderResult = await db
-      .select()
-      .from(ordersTable)
-      .where(eq(ordersTable.id, orderId))
-      .limit(1);
+    const order = await db.query.ordersTable.findFirst({
+      where: eq(ordersTable.id, orderId),
+      with: {
+        order_items: true,
+      },
+    });
 
-    if (!orderResult.length) {
+    if (!order) {
       return {success: false, error: 'Order not found'};
     }
 
-    const order = orderResult[0];
-
-    const orderItems = await db
-      .select()
-      .from(orderItemsTable)
-      .where(eq(orderItemsTable.order_id, orderId));
-
-    const orderWithItems = {
-      ...order,
-      order_items: orderItems,
-    };
-
-    return {success: true, order: orderWithItems};
+    return {success: true, order};
   } catch (error) {
     console.error('Error fetching order:', error);
     return {success: false, error: 'Failed to fetch order'};
   }
 }
 
-// TODO - relations api
-export async function getUserOrders() {
+export async function getUserOrdersOverview() {
   try {
     const session = await getServerSession(authOptions);
     const user = session?.user;
@@ -100,29 +88,33 @@ export async function getUserOrders() {
       return {success: false, error: 'User not authenticated', orders: []};
     }
 
-    // Get all user orders
     const orders = await db
-      .select()
+      .select({
+        id: ordersTable.id,
+        created_at: ordersTable.created_at,
+      })
       .from(ordersTable)
       .where(eq(ordersTable.user_id, user.id))
       .orderBy(desc(ordersTable.created_at));
 
-    // Get all order items for user's orders
     const orderIds = orders.map((order) => order.id);
-    const allOrderItems = await db
-      .select()
+    const orderItems = await db
+      .select({
+        order_id: orderItemsTable.order_id,
+        image: orderItemsTable.image,
+        name: orderItemsTable.name,
+      })
       .from(orderItemsTable)
       .where(inArray(orderItemsTable.order_id, orderIds));
 
-    // Group order items by order
     const ordersWithItems = orders.map((order) => ({
       ...order,
-      order_items: allOrderItems.filter((item) => item.order_id === order.id),
+      order_items: orderItems.filter((item) => item.order_id === order.id),
     }));
 
     return {success: true, orders: ordersWithItems};
   } catch (error) {
-    console.error('Unexpected error in getUserOrders:', error);
+    console.error('Unexpected error in getUserOrdersSummary:', error);
     return {success: false, error: 'Unexpected error', orders: []};
   }
 }

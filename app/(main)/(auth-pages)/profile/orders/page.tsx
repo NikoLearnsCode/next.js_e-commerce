@@ -3,8 +3,8 @@ import {redirect} from 'next/navigation';
 import {Metadata} from 'next';
 
 import {authOptions} from '@/lib/auth';
-import {OrderWithItems} from '@/lib/types/db';
-import {getUserOrders} from '@/actions/orders';
+
+import {getUserOrdersOverview} from '@/actions/orders';
 import OrdersClientContent from './OrdersContent';
 
 export const metadata: Metadata = {
@@ -18,7 +18,7 @@ export default async function ProfileOrdersPage() {
     return redirect('/sign-in?next=/profile/orders');
   }
 
-  const {success, orders, error} = await getUserOrders();
+  const {success, orders, error} = await getUserOrdersOverview();
 
   if (!success || error) {
     console.error('Error fetching orders for page:', error);
@@ -32,5 +32,5 @@ export default async function ProfileOrdersPage() {
     );
   }
 
-  return <OrdersClientContent orders={orders as OrderWithItems[]} />;
+  return <OrdersClientContent orders={orders} />;
 }

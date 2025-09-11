@@ -1,10 +1,9 @@
 import {NextResponse} from 'next/server';
 import type {NextRequest} from 'next/server';
 
-// Simplified middleware for database sessions
 // Route protection is handled at page level with getServerSession()
 export function middleware(_request: NextRequest) {
-  // Just allow all requests - auth protection happens in pages
+  // Allows all requests - auth protection happens in pages
   return NextResponse.next();
 }
 
