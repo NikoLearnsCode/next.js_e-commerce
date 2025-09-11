@@ -1,4 +1,4 @@
-import {getInitialProducts} from '@/actions/product';
+import {getInfiniteProducts} from '@/actions/product';
 import Newsletter from '@/components/shared/Newsletter';
 import ProductFilterWrapper from '@/components/products/product-grid/ProductFilterWrapper';
 import {notFound} from 'next/navigation';
@@ -43,7 +43,7 @@ async function getCategoryProducts(
   const isNewOnly = category === 'nyheter';
   const actualCategory = isNewOnly ? null : category;
 
-  const result = await getInitialProducts({
+  const result = await getInfiniteProducts({
     limit: 8,
     lastId: null,
     category: actualCategory,

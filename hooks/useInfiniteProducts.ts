@@ -1,7 +1,7 @@
 'use client';
 
 import {Product} from '@/lib/types/db';
-import {getInitialProducts} from '@/actions/product';
+import {getInfiniteProducts} from '@/actions/product';
 import {useInfiniteQuery} from '@tanstack/react-query';
 import {parseSortParam} from '@/utils/filterSort';
 
@@ -38,7 +38,7 @@ export function useInfiniteProducts({
     }: {
       pageParam?: {lastId: string; lastValue?: number | string};
     }) => {
-      const result = await getInitialProducts({
+      const result = await getInfiniteProducts({
         query,
         lastId: pageParam?.lastId || null,
         lastValue: pageParam?.lastValue || null,

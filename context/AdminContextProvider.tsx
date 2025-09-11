@@ -6,7 +6,7 @@ import {createContext, useContext, useEffect, useState} from 'react';
 import {Category, CategoryWithChildren} from '@/lib/types/category';
 import {Product} from '@/lib/types/db';
 import {ProductFormData, CategoryFormData} from '@/lib/form-validators';
-import {uploadProductImages} from '@/actions/admin/utils/upload-image';
+import {uploadProductImages} from '@/actions/utils/upload-image';
 import {
   createProduct as createProductAction,
   updateProduct as updateProductAction,

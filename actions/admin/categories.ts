@@ -3,7 +3,7 @@
 import {db} from '@/drizzle/index';
 import {categories, productsTable} from '@/drizzle/db/schema';
 import {asc, eq, and, isNull, or, sql} from 'drizzle-orm';
-import {buildCategoryTree} from '@/actions/admin/utils/category.builder';
+import {buildCategoryTree} from '@/actions/utils/category-builder';
 import {categoryFormSchema, CategoryFormData} from '@/lib/form-validators';
 import {revalidatePath} from 'next/cache';
 import {ActionResult} from '@/lib/types/query';

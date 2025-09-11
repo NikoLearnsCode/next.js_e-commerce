@@ -271,6 +271,7 @@ export default function CategoryManager({categories}: CategoryManagerProps) {
 
   const expandAll = () =>
     setExpandedCategories(new Set(getAllCategoryIdsRecursive(categories)));
+
   const collapseAll = () => setExpandedCategories(new Set());
 
   return (
