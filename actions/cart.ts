@@ -20,7 +20,6 @@ import {eq, and, isNull, asc} from 'drizzle-orm';
 import {cookies} from 'next/headers';
 import Decimal from 'decimal.js';
 
-
 async function getCartItemsWithProducts(cartId: string) {
   const cartItems = await db
     .select({
@@ -32,7 +31,7 @@ async function getCartItemsWithProducts(cartId: string) {
       size: cartItemsTable.size,
       created_at: cartItemsTable.created_at,
       updated_at: cartItemsTable.updated_at,
-      // Product fields via JOIN 
+      // Product fields via JOIN
       name: productsTable.name,
       price: productsTable.price,
       brand: productsTable.brand,
@@ -48,7 +47,6 @@ async function getCartItemsWithProducts(cartId: string) {
   return cartItems;
 }
 
-
 function calculateCartTotal(items: CartItemWithProduct[]): number {
   if (!items || items.length === 0) {
     return 0;
@@ -59,7 +57,6 @@ function calculateCartTotal(items: CartItemWithProduct[]): number {
   }, new Decimal(0));
   return total.toNumber();
 }
- 
 
 function calculateItemCount(items: CartItemWithProduct[]): number {
   if (!items || items.length === 0) {
@@ -81,7 +78,6 @@ export async function getCart() {
         .where(eq(cartsTable.user_id, user.id))
         .limit(1);
       cart = cartData[0] || null;
-
     } else {
       const sessionId = await getSessionId();
       if (!sessionId) {
@@ -278,6 +274,12 @@ export async function transferCartOnLogin(userId: string) {
       return {success: true, message: 'No session cart found'};
     }
 
+    // Hämta session cart items för att räkna dem
+    const sessionItems = await db
+      .select()
+      .from(cartItemsTable)
+      .where(eq(cartItemsTable.cart_id, sessionCart.id));
+
     // Hitta user cart
     const userCartData = await db
       .select()
@@ -288,11 +290,6 @@ export async function transferCartOnLogin(userId: string) {
 
     if (userCart) {
       // Merge session cart items into user cart
-      const sessionItems = await db
-        .select()
-        .from(cartItemsTable)
-        .where(eq(cartItemsTable.cart_id, sessionCart.id));
-
       for (const sessionItem of sessionItems) {
         // Kolla om samma produkt + storlek redan finns i user cart
         const existingUserItem = await db
@@ -335,7 +332,12 @@ export async function transferCartOnLogin(userId: string) {
         .where(eq(cartsTable.id, sessionCart.id));
     }
 
-    return {success: true, message: `Cart transferred successfully`};
+    return {
+      success: true,
+      message: `Cart transferred successfully`,
+      transferred: true,
+      itemCount: sessionItems.length,
+    };
   } catch (error) {
     console.error('Unexpected error transferring cart on login:', error);
     return {success: false, error, message: 'Failed to transfer cart'};

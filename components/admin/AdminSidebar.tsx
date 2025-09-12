@@ -15,7 +15,7 @@ const LetterIcon = ({
   // isActive: boolean;
 }) => (
   <div
-    className={`h-7 w-4 shrink-0  font-semibold   mb-[2px] flex items-center justify-center   text-lg  `}
+    className={`h-7 w-3.5 shrink-0  font-semibold   mb-[2px] flex items-center justify-center   text-base  `}
   >
     {letter}
   </div>
@@ -57,7 +57,7 @@ export default function AdminSidebar() {
             className=' px-3 py-6 cursor-pointer rounded-md relative flex flex-col justify-center items-center gap-1'
           >
             <motion.span
-              className={`inline-flex border-t-[1.5px] w-5  ${isCollapsed ? 'border-gray-800' : 'border-gray-600'}`}
+              className={`inline-flex border-t-[1.5px] w-5  ${isCollapsed ? 'border-gray-700' : 'border-gray-400'}`}
               animate={{
                 rotate: isCollapsed ? 0 : 45,
                 y: isCollapsed ? 0 : 2.5,
@@ -65,7 +65,7 @@ export default function AdminSidebar() {
               transition={{duration: 0.2}}
             />
             <motion.span
-              className={`inline-flex border-t-[1.5px] w-5  ${isCollapsed ? 'border-gray-800' : 'border-gray-600'}`}
+              className={`inline-flex border-t-[1.5px] w-5  ${isCollapsed ? 'border-gray-700' : 'border-gray-400'}`}
               animate={{
                 rotate: isCollapsed ? 0 : -45,
                 y: isCollapsed ? 0 : -2.5,

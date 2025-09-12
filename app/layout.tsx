@@ -11,6 +11,7 @@ import {getServerSession} from 'next-auth';
 import {authOptions} from '@/lib/auth';
 
 import {NavigatedHistoryProvider} from '@/context/NavigatedHistoryProvider';
+import {Toaster} from 'sonner';
 
 const arimo = Arimo({
   weight: ['400', '500', '600', '700'],
@@ -66,6 +67,7 @@ export default async function RootLayout({
             </CartProvider>
           </AuthProvider>
         </QueryProvider>
+        <Toaster />
       </body>
     </html>
   );

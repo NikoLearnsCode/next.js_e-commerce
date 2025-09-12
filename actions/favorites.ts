@@ -8,94 +8,60 @@ import {db} from '@/drizzle/index';
 import {favoritesTable, productsTable} from '@/drizzle/db/schema';
 import {eq, and, isNull, sql} from 'drizzle-orm';
 import {NEW_PRODUCT_DAYS} from '@/lib/constants';
-import {FavoriteWithProduct} from '@/lib/types/db';
-
-
 
 export async function getFavorites() {
   try {
     const session = await getServerSession(authOptions);
     const user = session?.user;
+    const sessionId = await getSessionId();
 
-    let favorites: FavoriteWithProduct[];
+    const baseQuery = db
+      .select({
+        id: favoritesTable.id,
+        user_id: favoritesTable.user_id,
+        session_id: favoritesTable.session_id,
+        product_id: favoritesTable.product_id,
+        created_at: favoritesTable.created_at,
+        // Product data via join
+        product: {
+          id: productsTable.id,
+          name: productsTable.name,
+          price: productsTable.price,
+          brand: productsTable.brand,
+          color: productsTable.color,
+          sizes: productsTable.sizes,
+          images: productsTable.images,
+          slug: productsTable.slug,
+          created_at: productsTable.created_at,
+          isNew:
+            sql<boolean>`${productsTable.created_at} > NOW() - INTERVAL '${sql.raw(
+              NEW_PRODUCT_DAYS.toString()
+            )} days'`.as('isNew'),
+        },
+      })
+      .from(favoritesTable)
+      .innerJoin(
+        productsTable,
+        eq(favoritesTable.product_id, productsTable.id)
+      );
 
     if (user) {
-      favorites = await db
-        .select({
-          id: favoritesTable.id,
-          user_id: favoritesTable.user_id,
-          session_id: favoritesTable.session_id,
-          product_id: favoritesTable.product_id,
-          created_at: favoritesTable.created_at,
-          // Product data via join
-          product: {
-            id: productsTable.id,
-            name: productsTable.name,
-            price: productsTable.price,
-            brand: productsTable.brand,
-            color: productsTable.color,
-            sizes: productsTable.sizes,
-            images: productsTable.images,
-            slug: productsTable.slug,
-            created_at: productsTable.created_at,
-            isNew:
-              sql<boolean>`${productsTable.created_at} > NOW() - INTERVAL '${sql.raw(NEW_PRODUCT_DAYS.toString())} days'`.as(
-                'isNew'
-              ),
-          },
-        })
-        .from(favoritesTable)
-        .innerJoin(
-          productsTable,
-          eq(favoritesTable.product_id, productsTable.id)
+      const favorites = await baseQuery.where(
+        eq(favoritesTable.user_id, user.id)
+      );
+      return {favorites};
+    } else if (sessionId) {
+      const favorites = await baseQuery.where(
+        and(
+          eq(favoritesTable.session_id, sessionId),
+          isNull(favoritesTable.user_id)
         )
-        .where(eq(favoritesTable.user_id, user.id));
+      );
+      return {favorites};
     } else {
-      const sessionId = await getSessionId();
-
-      if (!sessionId) {
-        return {favorites: []};
-      }
-
-      favorites = await db
-        .select({
-          id: favoritesTable.id,
-          user_id: favoritesTable.user_id,
-          session_id: favoritesTable.session_id,
-          product_id: favoritesTable.product_id,
-          created_at: favoritesTable.created_at,
-          // Product data via join
-          product: {
-            id: productsTable.id,
-            name: productsTable.name,
-            price: productsTable.price,
-            brand: productsTable.brand,
-            color: productsTable.color,
-            sizes: productsTable.sizes,
-
-            images: productsTable.images,
-            slug: productsTable.slug,
-            created_at: productsTable.created_at,
-            isNew:
-              sql<boolean>`${productsTable.created_at} > NOW() - INTERVAL '${sql.raw(NEW_PRODUCT_DAYS.toString())} days'`.as(
-                'isNew'
-              ),
-          },
-        })
-        .from(favoritesTable)
-        .innerJoin(
-          productsTable,
-          eq(favoritesTable.product_id, productsTable.id)
-        )
-        .where(
-          and(
-            eq(favoritesTable.session_id, sessionId),
-            isNull(favoritesTable.user_id)
-          )
-        );
+      // Om varken användare eller session finns, returnera en tom lista
+      return {favorites: []};
     }
-
-    return {favorites};
   } catch (error) {
     console.error('Error fetching favorites:', error);
     return {
@@ -268,6 +234,8 @@ export async function transferFavoritesOnLogin(userId: string) {
     return {
       success: true,
       message: `Favorites transferred successfully (${sessionFavorites.length} items processed)`,
+      transferred: true,
+      itemCount: sessionFavorites.length,
     };
   } catch (error) {
     console.error('Unexpected error transferring favorites on login:', error);

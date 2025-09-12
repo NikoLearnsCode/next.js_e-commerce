@@ -11,14 +11,14 @@ import {ChevronLeft, ChevronRight, X} from 'lucide-react';
 import {twMerge} from 'tailwind-merge';
 import 'swiper/css';
 import 'swiper/css/navigation';
-
+import {usePathname} from 'next/navigation';
 
 import FavoriteButton from '@/components/favorites/FavoriteButton';
 import NewBadge from '@/components/shared/NewBadge';
 import {formatPrice} from '@/utils/format';
 import {useFavorites} from '@/context/FavoritesProvider';
 import SpinningLogo from '@/components/shared/ui/SpinningLogo';
-import { useNavigatedHistory } from '@/context/NavigatedHistoryProvider';
+import {useNavigatedHistory} from '@/context/NavigatedHistoryProvider';
 
 type ProductCardProps = {
   product: Product;
@@ -36,6 +36,8 @@ export default function ProductCard({
   const {name, price, images, slug, isNew, id, brand, color} = product;
   const {removeFavorite, updatingItems} = useFavorites();
   const {handleSaveNavigated} = useNavigatedHistory();
+
+  const pathname = usePathname();
   // Handler for removing items from favorites (only used in list layout)
   const handleRemoveItem = async (productId: string) => {
     try {
@@ -205,9 +207,11 @@ export default function ProductCard({
             <Link
               href={`/${slug}`}
               className='outline-none focus:underline focus:underline-offset-2 text-wrap text-break text-center sm:text-start '
-              onClick={() => handleSaveNavigated({slug, image: images[0], name})}
+              onClick={() =>
+                handleSaveNavigated({slug, image: images[0], name})
+              }
             >
-              {isNew && <NewBadge />}
+              {isNew && !pathname.endsWith('/nyheter') && <NewBadge />}
               {name}
             </Link>
 
@@ -222,7 +226,7 @@ export default function ProductCard({
         </div>
       ) : (
         <>
-          {isNew && (
+          {isNew && !pathname.endsWith('/nyheter') && (
             <div className='px-2 pt-0.5 flex items-center justify-between'>
               <NewBadge />
               <FavoriteButton product={product} />
@@ -234,11 +238,15 @@ export default function ProductCard({
               <Link
                 href={`/${slug}`}
                 className='outline-none focus:underline focus:underline-offset-2'
-                onClick={() => handleSaveNavigated({slug, image: images[0], name})}
+                onClick={() =>
+                  handleSaveNavigated({slug, image: images[0], name})
+                }
               >
                 <h2 className='text-xs sm:text-sm font-medium'>{name}</h2>
               </Link>
-              {!isNew && <FavoriteButton product={product} />}
+              {(!isNew || pathname.endsWith('/nyheter')) && (
+                <FavoriteButton product={product} />
+              )}
             </div>
             <p className='text-xs text-gray-700 sm:text-sm'>
               {formatPrice(price)}

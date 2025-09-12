@@ -36,6 +36,7 @@ export default function SignInForm() {
       await signIn(provider, {
         callbackUrl: finalCallbackUrl,
         redirect: true,
+
       });
     } catch (error) {
       setErrorMessage(

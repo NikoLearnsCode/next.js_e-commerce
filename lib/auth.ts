@@ -33,11 +33,8 @@ export const authOptions: NextAuthOptions = {
 
   callbacks: {
     signIn: async ({user}) => {
-      // Transfer cart when user signs in
-
       if (user?.id) {
         try {
-          // Transfer both cart and favorites on login
           await Promise.all([
             transferCartOnLogin(user.id),
             transferFavoritesOnLogin(user.id),
@@ -59,7 +56,7 @@ export const authOptions: NextAuthOptions = {
 
         (session.user as any).role = (user as any).role;
       }
-      // Returnerar det modifierade session-objektet
+
       return session;
     },
   },
