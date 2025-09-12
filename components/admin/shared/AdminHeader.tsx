@@ -38,7 +38,7 @@ export default function AdminHeader({
           className='gap-1 m-0 rounded-full   '
           onClick={handleClick}
         >
-          <PlusIcon className='w-4 h-4 ' />
+          <PlusIcon />
           Lägg till
         </Button>
       )}

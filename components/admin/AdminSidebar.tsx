@@ -9,28 +9,24 @@ import {useAdmin} from '@/context/AdminContextProvider';
 // Letter-based icon component
 const LetterIcon = ({
   letter,
-  isActive,
+  // isActive,
 }: {
   letter: string;
-  isActive: boolean;
+  // isActive: boolean;
 }) => (
   <div
-    className={`h-7 w-7 shrink-0 font-arimo font-bold flex items-center justify-center rounded  text-sm ${
-      isActive
-        ? 'bg-gray-100 border  text-black'
-        : 'bg-gray-50 hover:bg-gray-100 text-gray-700'
-    }`}
+    className={`h-7 w-4 shrink-0  font-semibold   mb-[2px] flex items-center justify-center   text-lg  `}
   >
     {letter}
   </div>
 );
 
 const navigation = [
-  {name: 'Dashboard', href: '/admin', letter: 'D'},
-  {name: 'Produkter', href: '/admin/products', letter: 'P'},
-  {name: 'Kategorier', href: '/admin/categories', letter: 'K'},
+  {name: 'ashboard', href: '/admin', letter: 'D'},
+  {name: 'rodukter', href: '/admin/products', letter: 'P'},
+  {name: 'ategorier', href: '/admin/categories', letter: 'K'},
   {
-    name: 'Beställningar',
+    name: 'eställningar',
     href: '/admin/orders',
     letter: 'B',
   },
@@ -44,7 +40,7 @@ export default function AdminSidebar() {
 
   return (
     <motion.div
-      className='fixed inset-y-0 bg-white left-0 z-20 border-r border-gray-200 '
+      className='fixed inset-y-0 bg-white left-0 z-20 border-r border-gray-100 '
       animate={{
         width: isCollapsed ? '3.25rem' : '11rem',
       }}
@@ -80,10 +76,10 @@ export default function AdminSidebar() {
         </div>
 
         {/* Navigation */}
-        <nav className='flex flex-1 flex-col px-1 pb-4'>
+        <nav className='flex flex-1 flex-col px-2.25 py-4'>
           <ul role='list' className='flex flex-1 flex-col '>
             <li>
-              <ul role='list' className='space-y-2 '>
+              <ul role='list' className='space-y-4 '>
                 {navigation.map((item) => {
                   const isActive = pathname === item.href;
                   return (
@@ -91,15 +87,19 @@ export default function AdminSidebar() {
                       <Link
                         href={item.href}
                         className={`
-                          group flex font-semibold text-gray-700 uppercase text-[12px] items-center rounded-[10px] py-1 px-2 leading-6  transition-all duration-200
-                          ${isCollapsed ? '' : 'gap-x-3 hover:bg-gray-50'}
-                         
+                          group flex font-medium border hover:border-gray-100 uppercase text-[11px] items-center rounded-[6px]  px-2 leading-6  transition-all duration-200
+                          ${isCollapsed ? '' : ' hover:bg-gray-50'}
+                           ${
+                             isActive
+                               ? 'bg-gray-50 border border-gray-100  text-black'
+                               : 'bg-white border-transparent hover:bg-gray-50 text-gray-500 hover:text-black'
+                           }
 
 
                         `}
                         title={isCollapsed ? item.name : undefined}
                       >
-                        <LetterIcon letter={item.letter} isActive={isActive} />
+                        <LetterIcon letter={item.letter} />
                         <motion.span
                           animate={{
                             opacity: isCollapsed ? 0 : 1,
@@ -124,7 +124,7 @@ export default function AdminSidebar() {
           <Link
             href='/'
             className={`
-              group flex items-center uppercase rounded-[10px] p-1 py-3  leading-6 font-semibold text-[12px] text-gray-700 hover:bg-gray-50 transition-all duration-200
+              group flex items-center uppercase rounded-[10px] p-1 py-2  leading-6 font-semibold text-[12px] hover:text-black text-gray-700 hover:bg-gray-50 transition-all duration-200
               ${isCollapsed ? '' : 'gap-x-3'}
             `}
             title={isCollapsed ? 'Tillbaka till butik' : undefined}

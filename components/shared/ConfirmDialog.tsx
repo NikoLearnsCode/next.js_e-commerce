@@ -42,23 +42,23 @@ export default function ConfirmDialog({
     if (isOpen && triggerElement) {
       // Hämta trigger-elementets position och storlek
       const rect = triggerElement.getBoundingClientRect();
-      const dialogWidth = 380; // Ungefärlig bredd på dialogen
+      const dialogWidth = 365; // Ungefärlig bredd på dialogen
       const dialogHeight = 180; // Ungefärlig höjd på dialogen
 
       // Centrera dialogen horisontellt över trigger-elementet
       let x = rect.left + rect.width / 2 - dialogWidth / 2;
       // Placera dialogen ovanför trigger-elementet med lite marginal
-      let y = rect.top - dialogHeight - 10;
+      let y = rect.top - dialogHeight - 30;
 
       // Se till att dialogen stannar inom viewport (horisontellt)
-      if (x < 10) x = 10;
-      if (x + dialogWidth > window.innerWidth - 10) {
-        x = window.innerWidth - dialogWidth - 10;
+      if (x < 5) x = 5;
+      if (x + dialogWidth > window.innerWidth - 5) {
+        x = window.innerWidth - dialogWidth - 5;
       }
 
       // Om det inte finns plats ovanför, placera under istället
-      if (y < 10) {
-        y = rect.bottom + 10;
+      if (y < 5) {
+        y = rect.bottom + 5;
       }
 
       // Uppdatera positionen
@@ -107,7 +107,7 @@ export default function ConfirmDialog({
   // Färgscheman för olika varianter av dialogen
   const variantStyles = {
     danger: {
-      confirmBtn: 'bg-red-800 hover:bg-red-700 focus:ring-red-200',
+      confirmBtn: 'bg-red-800 hover:bg-red-700 focus:ring-red-700',
     },
     warning: {
       confirmBtn: 'bg-amber-500 hover:bg-amber-600 focus:ring-amber-200',
@@ -134,7 +134,7 @@ export default function ConfirmDialog({
       };
 
   return (
-    <div className='fixed inset-0 z-50'>
+    <div className='fixed inset-0 z-50 '>
       {/* Dialog container */}
       <div
         ref={dialogRef}
@@ -148,7 +148,7 @@ export default function ConfirmDialog({
         <div
           className={`
             relative bg-white rounded-sm shadow-xl border 
-            ${triggerElement ? 'w-[280px]' : 'w-full max-w-md'}
+            ${triggerElement ? 'w-[280px]' : 'w-full max-w-sm'}
             transform transition-all duration-200
           `}
         >
@@ -170,7 +170,7 @@ export default function ConfirmDialog({
                 <h3 className='text-base font-semibold text-gray-900 mb-2'>
                   {title}
                 </h3>
-                <p className='text-sm text-gray-600 leading-relaxed'>
+                <p className=' text-xs sm:text-sm text-gray-600 leading-relaxed'>
                   {message}
                 </p>
                 {/* Extra beskrivning om den finns */}
@@ -197,7 +197,7 @@ export default function ConfirmDialog({
                 {isLoading ? (
                   <div className='flex items-center gap-2 justify-center'>
                     <div className='w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin' />
-                    <span >Laddar...</span>
+                    <span>Laddar...</span>
                   </div>
                 ) : (
                   confirmText

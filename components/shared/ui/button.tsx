@@ -6,7 +6,7 @@ import {cva, type VariantProps} from 'class-variance-authority';
 import {cn} from '@/styles/style.utils';
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap  text-sm font-medium transition-[color,box-shadow] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive cursor-pointer",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap  text-sm font-medium transition-[color,box-shadow] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4.5 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive cursor-pointer",
   {
     variants: {
       variant: {
@@ -17,7 +17,7 @@ const buttonVariants = cva(
         outline:
           'border border-gray-400/70 bg-background  hover:bg-accent hover:text-accent-foreground transition-all duration-200',
         secondary:
-          'bg-gray-white border border-gray-300 hover:border-gray-400 text-secondary-foreground shadow-xs active:bg-secondary/80 hover:bg-secondary/60 transition',
+          'bg-gray-white border border-gray-300 hover:border-gray-400 text-secondary-foreground shadow-xs active:bg-secondary/80 hover:bg-secondary/60 transition ',
 
         ghost: 'hover:bg-accent hover:text-accent-foreground',
 
