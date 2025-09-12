@@ -3,7 +3,7 @@ import type {NextRequest} from 'next/server';
 
 // Route protection is handled at page level with getServerSession()
 export function middleware(_request: NextRequest) {
-  // Allows all requests - auth protection happens in pages
+
   return NextResponse.next();
 }
 

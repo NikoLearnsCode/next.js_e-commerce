@@ -2,15 +2,14 @@
 
 import Image from 'next/image';
 import {ArrowRight} from 'lucide-react';
-
-import type {OrderSummary} from '@/lib/types/db';
+import type {OrderOverview} from '@/lib/types/db';
 import AnimatedAuthContainer from '@/components/shared/AnimatedContainer';
 import {Link} from '@/components/shared/ui/link';
 import Carousel from '@/components/shared/Carousel';
 import {useMediaQuery} from '@/hooks/useMediaQuery';
 
 interface OrdersClientContentProps {
-  orders: OrderSummary[];
+  orders: OrderOverview[];
 }
 
 export default function OrdersClientContent({

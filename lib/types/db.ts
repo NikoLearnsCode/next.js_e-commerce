@@ -36,7 +36,7 @@ export type OrderWithItems = Order & {
   order_items: OrderItem[];
 };
 
-export type OrderSummary = Pick<OrderWithItems, 'id' | 'created_at'> & {
+export type OrderOverview = Pick<OrderWithItems, 'id' | 'created_at'> & {
   order_items: Pick<OrderItem, 'order_id' | 'image' | 'name'>[];
 };
 
