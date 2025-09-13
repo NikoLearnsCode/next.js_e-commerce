@@ -129,7 +129,10 @@ export async function toggleFavorite(product: Product) {
           session_id: null,
           product_id: product.id,
         };
-        await db.insert(favoritesTable).values(newFavorite);
+        await db.insert(favoritesTable).values({
+          ...newFavorite,
+          created_at: new Date(),
+        });
       }
     } else {
       const sessionId = await getSessionId();
@@ -140,7 +143,10 @@ export async function toggleFavorite(product: Product) {
           session_id: newSessionId,
           product_id: product.id,
         };
-        await db.insert(favoritesTable).values(newFavorite);
+        await db.insert(favoritesTable).values({
+          ...newFavorite,
+          created_at: new Date(),
+        });
       } else {
         const deleteResult = await db
           .delete(favoritesTable)
@@ -158,7 +164,10 @@ export async function toggleFavorite(product: Product) {
             session_id: sessionId,
             product_id: product.id,
           };
-          await db.insert(favoritesTable).values(newFavorite);
+          await db.insert(favoritesTable).values({
+            ...newFavorite,
+            created_at: new Date(),
+          });
         }
       }
     }

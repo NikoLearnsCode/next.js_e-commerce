@@ -62,42 +62,40 @@ export default function ProductModal({closeMenu, isOpen}: ProductModalProps) {
             isMobile={true}
             className='overflow-y-auto min-w-full md:min-w-[450px]'
           >
-            <div className='absolute top-1.5 right-3'>
+            <div className='flex justify-between items-center'>
+              <h2 className='font-medium text-base px-5 pt-4 pb-3'>
+                DIN VARUKORG ({itemCount})
+              </h2>
               <MotionCloseX
                 onClick={closeMenu}
                 size={14}
                 strokeWidth={1.5}
-                className='p-5 cursor-pointer'
+                className='p-5 px-6 cursor-pointer'
               />
             </div>
-            <h2 className='font-medium text-base p-5'>
-              DIN VARUKORG ({itemCount})
-            </h2>
-
-            <div className='pt-3 pb-12 grid grid-cols-1 max-h-[88%] overflow-y-auto'>
+            <div className='pt-3 grid grid-cols-1 max-h-[94%] overflow-y-auto'>
               {cartItems.map((item) => (
                 <div
                   key={item.id}
-                  className={`flex items-center px-5 not-last:border-b border-gray-100 py-3 justify-between gap-4 ${
+                  className={`flex relative  sm:px-4 py-1 justify-between gap-4 ${
                     removingItems[item.id] ? 'opacity-50' : ''
                   }`}
                 >
                   <Link
                     href={`/${item.slug}`}
                     tabIndex={-1}
-                    className='relative bg-gray-50'
+                    className='relative aspect-[7/9] min-w-2/3  w-full h-full'
                   >
                     <Image
                       src={item.images[0]}
                       alt={item.name}
-                      height={160}
-                      width={140}
+                      fill
                       priority
                       loading='eager'
                       className='object-cover'
                     />
                   </Link>
-                  <div className='flex-1'>
+                  <div className='text-xs space-y-1 pt-2 px-1 min-w-1/3'>
                     <Link
                       href={`/${item.slug}`}
                       className='font-medium outline-none focus:underline focus:underline-offset-2'
@@ -105,14 +103,12 @@ export default function ProductModal({closeMenu, isOpen}: ProductModalProps) {
                       {item.name}
                     </Link>
 
-                    <p className='text-sm text-gray-600'>
-                      Storlek: {item.size}
-                    </p>
-                    <p className='text-sm text-gray-600'>Färg: {item.color}</p>
-                    <p className='text-sm text-gray-600'>
+                    <p className=' text-gray-600'>Storlek: {item.size}</p>
+                    <p className=' text-gray-600'>Färg: {item.color}</p>
+                    <p className=' text-gray-600'>
                       {item.quantity} x {formatPrice(item.price)}
                     </p>
-                    {cartItems.length > 1 && (
+                    {cartItems.length > 2 && (
                       <button
                         className={`font-medium mr-3 mt-3 transition border-gray-400 text-black hover:text-red-700 hover:border-red-700 text-xs border-b disabled:opacity-50 cursor-pointer ${
                           removingItems[item.id]

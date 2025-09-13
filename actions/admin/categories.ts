@@ -66,6 +66,7 @@ export async function createCategory(
     }
 
     // Skapa ny kategori
+    const now = new Date();
     const [newCategory] = await db
       .insert(categories)
       .values({
@@ -75,6 +76,8 @@ export async function createCategory(
         displayOrder: validatedData.displayOrder,
         isActive: validatedData.isActive,
         parentId: validatedData.parentId,
+        created_at: now,
+        updated_at: now,
       })
       .returning();
 

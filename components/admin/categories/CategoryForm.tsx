@@ -19,6 +19,8 @@ import {
   findCategoriesForDropdown,
   findCategoryById,
 } from '@/components/admin/utils/admin.form-helpers';
+import {UploadCloud} from 'lucide-react';
+import FileInput from '../shared/FileInput';
 
 type CategoryFormProps = {
   mode: 'create' | 'edit';
@@ -235,8 +237,28 @@ export default function CategoryForm({mode, initialData}: CategoryFormProps) {
           label={watch('isActive') ? 'Aktiv' : 'Inaktiv'}
           checked={watch('isActive')}
         />
-      </div>
 
+        {/* BILDUPPLADDNING */}
+
+        {watchedType === 'MAIN-CATEGORY' && (
+          <div className='sticky -top-5 z-10 pb-2.5 pt-4 bg-white '>
+            <FileInput
+              onFilesSelected={() => {}}
+              accept='image/*'
+              // label='Bilder'
+              className='w-full'
+              id='image-upload-category'
+            >
+              <div className='flex flex-col items-center justify-center w-full p-4 border-2 border-dashed border-gray-300 rounded-lg text-center hover:border-gray-500 transition-colors'>
+                <UploadCloud className='w-8 h-8 text-gray-600 mb-1.5' />
+                <p className='font-semibold text-gray-700 uppercase text-xs'>
+                  Klicka för att ladda upp kategoribilder
+                </p>
+              </div>
+            </FileInput>
+          </div>
+        )}
+      </div>
       <div className='flex  gap-3 pt-3  pb-6'>
         <Button
           type='submit'

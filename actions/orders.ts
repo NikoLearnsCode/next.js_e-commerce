@@ -33,6 +33,7 @@ export async function createOrder(
     const user = session?.user;
 
     // Create order
+    const now = new Date();
     const newOrder = {
       user_id: user?.id,
       session_id: user ? null : await getSessionId(),
@@ -40,6 +41,8 @@ export async function createOrder(
       total_amount: totalPrice.toString(),
       delivery_info: deliveryInfo,
       payment_info: paymentInfo.method,
+      created_at: now,
+      updated_at: now,
     };
 
     const order = await db.insert(ordersTable).values(newOrder).returning();
@@ -57,6 +60,7 @@ export async function createOrder(
       color: item.color,
       slug: item.slug,
       image: item.images[0],
+      created_at: now,
     }));
 
     await db.insert(orderItemsTable).values(orderItems);

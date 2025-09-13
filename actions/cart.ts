@@ -121,9 +121,14 @@ export async function addToCart(newItem: AddToCartItem) {
         session_id: user ? null : sessionId,
         user_id: user?.id || null,
       };
+      const now = new Date();
       const createdCart = await db
         .insert(cartsTable)
-        .values(newCart)
+        .values({
+          ...newCart,
+          created_at: now,
+          updated_at: now,
+        })
         .returning();
       if (!createdCart[0]) throw new Error('Failed to create cart');
       cart = createdCart[0];
@@ -159,7 +164,12 @@ export async function addToCart(newItem: AddToCartItem) {
         quantity: newItem.quantity,
         size: newItem.size,
       };
-      await db.insert(cartItemsTable).values(newCartItem);
+      const now = new Date();
+      await db.insert(cartItemsTable).values({
+        ...newCartItem,
+        created_at: now,
+        updated_at: now,
+      });
     }
 
     // Hämta uppdaterade data

@@ -35,8 +35,12 @@ export default function ProductManager({products}: ProductManagerProps) {
     cell: (product: Product) => {
       const value = product[header as keyof Product];
 
-      if (header === 'created_at' || header === 'updated_at') {
-        return <div>{formatDateForAdmin(value as Date)}</div>;
+      if (header === 'created_at') {
+        return <div>{formatDateForAdmin(product.created_at)}</div>;
+      }
+
+      if (header === 'updated_at') {
+        return <div>{formatDateForAdmin(product.updated_at)}</div>;
       }
 
       if (header === 'price') {

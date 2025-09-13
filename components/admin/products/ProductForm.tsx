@@ -357,7 +357,7 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
         </div>
 
         {/* BILDUPPLADDNING */}
-        <div className='sticky -top-5 z-10 pb-2.5 bg-white '>
+        <div className='sticky  -top-5 z-10 pb-2.5 bg-white '>
           <FileInput
             id='image-upload'
             multiple
@@ -367,7 +367,7 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
             <div className='flex flex-col items-center justify-center w-full p-4 border-2 border-dashed border-gray-300 rounded-lg text-center hover:border-gray-500 transition-colors'>
               <UploadCloud className='w-8 h-8 text-gray-600 mb-1.5' />
               <p className='font-semibold text-gray-700 uppercase text-xs'>
-                Klicka för att ladda upp bilder
+                Klicka för att ladda upp produktbilder
               </p>
             </div>
           </FileInput>

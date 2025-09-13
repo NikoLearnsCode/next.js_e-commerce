@@ -23,7 +23,7 @@ export const usersTable = pgTable('users', {
   id: uuid('id').defaultRandom().primaryKey(),
   name: text('name'),
   email: text('email').notNull(),
-  emailVerified: timestamp('emailVerified', {mode: 'date'}),
+  emailVerified: timestamp('emailVerified', {mode: 'date', withTimezone: true}),
   image: text('image'),
   role: integer('role').notNull().default(0),
 });
@@ -55,7 +55,7 @@ export const sessionsTable = pgTable('sessions', {
   userId: uuid('userId')
     .notNull()
     .references(() => usersTable.id, {onDelete: 'cascade'}),
-  expires: timestamp('expires', {mode: 'date'}).notNull(),
+  expires: timestamp('expires', {mode: 'date', withTimezone: true}).notNull(),
 });
 
 // PRODUCTS
@@ -72,8 +72,12 @@ export const productsTable = pgTable('products', {
   specs: jsonb('specs').$type<string[]>(),
   images: jsonb('images').$type<string[]>().notNull(),
   sizes: jsonb('sizes').$type<string[]>().notNull(),
-  created_at: timestamp('created_at').defaultNow(),
-  updated_at: timestamp('updated_at').defaultNow(),
+  created_at: timestamp('created_at', {withTimezone: true})
+    .notNull()
+    .defaultNow(),
+  updated_at: timestamp('updated_at', {withTimezone: true})
+    .notNull()
+    .defaultNow(),
 });
 
 // CARTS
@@ -83,8 +87,8 @@ export const cartsTable = pgTable('carts', {
     onDelete: 'cascade',
   }),
   session_id: varchar('session_id', {length: 255}),
-  created_at: timestamp('created_at').defaultNow(),
-  updated_at: timestamp('updated_at').defaultNow(),
+  created_at: timestamp('created_at', {withTimezone: true}).defaultNow(),
+  updated_at: timestamp('updated_at', {withTimezone: true}).defaultNow(),
 });
 
 // CART ITEMS
@@ -98,8 +102,8 @@ export const cartItemsTable = pgTable('cart_items', {
     .references(() => productsTable.id, {onDelete: 'cascade'}),
   quantity: integer('quantity').notNull(),
   size: varchar('size', {length: 255}).notNull(),
-  created_at: timestamp('created_at').defaultNow(),
-  updated_at: timestamp('updated_at').defaultNow(),
+  created_at: timestamp('created_at', {withTimezone: true}).defaultNow(),
+  updated_at: timestamp('updated_at', {withTimezone: true}).defaultNow(),
 });
 
 // ORDERS
@@ -113,8 +117,8 @@ export const ordersTable = pgTable('orders', {
   payment_info: varchar('payment_info', {length: 255}).notNull(),
   status: varchar('status', {length: 255}).notNull(),
   delivery_info: jsonb('delivery_info').$type<DeliveryFormData>().notNull(),
-  created_at: timestamp('created_at').defaultNow(),
-  updated_at: timestamp('updated_at').defaultNow(),
+  created_at: timestamp('created_at', {withTimezone: true}).defaultNow(),
+  updated_at: timestamp('updated_at', {withTimezone: true}).defaultNow(),
 });
 
 // ORDER ITEMS
@@ -132,7 +136,7 @@ export const orderItemsTable = pgTable('order_items', {
   size: varchar('size', {length: 255}).notNull(),
   color: varchar('color', {length: 255}).notNull(),
   slug: varchar('slug', {length: 255}).notNull(),
-  created_at: timestamp('created_at').defaultNow(),
+  created_at: timestamp('created_at', {withTimezone: true}).defaultNow(),
   image: varchar('image', {length: 255}).notNull(),
 });
 
@@ -150,7 +154,7 @@ export const favoritesTable = pgTable(
         onDelete: 'cascade',
       })
       .notNull(),
-    created_at: timestamp('created_at').defaultNow(),
+    created_at: timestamp('created_at', {withTimezone: true}).defaultNow(),
   },
   (table) => [
     unique('user_product_unique').on(table.user_id, table.product_id),
@@ -173,8 +177,12 @@ export const categories = pgTable('categories', {
   type: categoryTypeEnum('type').notNull().default('SUB-CATEGORY'),
   displayOrder: integer('display_order').notNull().default(0),
   isActive: boolean('is_active').notNull().default(true),
-  created_at: timestamp('created_at').notNull().defaultNow(),
-  updated_at: timestamp('updated_at').notNull().defaultNow(),
+  created_at: timestamp('created_at', {withTimezone: true})
+    .notNull()
+    .defaultNow(),
+  updated_at: timestamp('updated_at', {withTimezone: true})
+    .notNull()
+    .defaultNow(),
 
   parentId: integer('parent_id').references((): AnyPgColumn => categories.id, {
     onDelete: 'cascade',

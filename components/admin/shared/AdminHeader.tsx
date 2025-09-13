@@ -38,7 +38,7 @@ export default function AdminHeader({
           className='gap-0 m-0  text-gray-900 hover:no-underline uppercase font-semibold  shadow-none text-sm group  '
           onClick={handleClick}
         >
-          <span className='text-xl font-medium   mb-[4.5px]'>n</span>y{' '}
+          <span className='text-xl font-medium mb-[4.5px]'>n</span>y{' '}
           {formType === 'product' ? 'produkt' : 'kategori'}
           <ArrowRight
             size={12}

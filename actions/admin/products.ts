@@ -1,7 +1,7 @@
 'use server';
 
 import {db} from '@/drizzle';
-import {eq, desc} from 'drizzle-orm';
+import {eq, asc} from 'drizzle-orm';
 import {productFormSchema, type ProductFormData} from '@/lib/form-validators';
 import {productsTable} from '@/drizzle/db/schema';
 import {ActionResult} from '@/lib/types/query';
@@ -14,7 +14,7 @@ export async function getAllProducts() {
   const products = await db
     .select()
     .from(productsTable)
-    .orderBy(desc(productsTable.created_at));
+    .orderBy(asc(productsTable.created_at));
   return products;
 }
 
@@ -62,6 +62,7 @@ export async function createProduct(
       : [];
 
     // Insert into database
+    const now = new Date();
     const [newProduct] = await db
       .insert(productsTable)
       .values({
@@ -76,6 +77,8 @@ export async function createProduct(
         sizes: sizesArray,
         specs: specsArray,
         images: data.images,
+        created_at: now,
+        updated_at: now,
       })
       .returning();
 
@@ -171,6 +174,7 @@ export async function updateProduct(
       color: data.color,
       sizes: sizesArray,
       specs: specsArray,
+      updated_at: new Date(),
     };
 
     // Hantera bilduppdateringar
