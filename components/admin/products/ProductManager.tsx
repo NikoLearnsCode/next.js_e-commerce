@@ -1,6 +1,7 @@
 import ProductTable from '@/components/admin/products/ProductTable';
 import {Product} from '@/lib/types/db';
 import AdminHeader from '../shared/AdminHeader';
+import AdminSearch from '../shared/AdminSearch';
 
 type ProductManagerProps = {
   products: Product[];
@@ -15,6 +16,12 @@ export default function ProductManager({products}: ProductManagerProps) {
         buttonShow
         formType='product'
       />
+      <AdminSearch
+        searchParam='search'
+        maxLength={50}
+        placeholder='SÖK namn, pris, kategori, slug'
+      />
+
       <ProductTable products={products} />
     </div>
   );

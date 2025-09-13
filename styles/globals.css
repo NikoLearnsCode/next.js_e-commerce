@@ -201,8 +201,8 @@ textarea:-webkit-autofill:active {
 
 /* Standardläge (hopfälld) */
 .search-input:not(.is-expanded)::placeholder {
-  font-size: 1.15rem; /* motsvarar text-xl */
-  color: rgb(41, 41, 41);
+  font-size: 1.25rem; /* motsvarar text-xl */
+  color: #6b7280;
 }
 
 /* Expanderat läge */

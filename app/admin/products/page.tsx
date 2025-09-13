@@ -4,7 +4,7 @@ import {getAllProducts} from '@/actions/admin/products';
 // import {getServerSession} from 'next-auth';
 // import {authOptions} from '@/lib/auth';
 // import {redirect} from 'next/navigation';
-import NoResults from '@/components/admin/shared/NoResults';
+
 import ProductManager from '@/components/admin/products/ProductManager';
 import {Metadata} from 'next';
 
@@ -14,18 +14,20 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function ProductsPage() {
+interface ProductsPageProps {
+  searchParams: {search?: string};
+}
+
+export default async function ProductsPage({searchParams}: ProductsPageProps) {
   // const session = await getServerSession(authOptions);
 
   // if (session?.user.role !== 1) {
   //   return redirect('/denied');
   // }
 
-  const products = await getAllProducts();
+  const products = await getAllProducts(searchParams.search);
 
-  if (!products || products.length === 0) {
-    return <NoResults message='Inga produkter hittades.' />;
-  }
+
 
   return <ProductManager products={products} />;
 }

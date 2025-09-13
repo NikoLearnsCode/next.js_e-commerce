@@ -101,8 +101,10 @@ export default function ReusableTable<T extends {id: string | number}>({
         </table>
 
         {data.length === 0 && (
-          <div className='text-center py-8'>
-            <p className='text-gray-500'>Inga data hittades</p>
+          <div className='text-center py-32'>
+            <p className='text-gray-500 text-base'>
+              Ingen data hittades
+            </p>
           </div>
         )}
       </div>

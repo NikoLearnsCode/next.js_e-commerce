@@ -96,7 +96,7 @@ const CustomDateInput = React.forwardRef<
             value={formatDateForInput(value || null)}
             disabled={disabled}
             className={cn(
-              'w-full bg-transparent text-gray-500  font-medium px-3 h-12.5 pt-3.5 text-sm pr-12',
+              'w-full bg-transparent text-gray-500  font-medium px-3 h-12.5 pt-4.5 text-sm pr-12',
               'outline-none',
               'disabled:cursor-not-allowed',
               // Dölj standard calendar icon
@@ -134,7 +134,7 @@ const CustomDateInput = React.forwardRef<
           <label
             htmlFor={id}
             className={cn(
-              'absolute left-3 top-1 text-xs text-gray-500 pointer-events-none',
+              'absolute left-3 top-1.5 text-xs text-gray-500 pointer-events-none',
               hasError ? 'text-destructive' : '',
               'disabled:opacity-50'
             )}

@@ -54,7 +54,7 @@ export default function FormWrapper({onClose}: {onClose: () => void}) {
             <MotionOverlay id='admin-form-overlay' onClick={onClose} />
             <MotionDropdown
               position='right'
-              className='max-w-full min-w-full  sm:max-w-[600px] sm:min-w-[600px]'
+              className='max-w-full min-w-full  sm:max-w-[640px] sm:min-w-[640px]'
             >
               <div className='flex flex-col h-screen bg-white'>
                 <div className='flex   justify-between items-center pl-4 sm:pl-6 pt-4 pb-0.5'>

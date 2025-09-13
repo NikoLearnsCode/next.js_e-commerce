@@ -9,7 +9,6 @@ import {
 } from '@/components/admin/utils/admin-helpers';
 import {formatPrice} from '@/utils/format';
 import {useAdmin} from '@/context/AdminContextProvider';
-import AdminSearch from '../shared/AdminSearch';
 
 type ProductManagerProps = {
   products: Product[];
@@ -27,11 +26,11 @@ export default function ProductManager({products}: ProductManagerProps) {
     'published_at',
   ];
 
-  const filteredKeys = Object.keys(products[0]).filter((key) =>
+  /*   const filteredKeys = Object.keys(products[0]).filter((key) =>
     desiredKeys.includes(key)
-  );
+  ); */
 
-  const columns = filteredKeys.map((header) => ({
+  const columns = desiredKeys.map((header) => ({
     header: getAdminHeader(header),
     cell: (product: Product) => {
       const value = product[header as keyof Product];
@@ -84,11 +83,5 @@ export default function ProductManager({products}: ProductManagerProps) {
     },
   ];
 
-  return (
-    <>
-      <AdminSearch searchParam='search' maxLength={50} placeholder='SÖK namn, pris, kategori, slug' />
-
-      <AdminTable data={products} columns={columns} actions={actions} />
-    </>
-  );
+  return <AdminTable data={products} columns={columns} actions={actions} />;
 }

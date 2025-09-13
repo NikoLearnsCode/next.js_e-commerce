@@ -11,7 +11,11 @@ export default function OrderManager({orders}: OrderManagerProps) {
   return (
     <div>
       <AdminHeader title='Beställningsöversikt' count={orders.length} />
-      <AdminSearch searchParam='search' maxLength={50} placeholder='SÖK kund, order-id, mail, adress' />
+      <AdminSearch
+        searchParam='search'
+        maxLength={50}
+        placeholder='SÖK kund, order-id, mail, adress'
+      />
       <OrderTable orders={orders} />
     </div>
   );

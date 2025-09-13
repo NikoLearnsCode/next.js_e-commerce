@@ -1,7 +1,7 @@
 'use server';
 
 import {db} from '@/drizzle';
-import {eq, desc} from 'drizzle-orm';
+import {eq, desc, or, ilike, sql} from 'drizzle-orm';
 import {productFormSchema, type ProductFormData} from '@/lib/form-validators';
 import {productsTable} from '@/drizzle/db/schema';
 import {ActionResult} from '@/lib/types/query';
@@ -10,11 +10,31 @@ import fs from 'fs/promises';
 import {revalidatePath} from 'next/cache';
 import {isUploadedImage} from '@/utils/image-helpers';
 
-export async function getAllProducts() {
+export async function getAllProducts(searchTerm?: string) {
+  if (!searchTerm?.trim()) {
+    const products = await db
+      .select()
+      .from(productsTable)
+      .orderBy(desc(productsTable.updated_at));
+    return products;
+  }
+
+  const searchPattern = `%${searchTerm.trim()}%`;
+
   const products = await db
     .select()
     .from(productsTable)
+    .where(
+      or(
+        // För UUID, använd like istället för ilike och konvertera till text
+        sql`${productsTable.id}::text ILIKE ${searchPattern}`,
+        ilike(productsTable.name, searchPattern),
+        ilike(productsTable.brand, searchPattern),
+        ilike(productsTable.category, searchPattern)
+      )
+    )
     .orderBy(desc(productsTable.updated_at));
+
   return products;
 }
 
