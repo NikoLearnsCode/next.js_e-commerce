@@ -15,7 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 interface ProductsPageProps {
-  searchParams: {search?: string};
+  searchParams: Promise<{search?: string}>;
 }
 
 export default async function ProductsPage({searchParams}: ProductsPageProps) {
@@ -25,9 +25,8 @@ export default async function ProductsPage({searchParams}: ProductsPageProps) {
   //   return redirect('/denied');
   // }
 
-  const products = await getAllProducts(searchParams.search);
-
-
+  const {search} = await searchParams;
+  const products = await getAllProducts(search);
 
   return <ProductManager products={products} />;
 }

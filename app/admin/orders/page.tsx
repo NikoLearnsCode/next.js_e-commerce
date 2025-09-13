@@ -15,7 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 interface OrdersPageProps {
-  searchParams: {search?: string};
+  searchParams: Promise<{search?: string}>;
 }
 
 export default async function OrdersPage({searchParams}: OrdersPageProps) {
@@ -24,8 +24,8 @@ export default async function OrdersPage({searchParams}: OrdersPageProps) {
   // if (session?.user.role !== 1) {
   //   return redirect('/denied');
   // }
-  const orders = await getAllOrders(searchParams.search);
-
+  const {search} = await searchParams;
+  const orders = await getAllOrders(search);
 
   return <OrderManager orders={orders} />;
 }
