@@ -25,7 +25,7 @@ export default async function OrderDetailPage({params}: Props) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user) {
-    return redirect('/sign-in?next=/profile/orders');
+    return redirect('/sign-in');
   }
 
   const {success, order, error} = await getUserOrderById(

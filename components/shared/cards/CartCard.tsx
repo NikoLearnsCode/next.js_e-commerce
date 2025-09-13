@@ -49,7 +49,7 @@ export default function CartCard({
       layout
     >
       {/* Image section */}
-      <div className='relative min-w-2/3 w-full h-full aspect-7/9'>
+      <div className='relative min-w-2/3 w-full h-full aspect-7/9 group'>
         <Link tabIndex={-1} href={`/${slug}`}>
           {images && images[0] ? (
             <Image
@@ -69,14 +69,14 @@ export default function CartCard({
         </Link>
 
         <button
-          className='absolute bg-white/60 top-2 right-2 z-1 hover:text-red-900 p-2 cursor-pointer'
+          className='absolute transition-all duration-300 top-1 group-active:bg-white/50 group-hover:bg-white/50 right-1 z-1 hover:text-red-900 p-2 cursor-pointer'
           onClick={() => onRemove(id)}
           disabled={isRemoving}
         >
           {isRemoving ? (
-            <SpinningLogo width='24' height='17' />
+            <SpinningLogo width='22' height='16' />
           ) : (
-            <X size={16} strokeWidth={1.5} />
+            <X size={20} strokeWidth={1} />
           )}
         </button>
       </div>
@@ -98,7 +98,7 @@ export default function CartCard({
 
         <div className='text-sm mt-1 gap-2 md:text-base flex flex-col sm:flex-row items-center'>
           {onUpdateQuantity && quantity && (
-            <div className='flex items-center gap-2 pr-2 justify-center'>
+            <div className='flex items-center gap-2 pr-2  justify-center'>
               <button
                 onClick={() => onUpdateQuantity(id, quantity - 1)}
                 disabled={isUpdating || quantity <= 1}
@@ -128,7 +128,7 @@ export default function CartCard({
               </button>
             </div>
           )}
-          <div className='flex gap-4 text-[13px]'>
+          <div className='flex gap-3 flex-wrap px-4 sm:px-0 sm:gap-4 text-[13px]'>
             {size && <span>{size}</span>}
 
             {brand && <span>{brand}</span>}

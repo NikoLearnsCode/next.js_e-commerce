@@ -36,7 +36,6 @@ export default function SignInForm() {
       await signIn(provider, {
         callbackUrl: finalCallbackUrl,
         redirect: true,
-
       });
     } catch (error) {
       setErrorMessage(
@@ -73,7 +72,7 @@ export default function SignInForm() {
           variant='outline'
           onClick={() => handleSignIn('google')}
           disabled={isLoading}
-          className='w-full h-12 md:h-14 mt-1'
+          className='w-full h-14 mt-1'
         >
           {isLoading && provider === 'google' ? (
             <Loader2 className='w-5 h-5 animate-spin' />
@@ -106,7 +105,7 @@ export default function SignInForm() {
           variant='outline'
           onClick={() => handleSignIn('github')}
           disabled={isLoading}
-          className='w-full h-12 md:h-14 mt-2 '
+          className='w-full h-14 mt-1 '
         >
           {isLoading && provider === 'github' ? (
             <Loader2 className='w-5 h-5 animate-spin' />
@@ -124,7 +123,7 @@ export default function SignInForm() {
         </Button>
       </div>
 
-      <div className='mt-8 '>
+      <div className='mt-7 '>
         {source === 'cart' || source === 'checkout' ? (
           <>
             <div className='flex items-center justify-center w-full'>
@@ -138,7 +137,7 @@ export default function SignInForm() {
               <Link
                 href={guestCallbackUrl}
                 variant='outline'
-                className='w-full h-12 md:h-14 mt-8   font-medium'
+                className='w-full h-14 mt-7 font-medium'
               >
                 {source === 'checkout'
                   ? 'Fortsätt som gäst'

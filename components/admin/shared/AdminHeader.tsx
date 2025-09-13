@@ -2,7 +2,7 @@
 
 import {Button} from '@/components/shared/ui/button';
 import {useAdmin} from '@/context/AdminContextProvider';
-import {PlusIcon} from 'lucide-react';
+import {ArrowRight, PlusIcon} from 'lucide-react';
 
 type AdminHeaderProps = {
   title: string;
@@ -34,12 +34,17 @@ export default function AdminHeader({
 
       {buttonShow && formType && (
         <Button
-          variant='secondary'
-          className='gap-1 m-0 rounded-full   '
+          variant='link'
+          className='gap-0 m-0  text-gray-900 hover:no-underline uppercase font-semibold  shadow-none text-sm group  '
           onClick={handleClick}
         >
-          <PlusIcon />
-          Lägg till
+          <span className='text-xl font-medium   mb-[4.5px]'>n</span>y{' '}
+          {formType === 'product' ? 'produkt' : 'kategori'}
+          <ArrowRight
+            size={12}
+            strokeWidth={1.75}
+            className='group-hover:translate-x-1 ml-1.5 mb-[1px] transition-transform duration-300'
+          />
         </Button>
       )}
     </div>

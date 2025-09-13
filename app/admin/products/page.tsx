@@ -1,9 +1,9 @@
 'use server';
 
 import {getAllProducts} from '@/actions/admin/products';
-import {getServerSession} from 'next-auth';
-import {authOptions} from '@/lib/auth';
-import {redirect} from 'next/navigation';
+// import {getServerSession} from 'next-auth';
+// import {authOptions} from '@/lib/auth';
+// import {redirect} from 'next/navigation';
 import NoResults from '@/components/admin/shared/NoResults';
 import ProductManager from '@/components/admin/products/ProductManager';
 import {Metadata} from 'next';
@@ -15,11 +15,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ProductsPage() {
-  const session = await getServerSession(authOptions);
+  // const session = await getServerSession(authOptions);
 
-  if (session?.user.role !== 1) {
-    return redirect('/denied');
-  }
+  // if (session?.user.role !== 1) {
+  //   return redirect('/denied');
+  // }
 
   const products = await getAllProducts();
 

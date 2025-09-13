@@ -52,14 +52,16 @@ export default function ProductManager({products}: ProductManagerProps) {
 
   const actions = [
     {
-      label: <FiEdit size={16} />,
+      label: <FiEdit size={16} className='text-gray-600 hover:text-gray-900' />,
       key: 'edit',
       onClick: (product: Product) => {
         openSidebar('product', product);
       },
     },
     {
-      label: <FiTrash size={16} />,
+      label: (
+        <FiTrash size={16} className='text-gray-600 hover:text-gray-900' />
+      ),
       key: 'delete',
       onClick: (product: Product, event?: React.MouseEvent) => {
         // Spara trigger-elementet för dialogruta

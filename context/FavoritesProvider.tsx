@@ -15,7 +15,7 @@ import {
   toggleFavorite,
 } from '@/actions/favorites';
 import {FavoriteWithProduct, Product} from '@/lib/types/db';
-import {useAuth} from '@/hooks/useAuth';
+// import {useAuth} from '@/hooks/useAuth';
 
 interface FavoritesContextType {
   favorites: FavoriteWithProduct[];
@@ -46,9 +46,9 @@ export function FavoritesProvider({children}: {children: React.ReactNode}) {
     {}
   );
 
-  const {user} = useAuth();
+  // const {user} = useAuth();
 
-  const userIdRef = useRef<string | undefined>(user?.id);
+  // const userIdRef = useRef<string | undefined>(user?.id);
   const isRefreshing = useRef(false);
 
   const favoriteCount = useMemo(() => favorites.length, [favorites]);
@@ -124,15 +124,15 @@ export function FavoritesProvider({children}: {children: React.ReactNode}) {
   // Fetch favorites on first render
   useEffect(() => {
     refreshFavorites();
-  }, [refreshFavorites]);
+  }, []);
 
   // When user logs in or out
-  useEffect(() => {
+  /*   useEffect(() => {
     if (userIdRef.current !== user?.id) {
       userIdRef.current = user?.id;
       refreshFavorites();
     }
-  }, [user?.id, refreshFavorites]);
+  }, [user?.id, refreshFavorites]); */
 
   return (
     <FavoritesContext.Provider

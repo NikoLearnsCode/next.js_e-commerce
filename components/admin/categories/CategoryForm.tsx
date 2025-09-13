@@ -14,7 +14,7 @@ import {FloatingLabelInput} from '@/components/shared/ui/floatingLabelInput';
 import {Button} from '@/components/shared/ui/button';
 import {CheckboxOption} from '@/components/shared/ui/CheckboxOption';
 import {generateSlug} from '@/components/admin/utils/slug-generator';
-import CustomSelect from '../shared/CustomSelect';
+import CustomSelect from '../shared/Select';
 import {
   findCategoriesForDropdown,
   findCategoryById,
@@ -134,7 +134,7 @@ export default function CategoryForm({mode, initialData}: CategoryFormProps) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className='space-y-5'>
-      <div className='flex-1 space-y-4 overflow-y-auto pt-8 pb-16 scrollbar-hide pr-5 -mr-5'>
+      <div className='flex-1  space-y-4 overflow-y-auto pt-5 pb-2 scrollbar-hide pr-5 -mr-5'>
         {/* Select 1 - Kategori-typ */}
         <div>
           <label className='block text-sm sr-only font-medium text-gray-700 mb-1'>
@@ -198,6 +198,7 @@ export default function CategoryForm({mode, initialData}: CategoryFormProps) {
           {...register('name')}
           id='category-name'
           label='Kategorinamn *'
+          value={watch('name')}
           type='text'
           hasError={!!errors.name}
           errorMessage={errors.name?.message}
@@ -218,6 +219,7 @@ export default function CategoryForm({mode, initialData}: CategoryFormProps) {
           id='category-display-order'
           label='Sorteringsordning'
           type='number'
+          value={watch('displayOrder').toString()}
           min='0'
           className='mb-7'
           hasError={!!errors.displayOrder}
@@ -235,13 +237,13 @@ export default function CategoryForm({mode, initialData}: CategoryFormProps) {
         />
       </div>
 
-      <div className='flex  gap-3 pt-4  pb-6'>
+      <div className='flex  gap-3 pt-3  pb-6'>
         <Button
           type='submit'
           disabled={
             isLoading /* || !isValid */ || (mode === 'edit' && !isDirty)
           }
-          className=' h-14 mt-0 w-full'
+          className=' h-12 mt-0 w-full'
         >
           {isLoading
             ? mode === 'edit'
@@ -256,7 +258,7 @@ export default function CategoryForm({mode, initialData}: CategoryFormProps) {
           variant='outline'
           onClick={closeSidebar}
           disabled={isLoading}
-          className='w-full h-14 mt-0'
+          className='w-full h-12 mt-0'
         >
           Avbryt
         </Button>

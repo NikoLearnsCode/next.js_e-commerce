@@ -1,5 +1,5 @@
 import type {Metadata} from 'next';
-import {getInitialProducts} from '@/actions/product';
+import {getInfiniteProducts} from '@/actions/product';
 import SearchInfiniteScroll from '@/components/products/product-grid/SearchInfinitePagination';
 
 type Props = {
@@ -21,7 +21,7 @@ export default async function SearchPage({searchParams}: Props) {
   const {q = ''} = await searchParams;
 
   const result = q
-    ? await getInitialProducts({
+    ? await getInfiniteProducts({
         query: q,
         limit: 8,
       })

@@ -50,7 +50,6 @@ export default function CheckoutPage() {
     router.push(getCheckoutUrl('confirmation', isGuest));
   };
 
-  //  förhindra layout shift
   if (loading) {
     return (
       <div className='fixed inset-0 flex flex-col  mb-40 justify-center items-center'>

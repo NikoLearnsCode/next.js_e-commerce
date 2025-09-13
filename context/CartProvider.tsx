@@ -16,7 +16,7 @@ import {
   clearCart,
 } from '@/actions/cart';
 import {AddToCartItem, CartItemWithProduct} from '@/lib/types/db';
-import {useAuth} from '@/hooks/useAuth';
+// import {useAuth} from '@/hooks/useAuth';
 
 interface CartContextType {
   cartItems: CartItemWithProduct[];
@@ -50,8 +50,8 @@ export function CartProvider({children}: {children: React.ReactNode}) {
     {}
   );
 
-  const {user} = useAuth();
-  const userIdRef = useRef<string | undefined>(user?.id);
+  // const {user} = useAuth();
+  // const userIdRef = useRef<string | undefined>(user?.id);
   const isRefreshing = useRef(false);
 
   const refreshCart = useCallback(async () => {
@@ -159,15 +159,15 @@ export function CartProvider({children}: {children: React.ReactNode}) {
 
   useEffect(() => {
     refreshCart();
-  }, [refreshCart]);
+  }, []);
 
-  useEffect(() => {
+/*   useEffect(() => {
     if (userIdRef.current !== user?.id) {
       userIdRef.current = user?.id;
       refreshCart();
     }
   }, [user?.id, refreshCart]);
-
+ */
   return (
     <CartContext.Provider
       value={{

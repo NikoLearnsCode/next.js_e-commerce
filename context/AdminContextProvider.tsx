@@ -1,5 +1,3 @@
-// context/AdminContextProvider.tsx
-
 'use client';
 
 import {createContext, useContext, useEffect, useState} from 'react';
@@ -30,30 +28,21 @@ type AdminContextType = {
   closeSidebar: () => void;
   editData: Category | Product | null;
   categories: CategoryWithChildren[];
-
-  // Admin sidebar state
   isCollapsed: boolean;
   toggleSidebar: () => void;
-
-  // PRODUCTS
   createProduct: (data: ProductFormData, images: File[]) => Promise<void>;
   updateProduct: (
     id: string,
     data: ProductFormData,
-    images?: File[]
+    newImages?: File[],
+    existingImages?: string[]
   ) => Promise<void>;
   deleteProduct: (id: string) => Promise<void>;
-
-  // CATEGORIES
   createCategory: (data: CategoryFormData) => Promise<void>;
   updateCategory: (id: string, data: CategoryFormData) => Promise<void>;
   deleteCategory: (id: string) => Promise<void>;
-
-  // Loading states
   isLoading: boolean;
   operationType: CRUDOperationType;
-
-  // Delete confirmation modal
   deleteModalOpen: boolean;
   setDeleteModalOpen: (open: boolean) => void;
   itemToDelete: {id: string; name: string; type: 'product' | 'category'} | null;
@@ -66,31 +55,22 @@ type AdminContextType = {
 
 const AdminContext = createContext<AdminContextType | null>(null);
 
-// UPPDATERAD TYP: Lägg till `categories` som en prop
 type AdminContextProviderProps = {
   children: React.ReactNode;
-  categories: CategoryWithChildren[]; // Tillagd
+  categories: CategoryWithChildren[];
 };
 
 export default function AdminContextProvider({
   children,
-  categories, // Ta emot datan som en prop
-  //// TODO FLYTTA ANROP FRÅN LAYOUT
+  categories,
 }: AdminContextProviderProps) {
-  // Sidebar state
   const [activeSidebar, setActiveSidebar] = useState<
     'category' | 'product' | null
   >(null);
   const [editData, setEditData] = useState<Category | Product | null>(null);
-
-  // Admin sidebar state
   const [isCollapsed, setIsCollapsed] = useState(true);
-
-  // CRUD loading states
   const [isLoading, setIsLoading] = useState(false);
   const [operationType, setOperationType] = useState<CRUDOperationType>(null);
-
-  // Delete confirmation modal state
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<{
     id: string;
@@ -118,13 +98,16 @@ export default function AdminContextProvider({
     setIsCollapsed(!isCollapsed);
   };
 
-  // --------------------------------------------------------
-
-  // CRUD FUNKTIONER FÖR PRODUKTER
   const createProduct = async (data: ProductFormData, images: File[]) => {
     setIsLoading(true);
     setOperationType('create');
     try {
+      // Validera att det finns bilder
+      if (images.length === 0) {
+        toast.error('Minst en bild måste laddas upp.');
+        return;
+      }
+
       const imageUrls = await uploadProductImages(
         images,
         data.gender,
@@ -160,23 +143,36 @@ export default function AdminContextProvider({
   const updateProduct = async (
     id: string,
     data: ProductFormData,
-    images?: File[]
+    newImages?: File[],
+    existingImages?: string[]
   ) => {
     setIsLoading(true);
     setOperationType('update');
     try {
-      // Prepare form data (transformation happens in server action)
+      // Validera att det finns minst en bild totalt
+      const totalImageCount =
+        (existingImages?.length || 0) + (newImages?.length || 0);
+      if (totalImageCount === 0) {
+        toast.error('Minst en bild måste finnas kvar.');
+        return;
+      }
+
       const productData: ProductFormData & {images?: string[]} = {...data};
 
-      // Upload new images if provided
-      if (images && images.length > 0) {
-        const imageUrls = await uploadProductImages(
-          images,
+      // Kombinera befintliga bilder med nya uppladdade bilder
+      let finalImages: string[] = existingImages || [];
+
+      if (newImages && newImages.length > 0) {
+        const newImageUrls = await uploadProductImages(
+          newImages,
           data.gender,
           data.category
         );
-        productData.images = imageUrls;
+        finalImages = [...finalImages, ...newImageUrls];
       }
+
+      // Sätt images (vi vet att det finns minst en efter validering)
+      productData.images = finalImages;
 
       const result = await updateProductAction(id, productData);
 
@@ -184,13 +180,11 @@ export default function AdminContextProvider({
         closeSidebar();
         toast.success('Produkt uppdaterad');
       } else {
-        // Display the specific error from server action
         toast.error(result.error);
         console.error('Product update failed:', result.error);
       }
     } catch (error) {
       console.error('Error updating product:', error);
-      // Only show generic message for truly unexpected errors
       toast.error(
         'Ett oväntat fel uppstod på servern. Produkten kunde inte uppdateras.'
       );
@@ -226,9 +220,6 @@ export default function AdminContextProvider({
     }
   };
 
-  // --------------------------------------------------------
-
-  // CRUD FUNKTIONER FÖR KATEGORIER
   const createCategory = async (data: CategoryFormData) => {
     setIsLoading(true);
     setOperationType('create');
@@ -303,8 +294,6 @@ export default function AdminContextProvider({
     }
   };
 
-  // --------------------------------------------------------
-
   useEffect(() => {
     if (activeSidebar) {
       const handleEscape = (event: KeyboardEvent) => {
@@ -328,32 +317,26 @@ export default function AdminContextProvider({
   return (
     <AdminContext.Provider
       value={{
-        // Sidebar funktioner
         activeSidebar,
         openSidebar,
         closeSidebar,
         editData,
         categories,
 
-        // Admin sidebar state
         isCollapsed,
         toggleSidebar,
 
-        // CRUD funktioner för produkter
         createProduct,
         updateProduct,
         deleteProduct,
 
-        // CRUD funktioner för kategorier
         createCategory,
         updateCategory,
         deleteCategory,
 
-        // Loading states
         isLoading,
         operationType,
 
-        // Delete modal
         deleteModalOpen,
         setDeleteModalOpen,
         itemToDelete,

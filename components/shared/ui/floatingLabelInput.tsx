@@ -11,8 +11,9 @@ interface FloatingLabelBaseProps {
   hasError?: boolean;
   errorMessage?: string;
   value?: string;
-  }
+}
 
+// Om as är textarea, tillåts textarea-attribut (t.ex rows). Annars defaultar den till input-attribut (t.ex type).
 type FloatingLabelProps = FloatingLabelBaseProps &
   (
     | ({as?: 'input'} & React.InputHTMLAttributes<HTMLInputElement>)
@@ -23,10 +24,20 @@ const FloatingLabelField = React.forwardRef<
   FowardableElement,
   FloatingLabelProps
 >((allProps, ref) => {
+  //låter förälderkomponenter (t.ex. ett formulär) skicka en ref direkt till det underliggande DOM-elementet (<input> eller <textarea>).
+
   const [isFocused, setIsFocused] = React.useState(false);
   const [hasValue, setHasValue] = React.useState(false);
+  // elementRef: En intern ref för att kunna komma åt DOM-elementet direkt inifrån komponenten,
+  // oberoende av den ref som skickas in från föräldern.
   const elementRef = React.useRef<FowardableElement | null>(null);
 
+  /**
+   * Kombinerar den externa ref från föräldern med den interna elementRef
+   * Detta är nödvändigt för att både react-hook-form (via den externa ref)
+   * och vår egen komponentlogik (via elementRef) ska kunna interagera med DOM-elementet.
+   * useCallback används för att memoizera funktionen så den inte skapas på nytt vid varje rendering.
+   */
   const combinedRef = React.useCallback(
     (node: FowardableElement | null) => {
       elementRef.current = node;
@@ -45,22 +56,13 @@ const FloatingLabelField = React.forwardRef<
     }
   }, []);
 
-  React.useEffect(() => {
-    checkElementValue();
-    const observer = new MutationObserver(() => checkElementValue());
-    if (elementRef.current) {
-      observer.observe(elementRef.current, {
-        attributes: true,
-        attributeFilter: ['value'],
-      });
-    }
-    return () => observer.disconnect();
-  }, [checkElementValue]);
-
+  /**
+   * Kör checkElementValue varje gång value-propen ändras utifrån.
+   * När react-hook-form använder initialdata, ändras value-propen (via watch), så triggas denna effekt, och labeln flyttas korrekt till "flytande" läge.
+   */
   React.useEffect(() => {
     checkElementValue();
   }, [allProps.value, checkElementValue]);
-
 
   if (allProps.as === 'textarea') {
     const {
@@ -83,7 +85,7 @@ const FloatingLabelField = React.forwardRef<
           {...restProps}
           ref={combinedRef as React.Ref<HTMLTextAreaElement>}
           className={cn(
-            'peer w-full border bg-transparent px-3 pt-5 pb-1 text-[15px]',
+            'peer w-full border bg-transparent px-3 pt-6 pb-1 text-[15px]',
             'rounded-xs outline-none transition-all duration-200',
             'disabled:cursor-not-allowed  disabled:opacity-50',
             ' min-h-[80px]',
@@ -108,9 +110,9 @@ const FloatingLabelField = React.forwardRef<
         <label
           htmlFor={id}
           className={cn(
-            'absolute left-3 w-[90%] pt-1 pb-0.5 bg-white pointer-events-none select-none transition-all duration-200',
+            'absolute left-3 w-[90%] py-1 bg-white pointer-events-none select-none transition-all text-gray-500 duration-200',
             hasError ? 'text-destructive' : 'peer-focus:text-black',
-            isFloating ? 'top-0.25 text-xs' : 'top-2 text-sm text-gray-500',
+            isFloating ? 'top-0.25 text-xs' : 'top-2 text-sm ',
             'peer-disabled:opacity-50'
           )}
         >

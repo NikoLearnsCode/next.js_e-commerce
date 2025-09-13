@@ -144,7 +144,7 @@ export default function ProductCard({
               <>
                 <button
                   className={twMerge(
-                    `${prevButtonClass} absolute left-1 top-1/2 -translate-y-1/2 pr-4 pl-1 py-2 transition-opacity duration-800 z-10 opacity-0 group-hover:opacity-100  group-focus-within:opacity-100 outline-black `
+                    `${prevButtonClass} absolute left-1 top-1/2 -translate-y-1/2 pr-2 pl-1 py-2 transition-all duration-800 z-10 opacity-0 group-hover:opacity-100  hover:bg-white/50 group-focus-within:opacity-100 outline-black `
                   )}
                   aria-label='Föregående bild'
                   type='button'
@@ -152,12 +152,12 @@ export default function ProductCard({
                   <ChevronLeft
                     size={20}
                     strokeWidth={1.25}
-                    className='text-gray-700 '
+                    className='text-black '
                   />
                 </button>
                 <button
                   className={twMerge(
-                    `${nextButtonClass} absolute right-1 top-1/2 -translate-y-1/2 pl-4 pr-1 py-2 transition-opacity duration-800 z-10 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 outline-black`
+                    `${nextButtonClass} absolute right-1 top-1/2 -translate-y-1/2 pl-2 pr-1 py-2 transition-opacity duration-800 z-10 opacity-0 group-hover:opacity-100 hover:bg-white/50 group-focus-within:opacity-100 outline-black`
                   )}
                   aria-label='Nästa bild'
                   type='button'
@@ -165,7 +165,7 @@ export default function ProductCard({
                   <ChevronRight
                     size={20}
                     strokeWidth={1.25}
-                    className='text-gray-700'
+                    className='text-black'
                   />
                 </button>
               </>
@@ -184,17 +184,17 @@ export default function ProductCard({
           </Link>
         )}
 
-        {/* Remove button for list layout */}
+        {/* button only for list layout */}
         {isListLayout && (
           <button
-            className='absolute bg-white/60 top-2 right-2 z-1 hover:text-red-900 p-2 cursor-pointer'
+            className='absolute transition-all duration-300 top-1 group-active:bg-white/50 hover:bg-white/50 right-1 z-1 hover:text-red-900 p-2 cursor-pointer'
             onClick={() => handleRemoveItem(id)}
             disabled={isUpdating}
           >
             {isUpdating ? (
-              <SpinningLogo width='24' height='17' />
+              <SpinningLogo width='22' height='16' />
             ) : (
-              <X size={16} strokeWidth={1.5} />
+              <X size={20} strokeWidth={1} />
             )}
           </button>
         )}
@@ -217,8 +217,8 @@ export default function ProductCard({
 
             <span className='text-black/80 text-sm'>{formatPrice(price)}</span>
           </div>
-          <div className='text-sm mt-1 gap-2 md:text-base flex flex-col sm:flex-row items-center'>
-            <div className='flex gap-4 text-[13px]'>
+          <div className='text-sm mt-1 gap-2 md:text-base  flex flex-col sm:flex-row items-center'>
+            <div className='flex gap-3 flex-wrap px-4 sm:px-0 sm:gap-4 text-[13px]'>
               {brand && <span>{brand}</span>}
               {color && <span>{color}</span>}
             </div>

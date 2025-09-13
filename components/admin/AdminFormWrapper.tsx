@@ -54,24 +54,20 @@ export default function FormWrapper({onClose}: {onClose: () => void}) {
             <MotionOverlay id='admin-form-overlay' onClick={onClose} />
             <MotionDropdown
               position='right'
-
-              className='max-w-full min-w-full sm:max-w-[600px] sm:min-w-[600px]'
+              className='max-w-full min-w-full  sm:max-w-[600px] sm:min-w-[600px]'
             >
-
               <div className='flex flex-col h-screen bg-white'>
-                <div className='flex uppercase font-semibold justify-between items-center pl-8 pr-2 pt-5 pb-3 '>
-                  <h1 className='font-semibold font-syne text-[17px]'>
-                    {title}
-                  </h1>
+                <div className='flex   justify-between items-center pl-4 sm:pl-6 pt-4 pb-0.5'>
+                  <h1 className='font-medium    uppercase text-sm'>{title}</h1>
                   <MotionCloseX
                     onClick={onClose}
                     size={16}
-                    className='px-7 py-3'
+                    strokeWidth={2}
+                    className='px-7 py-3 '
                   />
                 </div>
 
-
-                <div className='px-8  flex-1 overflow-y-auto'>
+                <div className='px-4 sm:px-6  flex-1 overflow-y-auto'>
                   {renderForm()}
                 </div>
               </div>

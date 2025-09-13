@@ -15,7 +15,7 @@ export default async function ProfileOrdersPage() {
   const session = await getServerSession(authOptions);
 
   if (!session?.user) {
-    return redirect('/sign-in?next=/profile/orders');
+    return redirect('/sign-in');
   }
 
   const {success, orders, error} = await getUserOrdersOverview();

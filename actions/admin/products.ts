@@ -17,8 +17,6 @@ export async function getAllProducts() {
   return products;
 }
 
-
-
 export async function createProduct(
   data: ProductFormData & {images: string[]}
 ): Promise<ActionResult> {
@@ -106,7 +104,6 @@ export async function createProduct(
   }
 }
 
-
 export async function updateProduct(
   id: string,
   data: ProductFormData & {images?: string[]} // images optional for updates
@@ -121,13 +118,30 @@ export async function updateProduct(
       };
     }
 
-    const existingProduct = await db
+    // Hämta befintlig produkt för att jämföra bilder
+    const [currentProduct] = await db
+      .select()
+      .from(productsTable)
+      .where(eq(productsTable.id, id))
+      .limit(1);
+
+    if (!currentProduct) {
+      return {
+        success: false,
+        error: 'Produkten kunde inte hittas.',
+      };
+    }
+
+    const existingProductWithSlug = await db
       .select()
       .from(productsTable)
       .where(eq(productsTable.slug, data.slug))
       .limit(1);
 
-    if (existingProduct.length > 0 && existingProduct[0].id !== id) {
+    if (
+      existingProductWithSlug.length > 0 &&
+      existingProductWithSlug[0].id !== id
+    ) {
       return {
         success: false,
         error: `Slug "${data.slug}" används redan av en annan produkt. Välj en unik slug.`,
@@ -158,8 +172,40 @@ export async function updateProduct(
       specs: specsArray,
     };
 
-    if (data.images && data.images.length > 0) {
-      updateData.images = data.images;
+    // Hantera bilduppdateringar
+    if (data.images !== undefined) {
+      // Validera att det finns minst en bild
+      if (data.images.length === 0) {
+        return {
+          success: false,
+          error: 'Minst en bild måste finnas kvar.',
+        };
+      }
+
+      // Om nya bilder skickas, ersätt alla befintliga bilder
+      const oldImages = currentProduct.images || [];
+      const newImages = data.images;
+
+      // Ta bort gamla bilder som inte längre används
+      const imagesToDelete = oldImages.filter(
+        (img) => !newImages.includes(img)
+      );
+
+      for (const imageUrl of imagesToDelete) {
+        try {
+          const imagePath = path.join(
+            process.cwd(),
+            'public',
+
+            imageUrl
+          );
+          await fs.unlink(imagePath);
+        } catch (error) {
+          console.warn('Could not delete old image:', imageUrl, error);
+        }
+      }
+
+      updateData.images = newImages;
     }
 
     const [updatedProduct] = await db
@@ -194,8 +240,6 @@ export async function updateProduct(
   }
 }
 
-// --------------------------------------------------------
-
 export async function deleteProduct(id: string): Promise<ActionResult> {
   try {
     const [product] = await db
@@ -214,7 +258,13 @@ export async function deleteProduct(id: string): Promise<ActionResult> {
     if (product.images && product.images.length > 0) {
       for (const imageUrl of product.images) {
         try {
-          const imagePath = path.join(process.cwd(), 'uploads', imageUrl);
+          const imagePath = path.join(
+            process.cwd(),
+            'public',
+
+            imageUrl
+          );
+
           await fs.unlink(imagePath);
         } catch (error) {
           console.warn('Could not delete image:', imageUrl, error);

@@ -3,9 +3,9 @@
 'use server';
 
 import CategoryManager from '@/components/admin/categories/CategoryManager';
-import {getServerSession} from 'next-auth';
-import {authOptions} from '@/lib/auth';
-import {redirect} from 'next/navigation';
+// import {getServerSession} from 'next-auth';
+// import {authOptions} from '@/lib/auth';
+// import {redirect} from 'next/navigation';
 
 import {Metadata} from 'next';
 
@@ -16,11 +16,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function CategoriesPage() {
-  const session = await getServerSession(authOptions);
+  // const session = await getServerSession(authOptions);
 
-  if (session?.user.role !== 1) {
-    return redirect('/denied');
-  }
+  // if (session?.user.role !== 1) {
+  //   return redirect('/denied');
+  // }
 
   return <CategoryManager />;
 }

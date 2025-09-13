@@ -97,7 +97,7 @@ export default function AdminSidebar() {
 
 
                         `}
-                        title={isCollapsed ? item.name : undefined}
+                        title={isCollapsed ? item.letter + item.name : undefined}
                       >
                         <LetterIcon letter={item.letter} />
                         <motion.span
@@ -124,13 +124,13 @@ export default function AdminSidebar() {
           <Link
             href='/'
             className={`
-              group flex items-center uppercase rounded-[10px] p-1 py-2  leading-6 font-semibold text-[12px] hover:text-black text-gray-700 hover:bg-gray-50 transition-all duration-200
+              group flex items-center uppercase rounded-[10px] px-1.5 py-2  leading-6 font-semibold text-[12px] hover:text-black text-gray-700  transition-all duration-200
               ${isCollapsed ? '' : 'gap-x-3'}
             `}
             title={isCollapsed ? 'Tillbaka till butik' : undefined}
           >
             <svg
-              className='h-5 w-5 shrink-0 text-black'
+              className='h-6 w-6 mb-1 shrink-0 text-black'
               fill='none'
               viewBox='0 0 24 24'
               strokeWidth={1.5}
@@ -148,9 +148,17 @@ export default function AdminSidebar() {
                 width: isCollapsed ? 0 : 'auto',
               }}
               transition={{duration: 0.2}}
-              className='overflow-hidden whitespace-nowrap'
+              className='overflow-hidden  whitespace-nowrap flex items-center '
             >
-              {!isCollapsed && 'Back to store'}
+              {!isCollapsed && (
+                <div className='text-base flex items-center justify-center gap-[1px]'>
+                  <span className='text-base mb-[2px]  text-gray-600'>B</span>
+
+                  <span className='text-[11px]  text-gray-600'>
+                    ack to store{' '}
+                  </span>
+                </div>
+              )}
             </motion.span>
           </Link>
         </div>

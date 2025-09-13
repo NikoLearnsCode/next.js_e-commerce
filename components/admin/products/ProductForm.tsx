@@ -14,8 +14,9 @@ import {
 import {generateSlug} from '@/components/admin/utils/slug-generator';
 import Image from 'next/image';
 import {Product} from '@/lib/types/db';
-import {X} from 'lucide-react';
-import CustomSelect from '../shared/CustomSelect';
+import {UploadCloud, X} from 'lucide-react';
+import CustomSelect from '../shared/Select';
+import FileInput from '../shared/FileInput';
 
 type ProductFormProps = {
   mode: 'create' | 'edit';
@@ -24,8 +25,9 @@ type ProductFormProps = {
 
 export default function ProductForm({mode, initialData}: ProductFormProps) {
   const {categories, createProduct, updateProduct, isLoading} = useAdmin();
-  const [imageFiles, setImageFiles] = useState<File[]>([]);
-  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [newImageFiles, setNewImageFiles] = useState<File[]>([]);
+  const [existingImages, setExistingImages] = useState<string[]>([]);
+  const [newImagePreviews, setNewImagePreviews] = useState<string[]>([]);
 
   const [subCategoryOptions, setSubCategoryOptions] = useState<
     DropdownOption[]
@@ -43,17 +45,17 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
     resolver: zodResolver(productFormSchema),
     mode: 'onChange',
     defaultValues: {
-      name: '',
-      slug: '',
-      description: '',
+      name: 'TEST NAME',
+      slug: 'TEST SLUG',
+      description: 'TEST DESCRIPTION',
       // @ts-ignore
       price: '',
-      brand: '',
-      color: '',
-      gender: '',
-      category: '',
-      sizes: '',
-      specs: '',
+      brand: 'TEST BRAND',
+      color: 'TEST COLOR',
+      gender: 'TEST GENDER',
+      category: 'TEST CATEGORY',
+      sizes: 'TEST SIZES',
+      specs: 'TEST SPECS',
     },
   });
 
@@ -103,8 +105,13 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
   // Ladda befintliga bilder vid edit mode
   useEffect(() => {
     if (mode === 'edit' && initialData?.images) {
-      setImagePreviews(initialData.images);
-      setImageFiles([]);
+      setExistingImages(initialData.images);
+      setNewImageFiles([]);
+      setNewImagePreviews([]);
+    } else {
+      setExistingImages([]);
+      setNewImageFiles([]);
+      setNewImagePreviews([]);
     }
   }, [mode, initialData]);
 
@@ -144,19 +151,12 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
     }
   }, [selectedMainCategorySlug, categories, resetField, mode]);
 
-  // Hanterar bilduppladdning
-  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
+  // Denna funktion tar emot filerna från FileInput-komponenten
+  const handleImageChange = (files: File[]) => {
+    setNewImageFiles((prevFiles) => [...prevFiles, ...files]);
 
-    if (files) {
-      const newFiles = Array.from(files);
-      setImageFiles((prev) => [...prev, ...newFiles]);
-
-      const newPrevies = newFiles.map((file: File) =>
-        URL.createObjectURL(file)
-      );
-      setImagePreviews((prev) => [...prev, ...newPrevies]);
-    }
+    const newPreviews = files.map((file) => URL.createObjectURL(file));
+    setNewImagePreviews((prevPreviews) => [...prevPreviews, ...newPreviews]);
   };
 
   const onError = (errors: any) => {
@@ -169,10 +169,11 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
         await updateProduct(
           initialData.id,
           data,
-          imageFiles.length > 0 ? imageFiles : undefined
+          newImageFiles,
+          existingImages
         );
       } else {
-        await createProduct(data, imageFiles);
+        await createProduct(data, newImageFiles);
       }
     } catch (error) {
       console.error('Form submission error:', error);
@@ -194,8 +195,9 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
       specs: '',
     });
 
-    setImageFiles([]);
-    setImagePreviews([]);
+    setExistingImages([]);
+    setNewImageFiles([]);
+    setNewImagePreviews([]);
   };
 
   return (
@@ -204,7 +206,7 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
       className='flex flex-col h-full'
     >
       {/* Scrollbart område för alla input-fält */}
-      <div className='flex-1 space-y-4 scrollbar-hide overflow-y-auto pt-8 pb-16 pr-5 -mr-5'>
+      <div className='flex-1 space-y-4 scrollbar-hide overflow-y-auto pt-5 pb-16 pr-5 -mr-5'>
         <div className='grid grid-cols-1 md:grid-cols-1 gap-4  '>
           {/* Huvudkategori Select */}
           <div>
@@ -272,6 +274,7 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
             {...register('name')}
             id='product-name'
             label='Produktnamn *'
+            value={watch('name')}
             as='input'
             type='text'
             hasError={!!errors.name}
@@ -281,9 +284,9 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
             {...register('slug')}
             id='product-slug'
             label='Slug *'
+            value={watch('slug')}
             as='input'
             type='text'
-            value={watch('slug')}
             hasError={!!errors.slug}
             errorMessage={errors.slug?.message}
           />
@@ -291,6 +294,7 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
             {...register('price')}
             id='product-price'
             label='Pris (SEK) *'
+            value={watch('price').toString()}
             as='input'
             type='number'
             hasError={!!errors.price}
@@ -300,6 +304,7 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
             {...register('brand')}
             id='product-brand'
             label='Märke *'
+            value={watch('brand')}
             as='input'
             type='text'
             hasError={!!errors.brand}
@@ -309,6 +314,7 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
             {...register('color')}
             id='product-color'
             label='Färg *'
+            value={watch('color')}
             as='input'
             type='text'
             hasError={!!errors.color}
@@ -319,6 +325,7 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
             {...register('sizes')}
             id='product-sizes'
             label='Storlekar *'
+            value={watch('sizes')}
             as='input'
             type='text'
             // className='w-full col-span-2 col-start-1 '
@@ -329,6 +336,7 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
             {...register('description')}
             id='product-description'
             label='Beskrivning *'
+            value={watch('description')}
             as='textarea'
             rows={3}
             className='w-full  col-span-2 col-start-1'
@@ -339,6 +347,7 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
             {...register('specs')}
             id='product-specs'
             label='Specifikationer (optional)'
+            value={watch('specs')}
             as='textarea'
             className=' w-full col-span-2 col-start-1'
             rows={5}
@@ -348,56 +357,108 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
         </div>
 
         {/* BILDUPPLADDNING */}
-        <div className='hover:border-gray-500 rounded-xs'>
-          <label
-            htmlFor='image-upload'
-            className='block uppercase font-syne ml-2 text-base text-black font-medium mb-4'
-          >
-            Bilder *
-          </label>
-          <input
+        <div className='sticky -top-5 z-10 pb-2.5 bg-white '>
+          <FileInput
             id='image-upload'
-            type='file'
             multiple
             accept='image/*'
-            onChange={handleImageChange}
-            className='block w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-xs file:uppercase file:text-xs uppercase file:font-semibold  file:cursor-pointer  cursor-pointer'
-          />
-          {imagePreviews.length > 0 && (
-            <div className='mt-4 grid grid-cols-2 sm:grid-cols-2 gap-1'>
-              {imagePreviews.map((src, index) => (
-                <div key={index} className='relative'>
-                  <Image
-                    src={src}
-                    height={250}
-                    width={160}
-                    alt={`Förhandsgranskning ${index + 1}`}
-                    className='w-full h-auto object-cover rounded-md'
-                  />
-                  <button
-                    type='button'
-                    className='absolute cursor-pointer text-gray-500 hover:text-red-700 p-3 top-0 right-0'
-                    onClick={() =>
-                      setImagePreviews(
-                        imagePreviews.filter((_, i) => i !== index)
-                      )
-                    }
-                  >
-                    <X size={12} strokeWidth={1.5} />
-                  </button>
-                </div>
-              ))}
+            onFilesSelected={handleImageChange}
+          >
+            <div className='flex flex-col items-center justify-center w-full p-4 border-2 border-dashed border-gray-300 rounded-lg text-center hover:border-gray-500 transition-colors'>
+              <UploadCloud className='w-8 h-8 text-gray-600 mb-1.5' />
+              <p className='font-semibold text-gray-700 uppercase text-xs'>
+                Klicka för att ladda upp bilder
+              </p>
             </div>
-          )}
+          </FileInput>
         </div>
+        {(existingImages.length > 0 || newImagePreviews.length > 0) && (
+          <div className='mt-4 space-y-4'>
+            {/* Befintliga bilder */}
+            {existingImages.length > 0 && (
+              <div>
+                <p className='text-sm  font-medium text-gray-700 ml-1 my-2'>
+                  Befintliga bilder:
+                </p>
+                <div className='grid grid-cols-2 sm:grid-cols-2 gap-1 mb-8'>
+                  {existingImages.map((src, index) => (
+                    <div key={`existing-${index}`} className='relative group '>
+                      <Image
+                        src={src}
+                        height={250}
+                        width={160}
+                        alt={`Befintlig bild ${index + 1}`}
+                        className='w-full h-auto object-cover rounded-md '
+                      />
+                      <button
+                        type='button'
+                        className='absolute cursor-pointer rounded-bl-full group-hover:bg-white group-active:bg-white transition-all duration-300  text-gray-500 group-hover:text-black hover:text-red-800 px-3 py-2.5 -top-1 -right-1'
+                        onClick={() =>
+                          setExistingImages(
+                            existingImages.filter((_, i) => i !== index)
+                          )
+                        }
+                      >
+                        <X size={12} strokeWidth={1.5} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Nya bilder */}
+            {newImagePreviews.length > 0 && (
+              <div>
+                <p className='text-sm  font-medium text-gray-700 ml-1 my-2'>
+                  Nya bilder:
+                </p>
+                <div className='grid grid-cols-2 sm:grid-cols-2 gap-1 mb-8'>
+                  {newImagePreviews.map((src, index) => (
+                    <div key={`new-${index}`} className='relative group'>
+                      <Image
+                        src={src}
+                        height={250}
+                        width={160}
+                        alt={`Ny bild ${index + 1}`}
+                        className='w-full h-auto object-cover rounded-md '
+                      />
+                      <button
+                        type='button'
+                        className='absolute cursor-pointer rounded-bl-full group-hover:bg-white group-active:bg-white transition-all duration-300  text-gray-500 group-hover:text-black hover:text-red-800 px-3 py-2.5 -top-1 -right-1'
+                        onClick={() => {
+                          setNewImagePreviews(
+                            newImagePreviews.filter((_, i) => i !== index)
+                          );
+                          setNewImageFiles(
+                            newImageFiles.filter((_, i) => i !== index)
+                          );
+                        }}
+                      >
+                        <X size={12} strokeWidth={1.5} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Footer med knappar som alltid är synlig */}
-      <div className='flex w-full gap-2 pb-6 pt-4 '>
+      <div className='flex w-full gap-2 pb-6 pt-3 '>
         <Button
-          className='w-full mt-0 h-14'
+          className='w-full mt-0 h-12'
           type='submit'
           disabled={isLoading || !isDirty /* || !isValid */}
+          /*          disabled={
+            isLoading ||
+            !isDirty ||
+            (mode === 'create' && newImageFiles.length === 0) ||
+            (mode === 'edit' &&
+              existingImages.length + newImageFiles.length === 0)
+          } */
         >
           {isLoading
             ? mode === 'edit'
@@ -408,7 +469,7 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
               : 'Spara produkt'}
         </Button>
         <Button
-          className='w-full mt-0 h-14'
+          className='w-full mt-0 h-12'
           variant='outline'
           type='button'
           onClick={handleReset}

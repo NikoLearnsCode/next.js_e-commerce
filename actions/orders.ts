@@ -4,7 +4,7 @@ import {getServerSession} from 'next-auth';
 import {authOptions} from '@/lib/auth';
 import {getSessionId} from '@/utils/cookies';
 import {CartItemWithProduct} from '@/lib/types/db';
-import {DeliveryFormData} from '@/lib/validators';
+import {DeliveryFormData, deliverySchema} from '@/lib/validators';
 import {db} from '@/drizzle/index';
 import {ordersTable, orderItemsTable} from '@/drizzle/db/schema';
 import {eq, desc, inArray} from 'drizzle-orm';
@@ -17,6 +17,18 @@ export async function createOrder(
   totalPrice: number
 ) {
   try {
+    const deliveryValidation = deliverySchema.safeParse(deliveryInfo);
+    if (!deliveryValidation.success) {
+      console.error(
+        'Delivery validation failed:',
+        deliveryValidation.error.flatten()
+      );
+      return {
+        success: false,
+        error: 'Leveransinformationen är ogiltig. Kontrollera alla fält.',
+      };
+    }
+
     const session = await getServerSession(authOptions);
     const user = session?.user;
 
