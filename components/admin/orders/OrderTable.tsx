@@ -39,6 +39,11 @@ export default function OrderTable({orders}: OrderTableProps) {
     },
   ];
 
+
+  
+  
+      
+
   const simpleKeys = [
     'payment_info',
     'status',

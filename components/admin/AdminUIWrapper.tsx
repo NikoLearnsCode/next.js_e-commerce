@@ -34,7 +34,7 @@ export default function AdminUIWrapper({children}: AdminUIWrapperProps) {
           isCollapsed ? 'ml-15' : 'ml-45'
         }`}
       >
-        <div className='py-12'>{children}</div>
+        <div className='py-4'>{children}</div>
       </main>
       <FormWrapper onClose={closeSidebar} />
 

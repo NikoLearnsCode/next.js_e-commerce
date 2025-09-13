@@ -19,6 +19,7 @@ export const productFormSchema = z.object({
     .string({required_error: 'Minst en storlek måste anges.'})
     .min(1, 'Minst en storlek måste anges.'),
   specs: z.string().optional(),
+  publishedAt: z.date().optional(),
 });
 
 export type ProductFormData = z.infer<typeof productFormSchema>;

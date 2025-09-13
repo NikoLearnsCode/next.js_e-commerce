@@ -9,13 +9,13 @@ import {useAdmin} from '@/context/AdminContextProvider';
 // Letter-based icon component
 const LetterIcon = ({
   letter,
-  // isActive,
+  isActive,
 }: {
   letter: string;
-  // isActive: boolean;
+  isActive: boolean;
 }) => (
   <div
-    className={`h-7 w-3.5 shrink-0  font-semibold   mb-[2px] flex items-center justify-center   text-base  `}
+    className={`h-7 w-3.5 shrink-0  font-semibold   mb-[2.25px] flex items-center justify-center   text-base ${isActive ? 'text-black' : 'text-gray-600 group-hover:text-black'}`}
   >
     {letter}
   </div>
@@ -51,13 +51,13 @@ export default function AdminSidebar() {
     >
       <div className='flex h-full flex-col'>
         {/* Logo and Toggle */}
-        <div className='flex h-16 shrink-0 items-center justify-end'>
+        <div className='flex h-18 shrink-0 items-center justify-end'>
           <button
             onClick={toggleSidebar}
             className=' px-3 py-6 cursor-pointer rounded-md relative flex flex-col justify-center items-center gap-1'
           >
             <motion.span
-              className={`inline-flex border-t-[1.5px] w-5  ${isCollapsed ? 'border-gray-700' : 'border-gray-400'}`}
+              className={`inline-flex border-t-[1.5px] w-5  ${isCollapsed ? 'border-gray-600' : 'border-gray-400'}`}
               animate={{
                 rotate: isCollapsed ? 0 : 45,
                 y: isCollapsed ? 0 : 2.5,
@@ -65,7 +65,7 @@ export default function AdminSidebar() {
               transition={{duration: 0.2}}
             />
             <motion.span
-              className={`inline-flex border-t-[1.5px] w-5  ${isCollapsed ? 'border-gray-700' : 'border-gray-400 '}`}
+              className={`inline-flex border-t-[1.5px] w-5  ${isCollapsed ? 'border-gray-600' : 'border-gray-400 '}`}
               animate={{
                 rotate: isCollapsed ? 0 : -45,
                 y: isCollapsed ? 0 : -2.5,
@@ -92,7 +92,7 @@ export default function AdminSidebar() {
                            ${
                              isActive
                                ? 'bg-gray-50 border border-gray-100  text-black'
-                               : 'bg-white border-transparent hover:bg-gray-50 text-gray-700 hover:text-black'
+                               : 'bg-white border-transparent hover:bg-gray-50 text-gray-600 hover:text-black'
                            }
 
 
@@ -101,7 +101,7 @@ export default function AdminSidebar() {
                           isCollapsed ? item.letter + item.name : undefined
                         }
                       >
-                        <LetterIcon letter={item.letter} />
+                        <LetterIcon letter={item.letter} isActive={isActive} />
                         <motion.span
                           animate={{
                             opacity: isCollapsed ? 0 : 1,
@@ -153,10 +153,10 @@ export default function AdminSidebar() {
               className='  whitespace-nowrap flex items-center '
             >
               {!isCollapsed && (
-                <div className='text-base flex items-center justify-center gap-[1px]'>
-                  <span className='text-[16px] mb-[2px]  text-gray-600'>B</span>
+                <div className='text-base flex group items-center justify-center gap-[1px]'>
+                  <span className='text-[16px] mb-[2px]  text-gray-600 group-hover:text-black'>B</span>
 
-                  <span className='text-[11px]  text-gray-600'>
+                  <span className='text-[11px]  text-gray-600 group-hover:text-black'>
                     ack to store{' '}
                   </span>
                 </div>

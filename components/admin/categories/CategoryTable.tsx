@@ -24,6 +24,7 @@ import {
   getAllCategoryIdsRecursive,
 } from '../utils/admin.table-helpers';
 
+
 type CategoryManagerProps = {
   categories: CategoryWithChildren[];
 };
@@ -276,20 +277,22 @@ export default function CategoryManager({categories}: CategoryManagerProps) {
 
   return (
     <div>
-      <div className='pb-1 flex items-center gap-2'>
+      
+      <div className='pb-1 pt-2 flex items-center gap-2'>
         <button
           onClick={expandAll}
-          className='p-2 text-sm cursor-pointer hover:underline text-gray-600 font-medium'
+          className='p-2 text-xs cursor-pointer hover:underline text-gray-600 font-medium'
         >
           Expandera
         </button>
         <button
           onClick={collapseAll}
-          className='p-2 text-sm cursor-pointer hover:underline text-gray-600 font-medium'
+          className='p-2 text-xs cursor-pointer hover:underline text-gray-600 font-medium'
         >
           Kollapsa
         </button>
       </div>
+
 
       <AdminTable
         data={flattenedCategories}

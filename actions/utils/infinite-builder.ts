@@ -41,6 +41,10 @@ export function buildCategoryGenderFilters(
   const conditions = [];
   if (category) conditions.push(eq(productsTable.category, category));
   if (gender) conditions.push(eq(productsTable.gender, gender));
+
+  // Filtrera bort produkter med framtida datum
+  conditions.push(sql`${productsTable.published_at} <= NOW()`);
+
   return conditions;
 }
 
@@ -79,7 +83,7 @@ export function buildIsNewFilter(isNewOnly: boolean) {
   if (!isNewOnly) return [];
 
   return [
-    sql`${productsTable.created_at} > NOW() - INTERVAL '${sql.raw(NEW_PRODUCT_DAYS.toString())} days'`,
+    sql`${productsTable.published_at} > NOW() - INTERVAL '${sql.raw(NEW_PRODUCT_DAYS.toString())} days'`,
   ];
 }
 
@@ -231,10 +235,13 @@ export async function fetchAvailableFilterOptions(
   if (gender) metadataConditions.push(eq(productsTable.gender, gender));
   if (category) metadataConditions.push(eq(productsTable.category, category));
 
+  // Filtrera bort produkter med framtida datum
+  metadataConditions.push(sql`${productsTable.published_at} <= NOW()`);
+
   // Add new products filter if isNewOnly is true
   if (isNewOnly) {
     metadataConditions.push(
-      sql`${productsTable.created_at} > NOW() - INTERVAL '${sql.raw(NEW_PRODUCT_DAYS.toString())} days'`
+      sql`${productsTable.published_at} > NOW() - INTERVAL '${sql.raw(NEW_PRODUCT_DAYS.toString())} days'`
     );
   }
 

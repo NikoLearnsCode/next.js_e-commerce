@@ -78,6 +78,9 @@ export const productsTable = pgTable('products', {
   updated_at: timestamp('updated_at', {withTimezone: true})
     .notNull()
     .defaultNow(),
+  published_at: timestamp('published_at', {withTimezone: true})
+    .notNull()
+    .defaultNow(),
 });
 
 // CARTS

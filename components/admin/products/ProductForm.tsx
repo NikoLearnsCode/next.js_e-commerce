@@ -5,6 +5,7 @@ import {useForm} from 'react-hook-form';
 import {productFormSchema, type ProductFormData} from '@/lib/form-validators';
 import {Button} from '@/components/shared/ui/button';
 import {FloatingLabelInput} from '@/components/shared/ui/floatingLabelInput';
+import {CustomDateInput} from '@/components/shared/ui/DateInput';
 import {useAdmin} from '@/context/AdminContextProvider';
 import {useState, useEffect} from 'react';
 import {
@@ -32,6 +33,7 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
   const [subCategoryOptions, setSubCategoryOptions] = useState<
     DropdownOption[]
   >([]);
+  const [realtimeUpdate, setRealtimeUpdate] = useState(true);
 
   const {
     register,
@@ -56,6 +58,7 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
       category: 'TEST CATEGORY',
       sizes: 'TEST SIZES',
       specs: 'TEST SPECS',
+      publishedAt: new Date(),
     },
   });
 
@@ -78,6 +81,9 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
         specs: Array.isArray(initialData.specs)
           ? initialData.specs.join('\n')
           : '',
+        publishedAt: initialData.published_at
+          ? new Date(initialData.published_at)
+          : undefined,
       });
     }
   }, [mode, initialData, reset]);
@@ -151,6 +157,17 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
     }
   }, [selectedMainCategorySlug, categories, resetField, mode]);
 
+  // Realtime clock update i create mode
+  useEffect(() => {
+    if (mode === 'create' && realtimeUpdate) {
+      const interval = setInterval(() => {
+        setValue('publishedAt', new Date());
+      }, 1000);
+
+      return () => clearInterval(interval);
+    }
+  }, [mode, realtimeUpdate, setValue]);
+
   // Denna funktion tar emot filerna från FileInput-komponenten
   const handleImageChange = (files: File[]) => {
     setNewImageFiles((prevFiles) => [...prevFiles, ...files]);
@@ -193,11 +210,17 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
       category: '',
       sizes: '',
       specs: '',
+      publishedAt: new Date(),
     });
 
     setExistingImages([]);
     setNewImageFiles([]);
     setNewImagePreviews([]);
+
+    // Starta realtime update igen
+    if (mode === 'create') {
+      setRealtimeUpdate(true);
+    }
   };
 
   return (
@@ -354,10 +377,25 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
             hasError={!!errors.specs}
             errorMessage={errors.specs?.message}
           />
+          <CustomDateInput
+            id='product-published-at'
+            label='Publiceringsdatum (optional, default: nu)'
+            value={watch('publishedAt') || null}
+            onChange={(date) => {
+              setValue('publishedAt', date || undefined);
+              // Stoppa realtime update när användaren manuellt ändrar
+              if (mode === 'create') {
+                setRealtimeUpdate(false);
+              }
+            }}
+            className='w-full col-span-2 col-start-1 mb-2'
+            hasError={!!errors.publishedAt}
+            errorMessage={errors.publishedAt?.message}
+          />
         </div>
 
         {/* BILDUPPLADDNING */}
-        <div className='sticky  -top-5 z-10 pb-2.5 bg-white '>
+        <div className='sticky -top-5 z-10 pb-2.5 bg-white '>
           <FileInput
             id='image-upload'
             multiple
@@ -365,7 +403,7 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
             onFilesSelected={handleImageChange}
           >
             <div className='flex flex-col items-center justify-center w-full p-4 border-2 border-dashed border-gray-300 rounded-lg text-center hover:border-gray-500 transition-colors'>
-              <UploadCloud className='w-8 h-8 text-gray-600 mb-1.5' />
+              <UploadCloud strokeWidth={1.25} className='w-8 h-8 text-gray-600 mb-1.5' />
               <p className='font-semibold text-gray-700 uppercase text-xs'>
                 Klicka för att ladda upp produktbilder
               </p>

@@ -9,6 +9,7 @@ import {
 } from '@/components/admin/utils/admin-helpers';
 import {formatPrice} from '@/utils/format';
 import {useAdmin} from '@/context/AdminContextProvider';
+import AdminSearch from '../shared/AdminSearch';
 
 type ProductManagerProps = {
   products: Product[];
@@ -22,8 +23,8 @@ export default function ProductManager({products}: ProductManagerProps) {
     'gender',
     'category',
     'sizes',
-    'created_at',
     'updated_at',
+    'published_at',
   ];
 
   const filteredKeys = Object.keys(products[0]).filter((key) =>
@@ -35,12 +36,14 @@ export default function ProductManager({products}: ProductManagerProps) {
     cell: (product: Product) => {
       const value = product[header as keyof Product];
 
-      if (header === 'created_at') {
-        return <div>{formatDateForAdmin(product.created_at)}</div>;
-      }
-
-      if (header === 'updated_at') {
-        return <div>{formatDateForAdmin(product.updated_at)}</div>;
+      if (header === 'updated_at' || header === 'published_at') {
+        return (
+          <div
+            className={`text-[13px] font-medium ${value && value > new Date() ? 'text-red-800' : 'text-gray-600'}`}
+          >
+            {formatDateForAdmin(value as Date)}
+          </div>
+        );
       }
 
       if (header === 'price') {
@@ -56,16 +59,14 @@ export default function ProductManager({products}: ProductManagerProps) {
 
   const actions = [
     {
-      label: <FiEdit size={16} className='text-gray-600 hover:text-gray-900' />,
+      label: <FiEdit size={16} />,
       key: 'edit',
       onClick: (product: Product) => {
         openSidebar('product', product);
       },
     },
     {
-      label: (
-        <FiTrash size={16} className='text-gray-600 hover:text-gray-900' />
-      ),
+      label: <FiTrash size={16} />,
       key: 'delete',
       onClick: (product: Product, event?: React.MouseEvent) => {
         // Spara trigger-elementet för dialogruta
@@ -83,5 +84,11 @@ export default function ProductManager({products}: ProductManagerProps) {
     },
   ];
 
-  return <AdminTable data={products} columns={columns} actions={actions} />;
+  return (
+    <>
+      <AdminSearch searchParam='search' maxLength={50} placeholder='SÖK namn, pris, kategori, slug' />
+
+      <AdminTable data={products} columns={columns} actions={actions} />
+    </>
+  );
 }

@@ -10,7 +10,7 @@ export default function AdminDashboard() {
           className='bg-white p-5 hover:border-gray-300 rounded-sm border border-gray-200'
           href='/admin/products'
         >
-          <h2 className='text-base uppercase font-semibold text-gray-700 mb-2 underline underline-offset-2 '>Produkter</h2>
+          <h2 className='text-base uppercase font-semibold  mb-1  '>Produkter</h2>
           <p className='text-gray-600 mb-4'>
             Hantera alla produkter i systemet
           </p>
@@ -19,14 +19,14 @@ export default function AdminDashboard() {
           className='bg-white p-5 rounded-sm border border-das hover:border-gray-300  border-gray-200'
           href='/admin/categories'
         >
-          <h2 className='text-base uppercase font-semibold text-gray-700 mb-2 underline underline-offset-2 '>Kategorier</h2>
+          <h2 className='text-base uppercase font-semibold  mb-1  '>Kategorier</h2>
           <p className='text-gray-600 mb-4'>Hantera produktkategorier</p>
         </Link>
         <Link
           className='bg-white p-5 rounded-sm border hover:border-gray-300  border-gray-200'
           href='/admin/orders'
         >
-          <h2 className='text-base uppercase font-semibold text-gray-700 mb-2 underline underline-offset-2 '>
+          <h2 className='text-base uppercase font-semibold  mb-1  '>
             Beställningar
           </h2>
           <p className='text-gray-600 mb-4'>Hantera beställningar</p>

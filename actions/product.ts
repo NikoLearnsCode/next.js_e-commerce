@@ -12,7 +12,7 @@ import {
   buildCursorPaginationWhereClause,
   createSortOrderClause,
   fetchAvailableFilterOptions,
-} from '@/actions/utils/products.query-builder';
+} from '@/actions/utils/infinite-builder';
 import {db} from '@/drizzle/index';
 import {NEW_PRODUCT_DAYS} from '@/lib/constants';
 
@@ -25,12 +25,17 @@ export async function getProductSlugAndRelatedProducts(slug: string): Promise<{
     .select({
       ...getTableColumns(productsTable),
       isNew:
-        sql<boolean>`${productsTable.created_at} > NOW() - INTERVAL '${sql.raw(NEW_PRODUCT_DAYS.toString())} days'`.as(
+        sql<boolean>`${productsTable.published_at} > NOW() - INTERVAL '${sql.raw(NEW_PRODUCT_DAYS.toString())} days'`.as(
           'isNew'
         ),
     })
     .from(productsTable)
-    .where(eq(productsTable.slug, slug))
+    .where(
+      and(
+        eq(productsTable.slug, slug),
+        sql`${productsTable.published_at} <= NOW()`
+      )
+    )
     .limit(1);
 
   if (mainProduct.length === 0) {
@@ -55,7 +60,7 @@ export async function getProductSlugAndRelatedProducts(slug: string): Promise<{
         slug: productsTable.slug,
         created_at: productsTable.created_at,
         isNew:
-          sql<boolean>`${productsTable.created_at} > NOW() - INTERVAL '${sql.raw(NEW_PRODUCT_DAYS.toString())} days'`.as(
+          sql<boolean>`${productsTable.published_at} > NOW() - INTERVAL '${sql.raw(NEW_PRODUCT_DAYS.toString())} days'`.as(
             'isNew'
           ),
       })
@@ -64,7 +69,8 @@ export async function getProductSlugAndRelatedProducts(slug: string): Promise<{
         and(
           eq(productsTable.category, category),
           eq(productsTable.gender, gender),
-          ne(productsTable.id, id)
+          ne(productsTable.id, id),
+          sql`${productsTable.published_at} <= NOW()`
         )
       )
       .limit(8),
@@ -78,7 +84,7 @@ export async function getProductSlugAndRelatedProducts(slug: string): Promise<{
         slug: productsTable.slug,
         created_at: productsTable.created_at,
         isNew:
-          sql<boolean>`${productsTable.created_at} > NOW() - INTERVAL '${sql.raw(NEW_PRODUCT_DAYS.toString())} days'`.as(
+          sql<boolean>`${productsTable.published_at} > NOW() - INTERVAL '${sql.raw(NEW_PRODUCT_DAYS.toString())} days'`.as(
             'isNew'
           ),
       })
@@ -87,7 +93,8 @@ export async function getProductSlugAndRelatedProducts(slug: string): Promise<{
         and(
           eq(productsTable.gender, gender),
           ne(productsTable.id, id),
-          ne(productsTable.category, category)
+          ne(productsTable.category, category),
+          sql`${productsTable.published_at} <= NOW()`
         )
       )
       .limit(8),

@@ -24,6 +24,7 @@ export const adminHeaderMapping: Record<string, string> = {
   slug: 'slug',
   created_at: 'Skapad',
   updated_at: 'Uppdaterad',
+  published_at: 'Publicerad',
 
   // Kategori-specifika
   isActive: 'Status',
