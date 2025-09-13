@@ -13,6 +13,10 @@ export const RadioOption = forwardRef<HTMLInputElement, RadioOptionProps>(
   ({id, label, children, className, ...props}, ref) => {
     const inputRef = useRef<HTMLInputElement | null>(null);
 
+    const handleRadioClick = () => {
+      inputRef.current?.click();
+    };
+
     const handleKeyDown = (event: React.KeyboardEvent) => {
       if (event.key === ' ' || event.key === 'Enter') {
         event.preventDefault();
@@ -23,15 +27,15 @@ export const RadioOption = forwardRef<HTMLInputElement, RadioOptionProps>(
     const accessibilityProps = {
       tabIndex: 0,
       onKeyDown: handleKeyDown,
+      onClick: handleRadioClick,
       role: 'radio',
       'aria-checked': props.checked,
+      'aria-labelledby': label ? `${id}-label` : undefined,
     };
 
     return (
-      <label
-        htmlFor={id}
-        className={className || 'flex items-center space-x-2 cursor-pointer'}
-      >
+      <div className={className || 'flex items-center space-x-2'}>
+        {/* Dold input för formulär-integration */}
         <input
           type='radio'
           id={id}
@@ -48,18 +52,18 @@ export const RadioOption = forwardRef<HTMLInputElement, RadioOptionProps>(
           }}
         />
 
-        {/* 2. Använder React.cloneElement för att lägga till props på d children */}
+        {/* Custom children med klickbar radio-funktionalitet */}
         {children && React.isValidElement(children) ? (
           // Klonar det yttre elementet i `children` och injicerar accessibilityProps
           React.cloneElement(children as React.ReactElement, accessibilityProps)
         ) : (
-          // Standard-läget använder samma props för konsistens
+          // Standard-läget - endast radio-knappen är klickbar
           <>
             <div className='relative'>
               <div
-                className={`w-5 h-5 border ${
+                className={`w-5 h-5 border cursor-pointer ${
                   props.checked ? 'border-black' : 'border-gray-300'
-                } flex items-center justify-center`}
+                } flex items-center justify-center hover:border-gray-500 transition-colors`}
                 {...accessibilityProps}
               >
                 {props.checked && (
@@ -68,6 +72,7 @@ export const RadioOption = forwardRef<HTMLInputElement, RadioOptionProps>(
                     viewBox='0 0 20 20'
                     fill='currentColor'
                     xmlns='http://www.w3.org/2000/svg'
+                    aria-hidden='true'
                   >
                     <path
                       fillRule='evenodd'
@@ -78,10 +83,17 @@ export const RadioOption = forwardRef<HTMLInputElement, RadioOptionProps>(
                 )}
               </div>
             </div>
-            <span className='text-xs uppercase cursor-pointer'>{label}</span>
+            {label && (
+              <span
+                id={`${id}-label`}
+                className='text-xs uppercase w-fit select-none'
+              >
+                {label}
+              </span>
+            )}
           </>
         )}
-      </label>
+      </div>
     );
   }
 );

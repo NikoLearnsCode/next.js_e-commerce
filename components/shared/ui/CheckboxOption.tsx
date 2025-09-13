@@ -8,13 +8,16 @@ interface CheckboxOptionProps
   label: string;
   className?: string;
   svgClassName?: string;
-  labelClassName?: string; // Ny prop för text-label
+  labelClassName?: string;
 }
 
 export const CheckboxOption = forwardRef<HTMLInputElement, CheckboxOptionProps>(
-  // Plocka ut alla tre custom className props
   ({id, label, className, svgClassName, labelClassName, ...props}, ref) => {
     const inputRef = useRef<HTMLInputElement | null>(null);
+
+    const handleCheckboxClick = () => {
+      inputRef.current?.click();
+    };
 
     const handleKeyDown = (event: React.KeyboardEvent) => {
       if (event.key === ' ' || event.key === 'Enter') {
@@ -24,29 +27,29 @@ export const CheckboxOption = forwardRef<HTMLInputElement, CheckboxOptionProps>(
     };
 
     return (
-      <label
-        htmlFor={id}
-        className='flex items-center space-x-2 cursor-pointer'
-      >
+      <div className='flex w-fit items-center space-x-2'>
+        {/* Klickbar checkbox - endast denna del triggar aktivering */}
         <div
-          // För div:en
           className={twMerge(
-            'w-5 h-5 border',
+            'w-5 h-5 border cursor-pointer',
             props.checked ? 'border-black' : 'border-gray-300',
             'flex items-center justify-center',
+            'hover:border-gray-500 transition-colors',
             className
           )}
           role='checkbox'
           aria-checked={props.checked}
+          aria-labelledby={`${id}-label`}
           tabIndex={0}
+          onClick={handleCheckboxClick}
           onKeyDown={handleKeyDown}
         >
           {props.checked && (
             <svg
-              // För SVGen
               className={twMerge('w-4 h-4 text-black', svgClassName)}
               viewBox='0 0 20 20'
               fill='currentColor'
+              aria-hidden='true'
             >
               <path
                 fillRule='evenodd'
@@ -57,6 +60,7 @@ export const CheckboxOption = forwardRef<HTMLInputElement, CheckboxOptionProps>(
           )}
         </div>
 
+        {/* Dold input för formulär-integration */}
         <input
           type='checkbox'
           id={id}
@@ -73,16 +77,17 @@ export const CheckboxOption = forwardRef<HTMLInputElement, CheckboxOptionProps>(
           }}
         />
 
+        {/* Text-label - INTE klickbar */}
         <span
-          // För texten
+          id={`${id}-label`}
           className={twMerge(
-            'text-xs uppercase cursor-pointer',
+            'text-xs uppercase w-fit select-none',
             labelClassName
           )}
         >
           {label}
         </span>
-      </label>
+      </div>
     );
   }
 );
