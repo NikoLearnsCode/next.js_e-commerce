@@ -27,7 +27,7 @@ export default function AdminHeader({
   };
 
   return (
-    <div className='pr-4 pb-6 flex items-center justify-between'>
+    <div className='pr-2 pb-6 flex items-center justify-between'>
       <h1 className='text-[17px] uppercase  font-semibold'>
         {title} {count && `(${count})`}
       </h1>

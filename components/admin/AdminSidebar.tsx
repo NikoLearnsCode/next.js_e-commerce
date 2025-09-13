@@ -65,7 +65,7 @@ export default function AdminSidebar() {
               transition={{duration: 0.2}}
             />
             <motion.span
-              className={`inline-flex border-t-[1.5px] w-5  ${isCollapsed ? 'border-gray-700' : 'border-gray-400'}`}
+              className={`inline-flex border-t-[1.5px] w-5  ${isCollapsed ? 'border-gray-700' : 'border-gray-400 '}`}
               animate={{
                 rotate: isCollapsed ? 0 : -45,
                 y: isCollapsed ? 0 : -2.5,
@@ -92,12 +92,14 @@ export default function AdminSidebar() {
                            ${
                              isActive
                                ? 'bg-gray-50 border border-gray-100  text-black'
-                               : 'bg-white border-transparent hover:bg-gray-50 text-gray-500 hover:text-black'
+                               : 'bg-white border-transparent hover:bg-gray-50 text-gray-700 hover:text-black'
                            }
 
 
                         `}
-                        title={isCollapsed ? item.letter + item.name : undefined}
+                        title={
+                          isCollapsed ? item.letter + item.name : undefined
+                        }
                       >
                         <LetterIcon letter={item.letter} />
                         <motion.span
@@ -105,8 +107,8 @@ export default function AdminSidebar() {
                             opacity: isCollapsed ? 0 : 1,
                             width: isCollapsed ? 0 : 'auto',
                           }}
-                          transition={{duration: 0.2}}
-                          className='overflow-hidden whitespace-nowrap'
+                          transition={{duration: 0.5}}
+                          className='  whitespace-nowrap flex items-center '
                         >
                           {!isCollapsed && item.name}
                         </motion.span>
@@ -147,12 +149,12 @@ export default function AdminSidebar() {
                 opacity: isCollapsed ? 0 : 1,
                 width: isCollapsed ? 0 : 'auto',
               }}
-              transition={{duration: 0.2}}
-              className='overflow-hidden  whitespace-nowrap flex items-center '
+              transition={{duration: 0.5}}
+              className='  whitespace-nowrap flex items-center '
             >
               {!isCollapsed && (
                 <div className='text-base flex items-center justify-center gap-[1px]'>
-                  <span className='text-base mb-[2px]  text-gray-600'>B</span>
+                  <span className='text-[16px] mb-[2px]  text-gray-600'>B</span>
 
                   <span className='text-[11px]  text-gray-600'>
                     ack to store{' '}

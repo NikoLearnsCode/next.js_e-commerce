@@ -12,7 +12,7 @@ import {
   buildCursorPaginationWhereClause,
   createSortOrderClause,
   fetchAvailableFilterOptions,
-} from '@/actions/utils/infinite-helpers';
+} from '@/actions/utils/products.query-builder';
 import {db} from '@/drizzle/index';
 import {NEW_PRODUCT_DAYS} from '@/lib/constants';
 

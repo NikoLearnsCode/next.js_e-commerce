@@ -23,7 +23,6 @@ export async function uploadProductImages(
   gender: string,
   category: string
 ): Promise<string[]> {
-
   if (images.length === 0) {
     throw new Error('Inga bilder att ladda upp');
   }
@@ -32,11 +31,9 @@ export async function uploadProductImages(
     throw new Error(`Maximalt ${MAX_IMAGES} bilder tillåtna`);
   }
 
-
   const validationErrors: ValidationError[] = [];
 
   for (const image of images) {
-
     if (!ALLOWED_IMAGE_TYPES.includes(image.type)) {
       validationErrors.push({
         fileName: image.name,
@@ -44,7 +41,6 @@ export async function uploadProductImages(
       });
       continue;
     }
-
 
     if (image.size > MAX_FILE_SIZE) {
       validationErrors.push({
@@ -54,7 +50,6 @@ export async function uploadProductImages(
       continue;
     }
 
-
     if (image.size === 0) {
       validationErrors.push({
         fileName: image.name,
@@ -62,7 +57,6 @@ export async function uploadProductImages(
       });
     }
   }
-
 
   if (validationErrors.length > 0) {
     const errorMessage = validationErrors

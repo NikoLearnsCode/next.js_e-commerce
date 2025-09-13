@@ -392,7 +392,7 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
                       />
                       <button
                         type='button'
-                        className='absolute cursor-pointer rounded-bl-full group-hover:bg-white group-active:bg-white transition-all duration-300  text-gray-500 group-hover:text-black hover:text-red-800 px-3 py-2.5 -top-1 -right-1'
+                        className='absolute cursor-pointer  group-hover:bg-white/50 group-active:bg-white/50 transition-all duration-300  text-gray-500 group-hover:text-black hover:text-red-800 p-2 top-1 right-1'
                         onClick={() =>
                           setExistingImages(
                             existingImages.filter((_, i) => i !== index)
@@ -425,7 +425,7 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
                       />
                       <button
                         type='button'
-                        className='absolute cursor-pointer rounded-bl-full group-hover:bg-white group-active:bg-white transition-all duration-300  text-gray-500 group-hover:text-black hover:text-red-800 px-3 py-2.5 -top-1 -right-1'
+                        className='absolute cursor-pointer  group-hover:bg-white/50 group-active:bg-white/50 transition-all duration-300  text-gray-500 group-hover:text-black hover:text-red-800 p-2 top-1 right-1'
                         onClick={() => {
                           setNewImagePreviews(
                             newImagePreviews.filter((_, i) => i !== index)

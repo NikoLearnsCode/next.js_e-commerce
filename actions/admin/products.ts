@@ -8,6 +8,7 @@ import {ActionResult} from '@/lib/types/query';
 import path from 'path';
 import fs from 'fs/promises';
 import {revalidatePath} from 'next/cache';
+import {isUploadedImage} from '@/utils/image-helpers';
 
 export async function getAllProducts() {
   const products = await db
@@ -186,19 +187,14 @@ export async function updateProduct(
       const oldImages = currentProduct.images || [];
       const newImages = data.images;
 
-      // Ta bort gamla bilder som inte längre används
+      // Ta bort endast gamla bilder från uploads-mappen som inte längre används
       const imagesToDelete = oldImages.filter(
-        (img) => !newImages.includes(img)
+        (img) => !newImages.includes(img) && isUploadedImage(img)
       );
 
       for (const imageUrl of imagesToDelete) {
         try {
-          const imagePath = path.join(
-            process.cwd(),
-            'public',
-
-            imageUrl
-          );
+          const imagePath = path.join(process.cwd(), 'public', imageUrl);
           await fs.unlink(imagePath);
         } catch (error) {
           console.warn('Could not delete old image:', imageUrl, error);
@@ -254,20 +250,18 @@ export async function deleteProduct(id: string): Promise<ActionResult> {
       };
     }
 
-    // Delete images from filesystem
+    // Delete only uploaded images from filesystem (not testdata from public/images)
     if (product.images && product.images.length > 0) {
       for (const imageUrl of product.images) {
-        try {
-          const imagePath = path.join(
-            process.cwd(),
-            'public',
+        // Only delete images from uploads directory
+        if (isUploadedImage(imageUrl)) {
+          try {
+            const imagePath = path.join(process.cwd(), 'public', imageUrl);
 
-            imageUrl
-          );
-
-          await fs.unlink(imagePath);
-        } catch (error) {
-          console.warn('Could not delete image:', imageUrl, error);
+            await fs.unlink(imagePath);
+          } catch (error) {
+            console.warn('Could not delete image:', imageUrl, error);
+          }
         }
       }
     }
