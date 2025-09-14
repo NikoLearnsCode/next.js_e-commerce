@@ -19,9 +19,10 @@ import {
   findCategoriesForDropdown,
   findCategoryById,
 } from '@/components/admin/utils/admin.form-helpers';
-import {UploadCloud} from 'lucide-react';
+import {UploadCloud, X} from 'lucide-react';
 import FileInput from '../shared/FileInput';
 import {uploadCategoryImages} from '@/actions/admin/admin.image-upload.actions';
+import Image from 'next/image';
 
 type CategoryFormProps = {
   mode: 'create' | 'edit';
@@ -209,7 +210,7 @@ export default function CategoryForm({mode, initialData}: CategoryFormProps) {
   const availableParents = getValidParentOptions();
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className='space-y-5'>
+    <form onSubmit={handleSubmit(onSubmit)} className='space-y-5 h-full flex flex-col'>
       <div className='flex-1  space-y-4 overflow-y-auto pt-5 pb-2 scrollbar-hide pr-5 -mr-5'>
         {/* Select 1 - Kategori-typ */}
         <div>
@@ -304,9 +305,9 @@ export default function CategoryForm({mode, initialData}: CategoryFormProps) {
 
         <CheckboxOption
           svgClassName='w-4.5 h-4.5 '
-          className=' ml-0.5  w-10 h-6 '
+          className=' ml-0.5  w-8 h-6 '
           {...register('isActive')}
-          labelClassName={`font-medium text-sm ml-0.5 font-semibold font-syne normal-case  ${watch('isActive') ? 'text-black' : 'text-red-900/80'}`}
+          labelClassName={`font-medium text-sm ml-0.5 font-medium  normal-case  ${watch('isActive') ? 'text-gray-900' : 'text-gray-500'}`}
           id='category-is-active'
           label={watch('isActive') ? 'Aktiv' : 'Inaktiv'}
           checked={watch('isActive')}
@@ -314,11 +315,13 @@ export default function CategoryForm({mode, initialData}: CategoryFormProps) {
 
         {/* BILDUPPLADDNING */}
         {watchedType === 'MAIN-CATEGORY' && (
-          <div className='sticky -top-5 z-10 pb-2.5 pt-4 bg-white space-y-4'>
+          <div
+            className='z-10 pb-2.5 pt-7 bg-white space-y-2'
+          >
             {/* Desktop bild */}
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
-                Desktop-bild (16:9 format rekommenderas)
+              <label className='block -mb-2 text-sm font-medium text-gray-700'>
+                <span className=' font-semibold'>Desktop-bild</span> (16:9 format rekommenderas)
               </label>
               <FileInput
                 onFilesSelected={handleDesktopImageSelect}
@@ -326,35 +329,38 @@ export default function CategoryForm({mode, initialData}: CategoryFormProps) {
                 className='w-full'
                 id='desktop-image-upload'
               >
-                <div className='flex flex-col items-center justify-center w-full p-4 border-2 border-dashed border-gray-300 rounded-lg text-center hover:border-gray-500 transition-colors'>
-                  <UploadCloud className='w-8 h-8 text-gray-600 mb-1.5' />
-                  <p className='font-semibold text-gray-700 uppercase text-xs'>
+                <div className='flex flex-col items-center justify-center w-full p-3 border-2 border-dashed border-gray-300 rounded-lg text-center hover:border-gray-500 transition-colors'>
+                  <UploadCloud strokeWidth={1.25} className='w-8 h-8 text-gray-600' />
+                  {/*   <p className='font-semibold text-gray-700 uppercase text-xs'>
                     Desktop-bild
-                  </p>
+                  </p> */}
                 </div>
               </FileInput>
               {desktopPreview && (
-                <div className='mt-2 relative'>
-                  <img
+                <div className='mt-2.5 mb-10 relative group'>
+                  <Image
                     src={desktopPreview}
                     alt='Desktop förhandsgranskning'
-                    className='w-full h-24 object-cover rounded-lg'
+                    className='w-full h-full object-cover aspect-16/9'
+                    width={200}
+                    height={300}
+                    quality={100}
                   />
                   <button
                     type='button'
                     onClick={clearDesktopImage}
-                    className='absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600'
+                    className='absolute cursor-pointer  group-hover:bg-white/50 group-active:bg-white/50 transition-all duration-300  text-gray-500 group-hover:text-black hover:text-red-800 p-2 top-1 right-1'
                   >
-                    ×
+                    <X size={12} strokeWidth={1.5} />
                   </button>
                 </div>
               )}
             </div>
 
             {/* Mobile bild */}
-            <div>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
-                Mobile-bild (9:16 format rekommenderas)
+            <div className='mt-6'>
+              <label className='block -mb-2 text-sm font-medium text-gray-700 '>
+               <span className=' font-semibold'>Mobile-bild</span> (9:16 format rekommenderas)
               </label>
               <FileInput
                 onFilesSelected={handleMobileImageSelect}
@@ -362,29 +368,32 @@ export default function CategoryForm({mode, initialData}: CategoryFormProps) {
                 className='w-full'
                 id='mobile-image-upload'
               >
-                <div className='flex flex-col items-center justify-center w-full p-4 border-2 border-dashed border-gray-300 rounded-lg text-center hover:border-gray-500 transition-colors'>
-                  <UploadCloud className='w-8 h-8 text-gray-600 mb-1.5' />
-                  <p className='font-semibold text-gray-700 uppercase text-xs'>
+                <div className='flex flex-col items-center justify-center w-full p-3 border-2 border-dashed border-gray-300 rounded-lg text-center hover:border-gray-500 transition-colors'>
+                  <UploadCloud strokeWidth={1.25} className='w-8 h-8 text-gray-600 ' />
+                  {/*  <p className='font-semibold text-gray-700 uppercase text-xs'>
                     Mobile-bild
-                  </p>
+                  </p> */}
                 </div>
               </FileInput>
               {mobilePreview && (
-                <div className='mt-2 relative'>
-                  <img
+                <div className='mt-2.5 relative group'>
+                  <Image
                     src={mobilePreview}
                     alt='Mobile förhandsgranskning'
-                    className='w-full h-32 object-cover rounded-lg'
+                    className='w-full full object-cover '
+                    width={200}
+                    height={300}
+                    quality={100}
                   />
                   <button
                     type='button'
+                    className='absolute cursor-pointer  group-hover:bg-white/50 group-active:bg-white/50 transition-all duration-300  text-gray-500 group-hover:text-black hover:text-red-800 p-2 top-1 right-1'
                     onClick={clearMobileImage}
-                    className='absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600'
                   >
-                    ×
+                    <X size={12} strokeWidth={1.5} />
                   </button>
                 </div>
-              )}
+              )}{' '}
             </div>
           </div>
         )}
@@ -395,7 +404,7 @@ export default function CategoryForm({mode, initialData}: CategoryFormProps) {
           disabled={
             isLoading /* || !isValid */ || (mode === 'edit' && !isDirty)
           }
-          className=' h-12 mt-0 w-full'
+          className=' h-13 mt-0 w-full'
         >
           {isLoading
             ? mode === 'edit'
@@ -410,7 +419,7 @@ export default function CategoryForm({mode, initialData}: CategoryFormProps) {
           variant='outline'
           onClick={closeSidebar}
           disabled={isLoading}
-          className='w-full h-12 mt-0'
+          className='w-full h-13 mt-0'
         >
           Avbryt
         </Button>

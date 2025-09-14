@@ -533,7 +533,7 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
       {/* Footer med knappar som alltid är synlig */}
       <div className='flex w-full gap-2 pb-6 pt-3 '>
         <Button
-          className='w-full mt-0 h-12'
+          className='w-full mt-0 h-13'
           type='submit'
           disabled={isLoading || !isDirty /* || !isValid */}
           /*          disabled={
@@ -553,7 +553,7 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
               : 'Spara produkt'}
         </Button>
         <Button
-          className='w-full mt-0 h-12'
+          className='w-full mt-0 h-13'
           variant='outline'
           type='button'
           onClick={handleReset}

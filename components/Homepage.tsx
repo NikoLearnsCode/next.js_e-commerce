@@ -101,7 +101,7 @@ export default function Homepage({
               return (
                 <Link
                   variant='underline'
-                  className={`focus:no-underline h-8 decoration-1 underline-offset-6 text-white text-base tracking-wide font-syne font-medium relative z-10 ${
+                  className={`focus:no-underline h-8 decoration-1 underline-offset-6 text-white text-[15px] tracking-wide font-syne font-semibold relative z-10 ${
                     isActive ? 'underline' : ''
                   }`}
                   key={link.href}

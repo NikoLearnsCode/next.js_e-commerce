@@ -11,7 +11,7 @@ import {
 } from '@/actions/lib/categoryTree-builder';
 
 export async function getNavigationData(): Promise<NavLink[]> {
-  const staticLinks: NavLink[] = [
+  /* const staticLinks: NavLink[] = [
     {
       title: 'Hem',
       href: '/',
@@ -22,7 +22,7 @@ export async function getNavigationData(): Promise<NavLink[]> {
         {title: 'Frakt', href: '/frakt', displayOrder: 3},
       ],
     },
-  ];
+  ]; */
 
   let dynamicLinks: NavLink[] = [];
 
@@ -39,10 +39,10 @@ export async function getNavigationData(): Promise<NavLink[]> {
   } catch (error) {
     console.error('Fel vid hämtning av navigation:', error);
 
-    return staticLinks;
+    return dynamicLinks;
   }
 
-  const navLinks = [...dynamicLinks, ...staticLinks];
+  const navLinks = [...dynamicLinks];
   navLinks.sort((a, b) => a.displayOrder - b.displayOrder);
 
   return navLinks;

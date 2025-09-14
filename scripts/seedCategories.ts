@@ -9,6 +9,8 @@ type CategoryBlueprint = {
   title: string;
   slug: string;
   type: (typeof categoryTypeEnum.enumValues)[number];
+  desktopImage?: string;
+  mobileImage?: string;
   children?: CategoryBlueprint[];
 };
 
@@ -17,11 +19,13 @@ const categoryTreeDefinition: CategoryBlueprint[] = [
     title: 'Dam',
     slug: 'dam',
     type: 'MAIN-CATEGORY',
+    desktopImage: '/images/dam.desktop.avif',
+    mobileImage: '/images/dam.mobile.avif',
     children: [
       {title: 'Nyheter', slug: 'nyheter', type: 'COLLECTION'},
       {
-        title: 'Plagg',
-        slug: 'plagg',
+        title: 'Kläder',
+        slug: 'klader',
         type: 'CONTAINER',
         children: [
           {title: 'Klänningar', slug: 'klanningar', type: 'SUB-CATEGORY'},
@@ -30,8 +34,8 @@ const categoryTreeDefinition: CategoryBlueprint[] = [
         ],
       },
       {
-        title: 'Ytterplagg',
-        slug: 'ytterplagg',
+        title: 'Ytterkläder',
+        slug: 'ytterklader',
         type: 'CONTAINER',
         children: [{title: 'Jackor', slug: 'jackor', type: 'SUB-CATEGORY'}],
       },
@@ -41,6 +45,8 @@ const categoryTreeDefinition: CategoryBlueprint[] = [
     title: 'Herr',
     slug: 'herr',
     type: 'MAIN-CATEGORY',
+    desktopImage: '/images/herr.desktop.avif',
+    mobileImage: '/images/herr.mobile.avif',
     children: [
       {title: 'Nyheter', slug: 'nyheter', type: 'COLLECTION'},
       {
@@ -85,6 +91,19 @@ const categoryTreeDefinition: CategoryBlueprint[] = [
       },
     ],
   },
+  {
+    title: 'Home',
+    slug: 'home',
+    type: 'MAIN-CATEGORY',
+    desktopImage: '/images/hem.desktop.avif',
+    mobileImage: '/images/hem.mobile.webp',
+    children: [
+
+      {title: 'Heminredning', slug: 'himinredning', type: 'SUB-CATEGORY'},
+      {title: 'Bestick', slug: 'bestick', type: 'SUB-CATEGORY'},
+      {title: 'Tavlor', slug: 'tavlor', type: 'SUB-CATEGORY'},
+    ],
+  },
 ];
 
 type InsertCategory = InferInsertModel<typeof categories>;
@@ -100,7 +119,9 @@ const byggKategoriMedDessBarn = async (
     parentId: parentId,
     displayOrder: displayOrder,
     isActive: true,
-    type: ritningForKategorin.type, // Läser den nya typen ('MAIN', 'SUB', etc)
+    type: ritningForKategorin.type, 
+    desktopImage: ritningForKategorin.desktopImage || null,
+    mobileImage: ritningForKategorin.mobileImage || null,
   };
 
   console.log(
