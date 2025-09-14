@@ -4,17 +4,17 @@ import {createContext, useContext, useEffect, useState} from 'react';
 import {Category, CategoryWithChildren} from '@/lib/types/category';
 import {Product} from '@/lib/types/db';
 import {ProductFormData, CategoryFormData} from '@/lib/form-validators';
-import {uploadProductImages} from '@/actions/admin/image-upload';
+import {uploadProductImages} from '@/actions/admin/admin.image-upload.actions';
 import {
   createProduct as createProductAction,
   updateProduct as updateProductAction,
   deleteProduct as deleteProductAction,
-} from '@/actions/admin/products';
+} from '@/actions/admin/admin.products.actions';
 import {
   createCategory as createCategoryAction,
   updateCategory as updateCategoryAction,
   deleteCategory as deleteCategoryAction,
-} from '@/actions/admin/categories';
+} from '@/actions/admin/admin.categories.actions';
 import {toast} from 'sonner';
 
 type CRUDOperationType = 'create' | 'update' | 'delete' | null;

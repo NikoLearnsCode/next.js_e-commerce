@@ -1,5 +1,5 @@
 import AdminContextProvider from '@/context/AdminContextProvider';
-import {getCategoriesWithChildren} from '@/actions/admin/categories';
+import {getCategoriesWithChildren} from '@/actions/admin/admin.categories.actions';
 import AdminUIWrapper from '@/components/admin/AdminUIWrapper';
 import {getServerSession} from 'next-auth';
 import {authOptions} from '@/lib/auth';

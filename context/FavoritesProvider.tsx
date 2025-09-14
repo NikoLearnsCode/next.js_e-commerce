@@ -13,8 +13,8 @@ import {
   getFavorites,
   removeFromFavorites,
   toggleFavorite,
-} from '@/actions/favorites';
-import {FavoriteWithProduct, Product} from '@/lib/types/db';
+} from '@/actions/favorites.actions';
+import {FavoriteWithProduct} from '@/lib/types/db';
 // import {useAuth} from '@/hooks/useAuth';
 
 interface FavoritesContextType {
@@ -23,7 +23,7 @@ interface FavoritesContextType {
   loading: boolean;
   refreshFavorites: () => Promise<void>;
   removeFavorite: (productId: string) => Promise<void>;
-  toggleFavoriteItem: (product: Product) => Promise<void>;
+  toggleFavoriteItem: (productId: string) => Promise<void>;
   isFavorite: (productId: string) => boolean;
   updatingItems: Record<string, boolean>;
 }
@@ -94,10 +94,10 @@ export function FavoritesProvider({children}: {children: React.ReactNode}) {
   );
 
   const toggleFavoriteItem = useCallback(
-    async (product: Product) => {
+    async (productId: string) => {
       try {
-        setUpdatingItems((prev) => ({...prev, [product.id]: true}));
-        const result = await toggleFavorite(product);
+        setUpdatingItems((prev) => ({...prev, [productId]: true}));
+        const result = await toggleFavorite(productId);
         if (result.success) {
           setFavorites(result.favorites || []);
         } else {
@@ -108,7 +108,7 @@ export function FavoritesProvider({children}: {children: React.ReactNode}) {
         console.error('Error toggling favorite:', error);
         await refreshFavorites();
       } finally {
-        setUpdatingItems((prev) => ({...prev, [product.id]: false}));
+        setUpdatingItems((prev) => ({...prev, [productId]: false}));
       }
     },
     [refreshFavorites]

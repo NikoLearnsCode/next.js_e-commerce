@@ -4,7 +4,7 @@
 import {useState, useEffect} from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import {Product} from '@/lib/types/db';
+import {ProductCard as ProductCardType} from '@/lib/types/db';
 import {Swiper, SwiperSlide} from 'swiper/react';
 import {Navigation} from 'swiper/modules';
 import {ChevronLeft, ChevronRight, X} from 'lucide-react';
@@ -21,7 +21,7 @@ import SpinningLogo from '@/components/shared/ui/SpinningLogo';
 import {useNavigatedHistory} from '@/context/NavigatedHistoryProvider';
 
 type ProductCardProps = {
-  product: Product;
+  product: ProductCardType;
   priorityLoading?: boolean;
   className?: string;
   layout?: 'grid' | 'list';

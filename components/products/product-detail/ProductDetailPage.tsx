@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import AddToCartButton from '@/components/products/product-detail/AddToCartButton';
 import {twMerge} from 'tailwind-merge';
-import {Product} from '@/lib/types/db';
+import type {ProductDetail, CarouselCard} from '@/lib/types/db';
 import {useState} from 'react';
 import Newsletter from '@/components/shared/Newsletter';
 import FavoriteButton from '@/components/favorites/FavoriteButton';
@@ -13,14 +13,14 @@ import dynamic from 'next/dynamic';
 import Carousel from '@/components/shared/Carousel';
 import NewBadge from '@/components/shared/NewBadge';
 
-const ProductCard = dynamic(
+const CarouselProductCard = dynamic(
   () => import('@/components/shared/cards/CarouselCard')
 );
 
 type ProductPageProps = {
-  product: Product;
-  categoryProducts?: Product[];
-  genderProducts?: Product[];
+  product: ProductDetail;
+  categoryProducts?: CarouselCard[];
+  genderProducts?: CarouselCard[];
   onCartClick?: () => void;
   initial?: boolean;
 };
@@ -90,7 +90,9 @@ export default function ProductPage({
               <h1 className='text-lg sm:text-xl mt-2 lg:mt-4 font-medium'>
                 {product.name}
               </h1>
-              <span className='absolute -top-2 left-0'>{product.isNew && <NewBadge />}</span>
+              <span className='absolute -top-2 left-0'>
+                {product.isNew && <NewBadge />}
+              </span>
               {/* <p className='text-gray-700 font-semibold uppercase font-syne text-sm'>
                 {product.brand}
               </p> */}
@@ -174,7 +176,7 @@ export default function ProductPage({
             titelDivClassName='px-4 md:px-6'
             title='Liknande produkter'
             renderItem={(product) => (
-              <ProductCard product={product} priorityLoading={false} />
+              <CarouselProductCard product={product} priorityLoading={false} />
             )}
             id='carousel-one'
           />
@@ -189,7 +191,7 @@ export default function ProductPage({
             title='Du kanske också gillar'
             titelDivClassName='px-4 md:px-6'
             renderItem={(product) => (
-              <ProductCard product={product} priorityLoading={false} />
+              <CarouselProductCard product={product} priorityLoading={false} />
             )}
             id='carousel-two'
           />

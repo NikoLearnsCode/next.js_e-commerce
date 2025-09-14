@@ -1,11 +1,10 @@
 import {useFavorites} from '@/context/FavoritesProvider';
-import {Product} from '@/lib/types/db';
+import {FavoriteButtonProduct} from '@/lib/types/db';
 import {Heart} from 'lucide-react';
 import {twMerge} from 'tailwind-merge';
 
 type FavoriteButtonProps = {
-  product: Product;
-
+  product: FavoriteButtonProduct;
   size?: number;
   strokeWidth?: number;
   className?: string;
@@ -28,7 +27,7 @@ export default function FavoriteButton({
     e.preventDefault();
     e.stopPropagation();
     try {
-      await toggleFavoriteItem(product);
+      await toggleFavoriteItem(product.id);
     } catch (error) {
       console.error('Error toggling favorite:', error);
     }

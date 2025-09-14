@@ -8,7 +8,7 @@ import {NavLink} from '@/lib/types/category';
 import {
   buildCategoryTree,
   transformTreeToNavLinks,
-} from '@/actions/utils/category-builder';
+} from '@/actions/lib/categoryTree-builder';
 
 export async function getNavigationData(): Promise<NavLink[]> {
   const staticLinks: NavLink[] = [

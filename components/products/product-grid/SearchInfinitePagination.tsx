@@ -2,13 +2,13 @@
 
 import {useEffect, useRef} from 'react';
 import {useInView} from 'react-intersection-observer';
-import {Product} from '@/lib/types/db';
+import {ProductCard} from '@/lib/types/db';
 import ProductGrid from '@/components/products/product-grid/ProductGrid';
 import {useInfiniteProducts} from '@/hooks/useInfiniteProducts';
 import SpinningLogo from '@/components/shared/ui/SpinningLogo';
 
 type SearchInfiniteScrollProps = {
-  initialProducts: Product[];
+  initialProducts: ProductCard[];
   initialHasMore: boolean;
   query: string;
   totalCount?: number;
@@ -54,7 +54,8 @@ export default function SearchInfiniteScroll({
   }, [inView, hasNextPage, fetchNextPage]);
 
   const products =
-    data?.pages.flatMap((page: {products: Product[]}) => page.products) ?? [];
+    data?.pages.flatMap((page: {products: ProductCard[]}) => page.products) ??
+    [];
 
   // Error state
   if (error) {

@@ -3,7 +3,7 @@
 import {getServerSession} from 'next-auth';
 import {authOptions} from '@/lib/auth';
 import {getOrCreateSessionId, getSessionId} from '@/utils/cookies';
-import type {NewFavorite, Product} from '@/lib/types/db';
+import type {NewFavorite} from '@/lib/types/db';
 import {db} from '@/drizzle/index';
 import {favoritesTable, productsTable} from '@/drizzle/db/schema';
 import {eq, and, isNull, sql} from 'drizzle-orm';
@@ -32,6 +32,7 @@ export async function getFavorites() {
           sizes: productsTable.sizes,
           images: productsTable.images,
           slug: productsTable.slug,
+          category: productsTable.category,
           created_at: productsTable.created_at,
           isNew:
             sql<boolean>`${productsTable.created_at} > NOW() - INTERVAL '${sql.raw(
@@ -108,7 +109,7 @@ export async function removeFromFavorites(productId: string) {
   }
 }
 
-export async function toggleFavorite(product: Product) {
+export async function toggleFavorite(productId: string) {
   try {
     const session = await getServerSession(authOptions);
     const user = session?.user;
@@ -119,7 +120,7 @@ export async function toggleFavorite(product: Product) {
         .where(
           and(
             eq(favoritesTable.user_id, user.id),
-            eq(favoritesTable.product_id, product.id)
+            eq(favoritesTable.product_id, productId)
           )
         );
 
@@ -127,7 +128,7 @@ export async function toggleFavorite(product: Product) {
         const newFavorite: NewFavorite = {
           user_id: user.id,
           session_id: null,
-          product_id: product.id,
+          product_id: productId,
         };
         await db.insert(favoritesTable).values({
           ...newFavorite,
@@ -141,7 +142,7 @@ export async function toggleFavorite(product: Product) {
         const newFavorite: NewFavorite = {
           user_id: null,
           session_id: newSessionId,
-          product_id: product.id,
+          product_id: productId,
         };
         await db.insert(favoritesTable).values({
           ...newFavorite,
@@ -153,7 +154,7 @@ export async function toggleFavorite(product: Product) {
           .where(
             and(
               eq(favoritesTable.session_id, sessionId),
-              eq(favoritesTable.product_id, product.id),
+              eq(favoritesTable.product_id, productId),
               isNull(favoritesTable.user_id)
             )
           );
@@ -162,7 +163,7 @@ export async function toggleFavorite(product: Product) {
           const newFavorite: NewFavorite = {
             user_id: null,
             session_id: sessionId,
-            product_id: product.id,
+            product_id: productId,
           };
           await db.insert(favoritesTable).values({
             ...newFavorite,

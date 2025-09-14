@@ -4,7 +4,7 @@ import {Metadata} from 'next';
 
 import {authOptions} from '@/lib/auth';
 
-import {getUserOrdersOverview} from '@/actions/orders';
+import {getUserOrdersOverview} from '@/actions/orders.actions';
 import OrdersClientContent from './OrdersContent';
 
 export const metadata: Metadata = {

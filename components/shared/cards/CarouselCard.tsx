@@ -3,7 +3,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import {Product} from '@/lib/types/db';
+import {CarouselCard} from '@/lib/types/db';
 
 import FavoriteButton from '@/components/favorites/FavoriteButton';
 import NewBadge from '@/components/shared/NewBadge';
@@ -11,7 +11,7 @@ import {formatPrice} from '@/utils/format';
 import {useNavigatedHistory} from '@/context/NavigatedHistoryProvider';
 
 type CarouselProductCardProps = {
-  product: Product;
+  product: CarouselCard;
   priorityLoading?: boolean;
 };
 

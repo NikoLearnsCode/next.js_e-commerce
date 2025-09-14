@@ -1,7 +1,7 @@
 'use client';
 
-import {Product} from '@/lib/types/db';
-import {getInfiniteProducts} from '@/actions/product';
+import {ProductCard} from '@/lib/types/db';
+import {getInfiniteProducts} from '@/actions/product.actions';
 import {useInfiniteQuery} from '@tanstack/react-query';
 import {parseSortParam} from '@/utils/filterSort';
 
@@ -16,7 +16,7 @@ export function useInfiniteProducts({
   sort,
 }: {
   query?: string;
-  initialProducts?: Product[];
+  initialProducts?: ProductCard[];
   initialHasMore?: boolean;
   category?: string;
   gender?: string;

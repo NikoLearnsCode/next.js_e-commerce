@@ -15,10 +15,8 @@ export const productFormSchema = z.object({
     .string({required_error: 'Du måste välja en underkategori.'})
     .min(1, 'Du måste välja en underkategori.'),
   color: z.string().min(1, 'Färg får inte vara tom.'),
-  sizes: z
-    .string({required_error: 'Minst en storlek måste anges.'})
-    .min(1, 'Minst en storlek måste anges.'),
-  specs: z.string().optional(),
+  sizes: z.array(z.string()).min(1, {message: 'Minst en storlek måste anges.'}),
+  specs: z.array(z.string()).optional(),
   publishedAt: z.date().optional(),
 });
 

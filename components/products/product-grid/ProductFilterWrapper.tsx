@@ -3,7 +3,7 @@
 import {useEffect, useState, useMemo} from 'react';
 import {useRouter, usePathname, useSearchParams} from 'next/navigation';
 
-import {Product} from '@/lib/types/db';
+import {ProductCard} from '@/lib/types/db';
 import Link from 'next/link';
 import {ChevronRight} from 'lucide-react';
 import FilterBar from '@/components/products/product-grid/FilterBar';
@@ -11,7 +11,7 @@ import FilterPanel from '@/components/products/product-grid/FilterPanel';
 import InfinitePagination from './InfinitePagination';
 
 interface ProductFilterWrapperProps {
-  initialProducts: Product[];
+  initialProducts: ProductCard[];
   initialHasMore: boolean;
   gender?: string;
   category?: string;
@@ -75,7 +75,6 @@ export default function ProductFilterWrapper({
     setSelectedSizes([]);
     setSortOrder(null);
     router.push(pathname);
-
   };
 
   const applyFilters = () => {

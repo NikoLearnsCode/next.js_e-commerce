@@ -1,4 +1,4 @@
-import type {Product} from '@/lib/types/db';
+import type {ProductCard} from '@/lib/types/db';
 
 export type SortField = 'id' | 'price' | 'name';
 
@@ -29,7 +29,7 @@ export type Params = {
 };
 
 export type Result = {
-  products: Product[];
+  products: ProductCard[];
   hasMore: boolean;
   totalCount: number;
   metadata?: {

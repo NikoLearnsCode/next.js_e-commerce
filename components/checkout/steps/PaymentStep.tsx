@@ -16,7 +16,7 @@ import {SiKlarna} from 'react-icons/si';
 import Image from 'next/image';
 import {CiCreditCard1} from 'react-icons/ci';
 import {useCart} from '@/context/CartProvider';
-import {createOrder} from '@/actions/orders';
+import {createOrder} from '@/actions/orders.actions';
 import {toast} from 'sonner';
 interface PaymentStepProps {
   onBack?: () => void;

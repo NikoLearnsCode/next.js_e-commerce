@@ -2,14 +2,14 @@
 import {useEffect, useRef} from 'react';
 import {useInView} from 'react-intersection-observer';
 import {useSearchParams} from 'next/navigation';
-import type {Product} from '@/lib/types/db';
+import type {ProductCard} from '@/lib/types/db';
 import ProductGrid from '@/components/products/product-grid/ProductGrid';
 import {useInfiniteProducts} from '@/hooks/useInfiniteProducts';
 // import {useScrollRestoration} from '@/hooks/useScrollRestoration';
 import SpinningLogo from '@/components/shared/ui/SpinningLogo';
 
 type InfiniteScrollProductsProps = {
-  initialProducts: Product[];
+  initialProducts: ProductCard[];
   initialHasMore: boolean;
   className?: string;
   gender?: string;
@@ -69,7 +69,8 @@ export default function InfiniteScrollProducts({
 
   // Get all products from React Query
   const products =
-    data?.pages.flatMap((page: {products: Product[]}) => page.products) ?? [];
+    data?.pages.flatMap((page: {products: ProductCard[]}) => page.products) ??
+    [];
 
   // Decide what to display: use React Query data if available and not loading, otherwise SSR data
   const displayProducts =

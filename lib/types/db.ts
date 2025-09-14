@@ -7,26 +7,13 @@ import {
   orderItemsTable,
 } from '@/drizzle/db/schema';
 
-export type Product = Partial<typeof productsTable.$inferSelect> & {
-  id: string;
-  name: string;
-  price: string;
-  images: string[];
-  brand: string;
-  sizes: string[];
-  color: string;
-  slug: string;
-  // created_at: Date | null;
+export type Product = typeof productsTable.$inferSelect & {
   isNew?: boolean;
 };
 
 export type Favorite = typeof favoritesTable.$inferSelect;
 
 export type NewFavorite = typeof favoritesTable.$inferInsert;
-
-export type FavoriteWithProduct = Favorite & {
-  product: Product;
-};
 
 export type Order = typeof ordersTable.$inferSelect;
 
@@ -54,3 +41,36 @@ export type CartItemWithProduct = typeof cartItemsTable.$inferSelect & {
   slug: string;
   images: string[];
 };
+
+// För carousel/related products
+export type CarouselCard = Pick<
+  Product,
+  'id' | 'name' | 'price' | 'images' | 'slug' | 'created_at'
+> & {
+  isNew?: boolean;
+};
+
+// För grids och favorites
+export type ProductCard = Pick<
+  Product,
+  | 'id'
+  | 'name'
+  | 'price'
+  | 'brand'
+  | 'color'
+  | 'sizes'
+  | 'images'
+  | 'slug'
+  | 'category'
+  | 'created_at'
+> & {
+  isNew?: boolean;
+};
+
+export type ProductDetail = Product;
+
+export type FavoriteWithProduct = Favorite & {
+  product: ProductCard;
+};
+
+export type FavoriteButtonProduct = Pick<CarouselCard, 'id'>;

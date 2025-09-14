@@ -1,5 +1,5 @@
 import {db} from '@/drizzle';
-import {or, ilike, sql} from 'drizzle-orm';
+import {or, sql} from 'drizzle-orm';
 import {ordersTable} from '@/drizzle/db/schema';
 
 export async function getAllOrders(searchTerm?: string) {

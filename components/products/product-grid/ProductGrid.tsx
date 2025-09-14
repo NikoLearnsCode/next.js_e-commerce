@@ -1,10 +1,10 @@
 'use client';
 
-import {Product} from '@/lib/types/db';
+import {ProductCard} from '@/lib/types/db';
 import Cards from '@/components/shared/cards/ProductCard';
 
 type ProductGridProps = {
-  products: Product[];
+  products: ProductCard[];
   title?: string;
   emptyMessage?: string;
   className?: string;

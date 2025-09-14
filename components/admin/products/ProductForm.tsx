@@ -1,7 +1,7 @@
 'use client';
 
 import {zodResolver} from '@hookform/resolvers/zod';
-import {useForm} from 'react-hook-form';
+import {useForm, Controller} from 'react-hook-form';
 import {productFormSchema, type ProductFormData} from '@/lib/form-validators';
 import {Button} from '@/components/shared/ui/button';
 import {FloatingLabelInput} from '@/components/shared/ui/floatingLabelInput';
@@ -43,6 +43,7 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
     watch,
     reset,
     resetField,
+    control,
   } = useForm<ProductFormData>({
     resolver: zodResolver(productFormSchema),
     mode: 'onChange',
@@ -50,14 +51,18 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
       name: 'TEST NAME',
       slug: 'TEST SLUG',
       description: 'TEST DESCRIPTION',
-      // @ts-ignore
-      price: '',
+      price: 123,
       brand: 'TEST BRAND',
       color: 'TEST COLOR',
       gender: 'TEST GENDER',
       category: 'TEST CATEGORY',
-      sizes: 'TEST SIZES',
-      specs: 'TEST SPECS',
+      sizes: ['xxs', 'xs', 's', 'm', 'l', 'xl', 'xxl'],
+      specs: [
+        'Normal passform',
+        'Material: 100% linne',
+        'Maskintvätt högst 30°C',
+        'Tål ej strykning',
+      ],
       publishedAt: new Date(),
     },
   });
@@ -75,12 +80,9 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
             : initialData.price,
         brand: initialData.brand,
         color: initialData.color,
-        sizes: Array.isArray(initialData.sizes)
-          ? initialData.sizes.join(',')
-          : '',
-        specs: Array.isArray(initialData.specs)
-          ? initialData.specs.join('\n')
-          : '',
+        sizes: initialData.sizes,
+        specs: initialData.specs || [],
+
         publishedAt: initialData.published_at
           ? new Date(initialData.published_at)
           : undefined,
@@ -180,17 +182,28 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
     console.error('Valideringsfel i formuläret:', errors);
   };
 
+  // Handles form submission.
+  // The raw data for 'sizes' and 'specs' can be "dirty" (containing extra whitespace or empty entries)
+  // because we allow flexible user input in the 'onChange' handlers.
+  // To ensure data integrity, we clean it up here right before sending it to the server action.
   const onSubmit = async (data: ProductFormData) => {
+    // Clean up sizes and specs before submitting
+    const cleanedData = {
+      ...data,
+      sizes: data.sizes.map((s) => s.trim()).filter(Boolean),
+      specs: data.specs ? data.specs.map((s) => s.trim()).filter(Boolean) : [],
+    };
+
     try {
       if (mode === 'edit' && initialData) {
         await updateProduct(
           initialData.id,
-          data,
+          cleanedData,
           newImageFiles,
           existingImages
         );
       } else {
-        await createProduct(data, newImageFiles);
+        await createProduct(cleanedData, newImageFiles);
       }
     } catch (error) {
       console.error('Form submission error:', error);
@@ -202,14 +215,13 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
       name: '',
       slug: '',
       description: '',
-      // @ts-ignore
-      price: '',
+      price: 0,
       brand: '',
       color: '',
       gender: '',
       category: '',
-      sizes: '',
-      specs: '',
+      sizes: [],
+      specs: [],
       publishedAt: new Date(),
     });
 
@@ -344,16 +356,32 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
             // className='col-span-2 col-start-1'
             errorMessage={errors.color?.message}
           />
-          <FloatingLabelInput
-            {...register('sizes')}
-            id='product-sizes'
-            label='Storlekar *'
-            value={watch('sizes')}
-            as='input'
-            type='text'
-            // className='w-full col-span-2 col-start-1 '
-            hasError={!!errors.sizes}
-            errorMessage={errors.sizes?.message}
+
+          {/* SIZES INPUT */}
+          {/* We use a Controller here because react-hook-form's state for 'sizes' is an ARRAY, */}
+          {/* but a standard HTML input's value can only be a STRING. */}
+          {/* The Controller acts as a bridge: */}
+          {/* 1. `render > value`: It transforms the form's array state into a comma-separated string for display in the input. */}
+          {/* 2. `render > onChange`: It transforms the input's string value back into an array before saving it in the form's state. */}
+          {/* This allows for a flexible user input experience while maintaining correct data types internally. */}
+          <Controller
+            name='sizes'
+            control={control}
+            render={({field}) => (
+              <FloatingLabelInput
+                {...field}
+                id='product-sizes'
+                label='Storlekar * (kommaseparerade)'
+                value={Array.isArray(field.value) ? field.value.join(',') : ''}
+                onChange={(e) => {
+                  field.onChange(e.target.value.split(','));
+                }}
+                as='input'
+                type='text'
+                hasError={!!errors.sizes}
+                errorMessage={errors.sizes?.message}
+              />
+            )}
           />
           <FloatingLabelInput
             {...register('description')}
@@ -366,16 +394,31 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
             hasError={!!errors.description}
             errorMessage={errors.description?.message}
           />
-          <FloatingLabelInput
-            {...register('specs')}
-            id='product-specs'
-            label='Specifikationer (optional)'
-            value={watch('specs')}
-            as='textarea'
-            className=' w-full col-span-2 col-start-1'
-            rows={5}
-            hasError={!!errors.specs}
-            errorMessage={errors.specs?.message}
+
+          {/* SPECS INPUT */}
+          {/* Similar to the 'sizes' field, we use a Controller to manage the mismatch */}
+          {/* between the form's internal ARRAY state for 'specs' and the textarea's STRING value. */}
+          {/* 1. `render > value`: Transforms the array into a newline-separated string for the textarea. */}
+          {/* 2. `render > onChange`: Transforms the string from the textarea back into an array. */}
+          <Controller
+            name='specs'
+            control={control}
+            render={({field}) => (
+              <FloatingLabelInput
+                {...field}
+                id='product-specs'
+                label='Specifikationer (en per rad)'
+                value={Array.isArray(field.value) ? field.value.join('\n') : ''}
+                onChange={(e) => {
+                  field.onChange(e.target.value.split('\n'));
+                }}
+                as='textarea'
+                className=' w-full col-span-2 col-start-1'
+                rows={5}
+                hasError={!!errors.specs}
+                errorMessage={errors.specs?.message}
+              />
+            )}
           />
           <CustomDateInput
             id='product-published-at'
@@ -403,7 +446,10 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
             onFilesSelected={handleImageChange}
           >
             <div className='flex flex-col items-center justify-center w-full p-4 border-2 border-dashed border-gray-300 rounded-lg text-center hover:border-gray-500 transition-colors'>
-              <UploadCloud strokeWidth={1.25} className='w-8 h-8 text-gray-600 mb-1.5' />
+              <UploadCloud
+                strokeWidth={1.25}
+                className='w-8 h-8 text-gray-600 mb-1.5'
+              />
               <p className='font-semibold text-gray-700 uppercase text-xs'>
                 Klicka för att ladda upp produktbilder
               </p>

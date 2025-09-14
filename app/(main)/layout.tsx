@@ -1,6 +1,6 @@
 'use server';
 
-import {getNavigationData} from '@/actions/navigation';
+import {getNavigationData} from '@/actions/navigation.actions';
 import Footer from '@/components/footer/Footer';
 import Header from '@/components/header/Header';
 import {Toaster} from 'sonner';

@@ -1,6 +1,6 @@
 'use server';
 
-import {getAllProducts} from '@/actions/admin/products';
+import {getAllProducts} from '@/actions/admin/admin.products.actions';
 // import {getServerSession} from 'next-auth';
 // import {authOptions} from '@/lib/auth';
 // import {redirect} from 'next/navigation';

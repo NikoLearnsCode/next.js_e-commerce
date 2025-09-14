@@ -5,7 +5,7 @@ import {Metadata} from 'next';
 import {authOptions} from '@/lib/auth';
 
 import OrderDetailContent from './OrderDetailContent';
-import {getUserOrderById} from '@/actions/orders';
+import {getUserOrderById} from '@/actions/orders.actions';
 
 type Props = {
   params: Promise<{

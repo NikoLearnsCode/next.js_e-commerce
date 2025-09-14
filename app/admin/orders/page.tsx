@@ -1,6 +1,6 @@
 'use server';
 
-import {getAllOrders} from '@/actions/admin/orders';
+import {getAllOrders} from '@/actions/admin/admin.orders.actions';
 import OrderManager from '@/components/admin/orders/OrderManager';
 // import {getServerSession} from 'next-auth';
 // import {authOptions} from '@/lib/auth';

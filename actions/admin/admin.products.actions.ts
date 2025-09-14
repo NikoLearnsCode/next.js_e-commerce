@@ -69,18 +69,6 @@ export async function createProduct(
       };
     }
 
-    // Transform strings to arrays for database
-    const sizesArray = data.sizes
-      .split(',')
-      .map((s) => s.trim())
-      .filter((s) => s);
-    const specsArray = data.specs
-      ? data.specs
-          .split('\n')
-          .map((s) => s.trim())
-          .filter((s) => s)
-      : [];
-
     // Insert into database
     const now = new Date();
     const publishedAt = data.publishedAt || now;
@@ -95,8 +83,8 @@ export async function createProduct(
         gender: data.gender,
         category: data.category,
         color: data.color,
-        sizes: sizesArray,
-        specs: specsArray,
+        sizes: data.sizes,
+        specs: data.specs,
         images: data.images,
         created_at: now,
         updated_at: now,
@@ -174,17 +162,6 @@ export async function updateProduct(
       };
     }
 
-    const sizesArray = data.sizes
-      .split(',')
-      .map((s) => s.trim())
-      .filter((s) => s);
-    const specsArray = data.specs
-      ? data.specs
-          .split('\n')
-          .map((s) => s.trim())
-          .filter((s) => s)
-      : [];
-
     const updateData: Partial<typeof productsTable.$inferInsert> = {
       name: data.name,
       slug: data.slug,
@@ -194,8 +171,8 @@ export async function updateProduct(
       gender: data.gender,
       category: data.category,
       color: data.color,
-      sizes: sizesArray,
-      specs: specsArray,
+      sizes: data.sizes,
+      specs: data.specs,
       updated_at: new Date(),
     };
 
