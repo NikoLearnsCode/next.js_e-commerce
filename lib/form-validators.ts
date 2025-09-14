@@ -74,6 +74,8 @@ export const categoryFormSchema = z
       .int()
       .positive('Du måste välja en föräldrakategori.')
       .nullable(),
+    desktopImage: z.string().optional(),
+    mobileImage: z.string().optional(),
   })
   .refine(
     (data) => {

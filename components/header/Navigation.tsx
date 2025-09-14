@@ -138,15 +138,15 @@ function DesktopNavView({navLinks}: {navLinks: NavLink[]}) {
                 {link.title}
               </span>
             </Link>
-            {link.isFolder && (
-              <span
-                onKeyDown={(e) => handleKeyOpen(e, index)}
-                tabIndex={0}
-                className='inline-flex w-3 justify-center items-center focus:text-black text-white cursor-default'
-              >
-                ˅
-              </span>
-            )}
+            {/*   {link.isFolder && ( */}
+            <span
+              onKeyDown={(e) => handleKeyOpen(e, index)}
+              tabIndex={0}
+              className='inline-flex w-3 justify-center items-center focus:text-black text-white cursor-default'
+            >
+              ˅
+            </span>
+            {/* )} */}
           </li>
         ))}
       </ul>

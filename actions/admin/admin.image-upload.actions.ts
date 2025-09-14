@@ -9,6 +9,7 @@ const ALLOWED_IMAGE_TYPES = [
   'image/jpg',
   'image/png',
   'image/webp',
+  'image/avif',
 ];
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const MAX_IMAGES = 10;
@@ -16,6 +17,111 @@ const MAX_IMAGES = 10;
 interface ValidationError {
   fileName: string;
   error: string;
+}
+
+export async function uploadCategoryImages(
+  desktopImage: File | null,
+  mobileImage: File | null,
+  categorySlug: string
+): Promise<{desktopImageUrl?: string; mobileImageUrl?: string}> {
+  const images = [desktopImage, mobileImage].filter(Boolean) as File[];
+
+  if (images.length === 0) {
+    throw new Error('Minst en bild måste väljas');
+  }
+
+  const validationErrors: ValidationError[] = [];
+
+  for (const image of images) {
+    if (!ALLOWED_IMAGE_TYPES.includes(image.type)) {
+      validationErrors.push({
+        fileName: image.name,
+        error: `Filtyp ${image.type} är inte tillåten. Endast JPEG, PNG och WebP tillåts.`,
+      });
+      continue;
+    }
+
+    if (image.size > MAX_FILE_SIZE) {
+      validationErrors.push({
+        fileName: image.name,
+        error: `Filen är ${(image.size / 1024 / 1024).toFixed(1)}MB. Maximal storlek är ${MAX_FILE_SIZE / 1024 / 1024}MB.`,
+      });
+      continue;
+    }
+
+    if (image.size === 0) {
+      validationErrors.push({
+        fileName: image.name,
+        error: 'Filen är tom',
+      });
+    }
+  }
+
+  if (validationErrors.length > 0) {
+    const errorMessage = validationErrors
+      .map((err) => `${err.fileName}: ${err.error}`)
+      .join('\n');
+    throw new Error(`Bildvalidering misslyckades:\n${errorMessage}`);
+  }
+
+  const uploadDir = path.join(
+    process.cwd(),
+    'public',
+    'uploads',
+    'categories',
+    categorySlug
+  );
+
+  // Skapa upload-mapp
+  try {
+    await fs.mkdir(uploadDir, {recursive: true});
+  } catch (error) {
+    throw new Error(`Kunde inte skapa upload-mapp: ${error}`);
+  }
+
+  const uploadedFiles: string[] = [];
+  const result: {desktopImageUrl?: string; mobileImageUrl?: string} = {};
+
+  try {
+    // Ladda upp desktop-bild
+    if (desktopImage) {
+      const buffer = Buffer.from(await desktopImage.arrayBuffer());
+      const fileExtension = path.extname(desktopImage.name);
+      const finalFileName = `desktop${fileExtension}`;
+      const savePath = path.join(uploadDir, finalFileName);
+
+      await fs.writeFile(savePath, buffer);
+      uploadedFiles.push(savePath);
+      result.desktopImageUrl = `/uploads/categories/${categorySlug}/${finalFileName}`;
+    }
+
+    // Ladda upp mobile-bild
+    if (mobileImage) {
+      const buffer = Buffer.from(await mobileImage.arrayBuffer());
+      const fileExtension = path.extname(mobileImage.name);
+      const finalFileName = `mobile${fileExtension}`;
+      const savePath = path.join(uploadDir, finalFileName);
+
+      await fs.writeFile(savePath, buffer);
+      uploadedFiles.push(savePath);
+      result.mobileImageUrl = `/uploads/categories/${categorySlug}/${finalFileName}`;
+    }
+
+    return result;
+  } catch (error) {
+    // Cleanup vid fel
+    for (const filePath of uploadedFiles) {
+      try {
+        await fs.unlink(filePath);
+      } catch (cleanupError) {
+        console.warn(
+          `Kunde inte ta bort fil vid cleanup: ${filePath}`,
+          cleanupError
+        );
+      }
+    }
+    throw error;
+  }
 }
 
 export async function uploadProductImages(

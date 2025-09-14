@@ -9,7 +9,7 @@ import {
   CategoryFormData,
   CATEGORY_TYPE_OPTIONS,
 } from '@/lib/form-validators';
-import {useEffect} from 'react';
+import {useEffect, useState} from 'react';
 import {FloatingLabelInput} from '@/components/shared/ui/floatingLabelInput';
 import {Button} from '@/components/shared/ui/button';
 import {CheckboxOption} from '@/components/shared/ui/CheckboxOption';
@@ -21,6 +21,7 @@ import {
 } from '@/components/admin/utils/admin.form-helpers';
 import {UploadCloud} from 'lucide-react';
 import FileInput from '../shared/FileInput';
+import {uploadCategoryImages} from '@/actions/admin/admin.image-upload.actions';
 
 type CategoryFormProps = {
   mode: 'create' | 'edit';
@@ -30,6 +31,12 @@ type CategoryFormProps = {
 export default function CategoryForm({mode, initialData}: CategoryFormProps) {
   const {createCategory, updateCategory, closeSidebar, isLoading, categories} =
     useAdmin();
+
+  // State för bilduppladdning
+  const [desktopImage, setDesktopImage] = useState<File | null>(null);
+  const [mobileImage, setMobileImage] = useState<File | null>(null);
+  const [desktopPreview, setDesktopPreview] = useState<string>('');
+  const [mobilePreview, setMobilePreview] = useState<string>('');
 
   const {
     register,
@@ -49,8 +56,45 @@ export default function CategoryForm({mode, initialData}: CategoryFormProps) {
       displayOrder: 0,
       isActive: true,
       parentId: null,
+      desktopImage: '',
+      mobileImage: '',
     },
   });
+
+  // Funktioner för bildhantering
+  const handleDesktopImageSelect = (files: File[]) => {
+    if (files && files[0]) {
+      const file = files[0];
+      setDesktopImage(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setDesktopPreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleMobileImageSelect = (files: File[]) => {
+    if (files && files[0]) {
+      const file = files[0];
+      setMobileImage(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setMobilePreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const clearDesktopImage = () => {
+    setDesktopImage(null);
+    setDesktopPreview('');
+  };
+
+  const clearMobileImage = () => {
+    setMobileImage(null);
+    setMobilePreview('');
+  };
 
   useEffect(() => {
     if (mode === 'edit' && initialData) {
@@ -65,7 +109,17 @@ export default function CategoryForm({mode, initialData}: CategoryFormProps) {
         displayOrder: initialData.displayOrder,
         isActive: initialData.isActive,
         parentId: initialData.parentId || null,
+        desktopImage: initialData.desktopImage || '',
+        mobileImage: initialData.mobileImage || '',
       });
+
+      // Sätt befintliga bilder för förhandsgranskning
+      if (initialData.desktopImage) {
+        setDesktopPreview(initialData.desktopImage);
+      }
+      if (initialData.mobileImage) {
+        setMobilePreview(initialData.mobileImage);
+      }
     }
   }, [mode, initialData, reset]);
 
@@ -122,10 +176,30 @@ export default function CategoryForm({mode, initialData}: CategoryFormProps) {
 
   const onSubmit = async (data: CategoryFormData) => {
     try {
+      let finalData = {...data};
+
+      // Ladda upp bilder om det är en MAIN-CATEGORY och bilder har valts
+      if (data.type === 'MAIN-CATEGORY' && (desktopImage || mobileImage)) {
+        try {
+          const imageUrls = await uploadCategoryImages(
+            desktopImage,
+            mobileImage,
+            data.slug
+          );
+
+          finalData.desktopImage = imageUrls.desktopImageUrl || '';
+          finalData.mobileImage = imageUrls.mobileImageUrl || '';
+        } catch (uploadError) {
+          console.error('Image upload error:', uploadError);
+          alert(`Bilduppladdning misslyckades: ${uploadError}`);
+          return;
+        }
+      }
+
       if (mode === 'edit' && initialData) {
-        await updateCategory(initialData.id.toString(), data);
+        await updateCategory(initialData.id.toString(), finalData);
       } else {
-        await createCategory(data);
+        await createCategory(finalData);
       }
     } catch (error) {
       console.error('Category form submission error:', error);
@@ -239,23 +313,79 @@ export default function CategoryForm({mode, initialData}: CategoryFormProps) {
         />
 
         {/* BILDUPPLADDNING */}
-
         {watchedType === 'MAIN-CATEGORY' && (
-          <div className='sticky -top-5 z-10 pb-2.5 pt-4 bg-white '>
-            <FileInput
-              onFilesSelected={() => {}}
-              accept='image/*'
-              // label='Bilder'
-              className='w-full'
-              id='image-upload-category'
-            >
-              <div className='flex flex-col items-center justify-center w-full p-4 border-2 border-dashed border-gray-300 rounded-lg text-center hover:border-gray-500 transition-colors'>
-                <UploadCloud className='w-8 h-8 text-gray-600 mb-1.5' />
-                <p className='font-semibold text-gray-700 uppercase text-xs'>
-                  Klicka för att ladda upp kategoribilder
-                </p>
-              </div>
-            </FileInput>
+          <div className='sticky -top-5 z-10 pb-2.5 pt-4 bg-white space-y-4'>
+            {/* Desktop bild */}
+            <div>
+              <label className='block text-sm font-medium text-gray-700 mb-2'>
+                Desktop-bild (16:9 format rekommenderas)
+              </label>
+              <FileInput
+                onFilesSelected={handleDesktopImageSelect}
+                accept='image/*'
+                className='w-full'
+                id='desktop-image-upload'
+              >
+                <div className='flex flex-col items-center justify-center w-full p-4 border-2 border-dashed border-gray-300 rounded-lg text-center hover:border-gray-500 transition-colors'>
+                  <UploadCloud className='w-8 h-8 text-gray-600 mb-1.5' />
+                  <p className='font-semibold text-gray-700 uppercase text-xs'>
+                    Desktop-bild
+                  </p>
+                </div>
+              </FileInput>
+              {desktopPreview && (
+                <div className='mt-2 relative'>
+                  <img
+                    src={desktopPreview}
+                    alt='Desktop förhandsgranskning'
+                    className='w-full h-24 object-cover rounded-lg'
+                  />
+                  <button
+                    type='button'
+                    onClick={clearDesktopImage}
+                    className='absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600'
+                  >
+                    ×
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Mobile bild */}
+            <div>
+              <label className='block text-sm font-medium text-gray-700 mb-2'>
+                Mobile-bild (9:16 format rekommenderas)
+              </label>
+              <FileInput
+                onFilesSelected={handleMobileImageSelect}
+                accept='image/*'
+                className='w-full'
+                id='mobile-image-upload'
+              >
+                <div className='flex flex-col items-center justify-center w-full p-4 border-2 border-dashed border-gray-300 rounded-lg text-center hover:border-gray-500 transition-colors'>
+                  <UploadCloud className='w-8 h-8 text-gray-600 mb-1.5' />
+                  <p className='font-semibold text-gray-700 uppercase text-xs'>
+                    Mobile-bild
+                  </p>
+                </div>
+              </FileInput>
+              {mobilePreview && (
+                <div className='mt-2 relative'>
+                  <img
+                    src={mobilePreview}
+                    alt='Mobile förhandsgranskning'
+                    className='w-full h-32 object-cover rounded-lg'
+                  />
+                  <button
+                    type='button'
+                    onClick={clearMobileImage}
+                    className='absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600'
+                  >
+                    ×
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>

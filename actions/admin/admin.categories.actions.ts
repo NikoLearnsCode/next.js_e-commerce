@@ -7,6 +7,9 @@ import {buildCategoryTree} from '@/actions/lib/categoryTree-builder';
 import {categoryFormSchema, CategoryFormData} from '@/lib/form-validators';
 import {revalidatePath} from 'next/cache';
 import {ActionResult} from '@/lib/types/query';
+import path from 'path';
+import fs from 'fs/promises';
+import {isUploadedImage} from '@/utils/image-helpers';
 
 export async function getCategoriesWithChildren() {
   const flatCategories = await db
@@ -17,6 +20,18 @@ export async function getCategoriesWithChildren() {
   const categoryTree = buildCategoryTree(flatCategories);
 
   return categoryTree;
+}
+
+export async function getMainCategoriesForHomepage() {
+  const mainCategories = await db
+    .select()
+    .from(categories)
+    .where(
+      and(eq(categories.type, 'MAIN-CATEGORY'), eq(categories.isActive, true))
+    )
+    .orderBy(asc(categories.displayOrder));
+
+  return mainCategories;
 }
 
 export async function createCategory(
@@ -76,6 +91,8 @@ export async function createCategory(
         displayOrder: validatedData.displayOrder,
         isActive: validatedData.isActive,
         parentId: validatedData.parentId,
+        desktopImage: validatedData.desktopImage || null,
+        mobileImage: validatedData.mobileImage || null,
         created_at: now,
         updated_at: now,
       })
@@ -197,6 +214,52 @@ export async function updateCategory(
       }
     }
 
+    // Hantera bilduppdateringar - radera gamla bilder om nya har laddats upp
+    if (validatedData.desktopImage || validatedData.mobileImage) {
+      const oldDesktopImage = existingCategory.desktopImage;
+      const oldMobileImage = existingCategory.mobileImage;
+      const newDesktopImage = validatedData.desktopImage;
+      const newMobileImage = validatedData.mobileImage;
+
+      // Radera gamla desktop-bild om en ny har laddats upp
+      if (
+        oldDesktopImage &&
+        newDesktopImage &&
+        oldDesktopImage !== newDesktopImage &&
+        isUploadedImage(oldDesktopImage)
+      ) {
+        try {
+          const imagePath = path.join(process.cwd(), 'public', oldDesktopImage);
+          await fs.unlink(imagePath);
+        } catch (error) {
+          console.warn(
+            'Could not delete old desktop image:',
+            oldDesktopImage,
+            error
+          );
+        }
+      }
+
+      // Radera gamla mobile-bild om en ny har laddats upp
+      if (
+        oldMobileImage &&
+        newMobileImage &&
+        oldMobileImage !== newMobileImage &&
+        isUploadedImage(oldMobileImage)
+      ) {
+        try {
+          const imagePath = path.join(process.cwd(), 'public', oldMobileImage);
+          await fs.unlink(imagePath);
+        } catch (error) {
+          console.warn(
+            'Could not delete old mobile image:',
+            oldMobileImage,
+            error
+          );
+        }
+      }
+    }
+
     // Uppdatera kategorin
     const [updatedCategory] = await db
       .update(categories)
@@ -207,6 +270,8 @@ export async function updateCategory(
         displayOrder: validatedData.displayOrder,
         isActive: validatedData.isActive,
         parentId: validatedData.parentId,
+        desktopImage: validatedData.desktopImage || null,
+        mobileImage: validatedData.mobileImage || null,
         updated_at: new Date(),
       })
       .where(eq(categories.id, id))
@@ -277,6 +342,67 @@ export async function deleteCategory(id: number): Promise<ActionResult> {
         success: false,
         error: `Kategorin kan inte raderas eftersom den har ${childCategories.length} underkategorier. Ta bort eller flytta underkategorierna först.`,
       };
+    }
+
+    // Radera associerade bilder från filsystemet
+    if (
+      categoryToDelete.desktopImage &&
+      isUploadedImage(categoryToDelete.desktopImage)
+    ) {
+      try {
+        const imagePath = path.join(
+          process.cwd(),
+          'public',
+          categoryToDelete.desktopImage
+        );
+        await fs.unlink(imagePath);
+      } catch (error) {
+        console.warn(
+          'Could not delete desktop image:',
+          categoryToDelete.desktopImage,
+          error
+        );
+      }
+    }
+
+    if (
+      categoryToDelete.mobileImage &&
+      isUploadedImage(categoryToDelete.mobileImage)
+    ) {
+      try {
+        const imagePath = path.join(
+          process.cwd(),
+          'public',
+          categoryToDelete.mobileImage
+        );
+        await fs.unlink(imagePath);
+      } catch (error) {
+        console.warn(
+          'Could not delete mobile image:',
+          categoryToDelete.mobileImage,
+          error
+        );
+      }
+    }
+
+    // Ta bort hela upload-mappen för kategorin om den finns
+    if (categoryToDelete.type === 'MAIN-CATEGORY') {
+      try {
+        const uploadDir = path.join(
+          process.cwd(),
+          'public',
+          'uploads',
+          'categories',
+          categoryToDelete.slug
+        );
+        await fs.rmdir(uploadDir);
+      } catch (error) {
+        console.warn(
+          'Could not delete category upload directory:',
+          categoryToDelete.slug,
+          error
+        );
+      }
     }
 
     // Ta bort kategorin

@@ -180,6 +180,8 @@ export const categories = pgTable('categories', {
   type: categoryTypeEnum('type').notNull().default('SUB-CATEGORY'),
   displayOrder: integer('display_order').notNull().default(0),
   isActive: boolean('is_active').notNull().default(true),
+  desktopImage: text('desktop_image'),
+  mobileImage: text('mobile_image'),
   created_at: timestamp('created_at', {withTimezone: true})
     .notNull()
     .defaultNow(),
@@ -208,4 +210,3 @@ export const ordersRelations = relations(ordersTable, ({one, many}) => ({
   }),
   order_items: many(orderItemsTable),
 }));
-
