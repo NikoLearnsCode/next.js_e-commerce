@@ -119,14 +119,8 @@ export default function ProductFilterWrapper({
   // Plockar fram unika kategorier
   const uniqueCategories = useMemo(() => {
     if (!isGenderPage) return [];
-    if (metadata?.availableCategories) {
-      return metadata.availableCategories;
-    }
-
-    const categoriesSet = new Set<string>();
-    initialProducts.forEach((p) => p.category && categoriesSet.add(p.category));
-    return Array.from(categoriesSet).sort();
-  }, [initialProducts, isGenderPage, metadata]);
+    return metadata?.availableCategories || [];
+  }, [isGenderPage, metadata]);
 
   useEffect(() => {
     const handleEscapeKey = (e: KeyboardEvent) => {

@@ -201,32 +201,6 @@ export const categoriesNameParentUniqueIndex = unique('name_unique_idx').on(
   categories.parentId
 );
 
-/* // Relations för nya cart-strukturen
-export const cartsRelations = relations(cartsTable, ({one, many}) => ({
-  user: one(usersTable, {
-    fields: [cartsTable.user_id],
-    references: [usersTable.id],
-  }),
-  cartItems: many(cartItemsTable),
-}));
-
-export const cartItemsRelations = relations(cartItemsTable, ({one}) => ({
-  cart: one(cartsTable, {
-    fields: [cartItemsTable.cart_id],
-    references: [cartsTable.id],
-  }),
-  product: one(productsTable, {
-    fields: [cartItemsTable.product_id],
-    references: [productsTable.id],
-  }),
-})); */
-
-/* export const productsRelations = relations(productsTable, ({many}) => ({
-  orderItems: many(orderItemsTable),
-  cartItems: many(cartItemsTable),
-  favorites: many(favoritesTable),
-}));
- */
 export const ordersRelations = relations(ordersTable, ({one, many}) => ({
   user: one(usersTable, {
     fields: [ordersTable.user_id],
@@ -235,13 +209,3 @@ export const ordersRelations = relations(ordersTable, ({one, many}) => ({
   order_items: many(orderItemsTable),
 }));
 
-export const orderItemsRelations = relations(orderItemsTable, ({one}) => ({
-  order: one(ordersTable, {
-    fields: [orderItemsTable.order_id],
-    references: [ordersTable.id],
-  }),
-  product: one(productsTable, {
-    fields: [orderItemsTable.product_id],
-    references: [productsTable.id],
-  }),
-}));

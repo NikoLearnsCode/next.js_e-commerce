@@ -8,41 +8,58 @@ export interface DropdownOption {
 }
 
 /**
- * Hittar och formaterar kategorier från ett träd för att användas i en dropdown.
- * Funktionen filtrerar resultatet baserat på en lista av tillåtna kategorityper.
- *
- * @param nodes - En array av hela kategoriträdet.
- * @param allowedTypes - En array av kategorityper som ska inkluderas (t.ex. ['MAIN-CATEGORY', 'CONTAINER']).
- * @param parentName - Används internt för att bygga hierarkiska etiketter.
- * @returns En array av DropdownOption.
+ * @param nodes Den nästade listan med kategorier att söka i.
+ * @param allowedTypes En array med strängar, t.ex. ['SUB-CATEGORY', 'COLLECTION'].
+ * Endast kategorier vars typ finns i denna lista kommer att inkluderas.
+ * @param parentName Namnet på föräldrakategorin. Används för att bygga
+ * de beskrivande etiketterna.
+ * @returns En platt array med `DropdownOption`-objekt.
  */
 export function findCategoriesForDropdown(
   nodes: CategoryWithChildren[],
   allowedTypes: string[],
   parentName: string | null = null
 ): DropdownOption[] {
+  // Starta med en tom lista som vi kommer att fylla på under resans gång.
   let options: DropdownOption[] = [];
 
+  // Loopa igenom varje kategori (nod) på den nuvarande nivån i trädet.
   for (const node of nodes) {
-    // Steg 1: Kontrollera om nodens typ är tillåten.
+    // Steg 1: Kontrollera om den nuvarande nodens typ är tillåten.
+    // Detta fungerar som ett filter eller en "gatekeeper".
+    // Bara om `node.type` finns i `allowedTypes` fortsätter vi.
     if (allowedTypes.includes(node.type)) {
+      // Om typen är godkänd, skapa ett nytt `DropdownOption`-objekt...
       options.push({
-        value: node.id,
-        slug: node.slug,
-        // Steg 2: Använd en standardiserad etikett.
-        // Skapar "Kategori" eller "Kategori - Förälder"
+        value: node.id, // Värdet som skickas, t.ex. till en databas.
+        slug: node.slug, // URL-sluggen, kan vara användbar.
+        // Steg 2: Skapa en användarvänlig etikett.
+        // Om `parentName` finns (dvs. vi är inte på toppnivån),
+        // skapa en etikett som "Barnets Namn - Förälderns Namn".
+        // Annars, använd bara kategorins eget namn.
+        // Detta är superbra för att skilja på t.ex. 'Byxor - Dam' och 'Byxor - Herr'.
         label: parentName ? `${node.name} - ${parentName}` : node.name,
       });
     }
 
-    // Rekursivt anrop för att gå igenom alla barn.
+    // Steg 3: "Dyk ner" och gör samma sak för alla barn.
+    // Om den nuvarande noden har en `children`-array som inte är tom...
     if (node.children && node.children.length > 0) {
+      // ...anropa då denna funktion igen för barnen (rekursion).
+      // Resultatet från det anropet (en platt lista med barnens alternativ)
+      // slås ihop med vår nuvarande `options`-lista.
       options = options.concat(
-        findCategoriesForDropdown(node.children, allowedTypes, node.name)
+        findCategoriesForDropdown(
+          node.children,
+          allowedTypes,
+          node.name // VIKTIGT: skicka med den *nuvarande* nodens namn som `parentName` till nästa nivå.
+        )
       );
     }
   }
 
+  // När loopen har gått igenom alla noder (och deras barn via rekursion)
+  // på denna nivå, returnera den kompletta, platta listan med alternativ.
   return options;
 }
 
@@ -59,11 +76,11 @@ export const findCategoryById = (
 ): CategoryWithChildren | null => {
   for (const cat of cats) {
     if (cat.id === id) return cat;
-    /*  if (cat.children) {
-      // Om kategorin har barn, anropa samma funktion för barnen.
-      const found = findCategoryById(cat.children, id);
-      if (found) return found; 
-    } */
+    //  if (cat.children) {
+    //   // Om kategorin har barn, anropa samma funktion för barnen.
+    //   const found = findCategoryById(cat.children, id);
+    //   if (found) return found; 
+    // }
   }
   return null;
 };

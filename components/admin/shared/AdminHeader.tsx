@@ -2,7 +2,7 @@
 
 import {Button} from '@/components/shared/ui/button';
 import {useAdmin} from '@/context/AdminContextProvider';
-import {ArrowRight, PlusIcon} from 'lucide-react';
+import {ArrowRight} from 'lucide-react';
 
 type AdminHeaderProps = {
   title: string;

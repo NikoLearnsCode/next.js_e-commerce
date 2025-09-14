@@ -3,8 +3,9 @@
 import Image from 'next/image';
 import {Link} from '@/components/shared/ui/link';
 import {useState, useEffect} from 'react';
+import {NavLink} from '@/lib/types/category';
 
-export default function Homepage() {
+export default function Homepage({navLinks}: {navLinks: NavLink[]}) {
   const [currentView, setCurrentView] = useState<'dam' | 'herr'>('dam');
 
   const damDesktopImage = '/images/LP.DAM.avif';
@@ -72,9 +73,8 @@ export default function Homepage() {
           />
         </div>
       </div>
-
       <div className='absolute left-0 top-5/8 w-full px-6'>
-        <div className='flex justify-center items-center space-x-5 font-syne uppercase'>
+        {/*  <div className='flex justify-center items-center space-x-5 font-syne uppercase'>
           <Link
             variant='secondaryTwo'
             href='/c/dam'
@@ -89,6 +89,21 @@ export default function Homepage() {
           >
             herr
           </Link>
+        </div> */}
+
+        <div className='flex justify-center items-center space-x-1 uppercase'>
+          {navLinks
+            .filter((link) => link.href !== '/')
+            .map((link) => (
+              <Link
+                variant='underline'
+                className={`focus:no-underline h-8 decoration-1 underline-offset-6 text-white text-base tracking-wide font-syne font-medium relative z-10 ${link.href === '/' ? 'underline' : ''}`}
+                key={link.href}
+                href={link.href}
+              >
+                {link.title}
+              </Link>
+            ))}
         </div>
       </div>
     </div>

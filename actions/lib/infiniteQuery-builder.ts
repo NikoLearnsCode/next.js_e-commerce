@@ -39,8 +39,8 @@ export function buildCategoryGenderFilters(
   gender: string | null
 ) {
   const conditions = [];
-  if (category) conditions.push(eq(productsTable.category, category));
   if (gender) conditions.push(eq(productsTable.gender, gender));
+  if (category) conditions.push(eq(productsTable.category, category));
 
   // Filtrera bort produkter med framtida datum
   conditions.push(sql`${productsTable.published_at} <= NOW()`);

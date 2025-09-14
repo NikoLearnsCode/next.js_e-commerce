@@ -61,7 +61,6 @@ export type ProductCard = Pick<
   | 'sizes'
   | 'images'
   | 'slug'
-  | 'category'
   | 'created_at'
 > & {
   isNew?: boolean;
