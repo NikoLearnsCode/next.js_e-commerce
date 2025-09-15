@@ -11,11 +11,53 @@ import {
 import {useRouter, useSearchParams} from 'next/navigation';
 import {useCart} from '@/context/CartProvider';
 import {DeliveryFormData} from '@/lib/validators';
-import {
-  CheckoutStep,
-  validateStep,
-  getCheckoutUrl,
-} from '@/components/checkout/utils/steps';
+
+// Checkout steps - en enda source of truth
+export const STEP_INFO = {
+  delivery: 'Frakt',
+  payment: 'Betalning',
+  confirmation: 'Bekräftelse',
+} as const;
+
+export type CheckoutStep = keyof typeof STEP_INFO;
+export const CHECKOUT_STEPS = Object.keys(STEP_INFO) as CheckoutStep[];
+
+// Enkel step-validering: kan bara gå till nästa steg om föregående är klart
+const canAccessStep = (
+  step: CheckoutStep,
+  completedSteps: CheckoutStep[]
+): boolean => {
+  if (step === 'delivery') return true;
+  if (step === 'payment') return completedSteps.includes('delivery');
+  if (step === 'confirmation') return completedSteps.includes('payment');
+  return false;
+};
+
+// Byggare checkout URL
+const getCheckoutUrl = (step: CheckoutStep, isGuest?: boolean): string => {
+  return `/checkout?step=${step}${isGuest ? '&guest=true' : ''}`;
+};
+
+// Validera step från URL - om inte tillåtet, gå till senaste möjliga
+const validateStep = (
+  urlStep: string | null,
+  completedSteps: CheckoutStep[]
+): CheckoutStep => {
+  const step = urlStep as CheckoutStep;
+
+  // Om ogiltig step, börja med delivery
+  if (!CHECKOUT_STEPS.includes(step)) {
+    return 'delivery';
+  }
+
+  // Om kan inte komma åt steget, gå till senaste tillåtna
+  if (!canAccessStep(step, completedSteps)) {
+    if (completedSteps.includes('delivery')) return 'payment';
+    return 'delivery';
+  }
+
+  return step;
+};
 
 interface CheckoutContextType {
   currentStep: CheckoutStep;

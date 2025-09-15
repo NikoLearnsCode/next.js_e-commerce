@@ -1,11 +1,16 @@
 'use client';
 import Logo from '@/components/shared/Logo';
-import {getStepsArray, CheckoutStep} from '@/components/checkout/utils/steps';
+import {
+  CHECKOUT_STEPS,
+  STEP_INFO,
+  CheckoutStep,
+} from '@/context/CheckoutProvider';
 
 export default function Steps({currentStep}: {currentStep: CheckoutStep}) {
-  const steps = getStepsArray();
-  const currentStepIndex = steps.findIndex((step) => step.key === currentStep);
-  const allStepsDone = currentStepIndex >= steps.length - 1;
+  const currentStepIndex = CHECKOUT_STEPS.findIndex(
+    (step) => step === currentStep
+  );
+  const allStepsDone = currentStepIndex >= CHECKOUT_STEPS.length - 1;
 
   return (
     <>
@@ -22,7 +27,7 @@ export default function Steps({currentStep}: {currentStep: CheckoutStep}) {
           <div className='relative flex justify-between px-4 mb-8 md:px-0'>
             <div className='transition absolute top-3 left-11 right-11 md:left-5 md:right-5 h-0.5 bg-gray-200' />
 
-            {steps.map((step, index) => {
+            {CHECKOUT_STEPS.map((step, index) => {
               let circleClasses =
                 'w-6 h-6 text-xs font-medium rounded-full flex items-center justify-center relative z-10';
 
@@ -43,12 +48,11 @@ export default function Steps({currentStep}: {currentStep: CheckoutStep}) {
               }
 
               return (
-                <div
-                  key={step.key}
-                  className='flex flex-col items-center relative'
-                >
+                <div key={step} className='flex flex-col items-center relative'>
                   <div className={circleClasses}>{content}</div>
-                  <span className='mt-2 text-xs font-medium'>{step.label}</span>
+                  <span className='mt-2 text-xs font-medium'>
+                    {STEP_INFO[step]}
+                  </span>
                 </div>
               );
             })}
