@@ -22,14 +22,13 @@ import {useNavigatedHistory} from '@/context/NavigatedHistoryProvider';
 
 type ProductCardProps = {
   product: ProductCardType;
-  priorityLoading?: boolean;
   className?: string;
   layout?: 'grid' | 'list';
 };
 
 export default function ProductCard({
   product,
-  priorityLoading = false,
+
   layout = 'grid',
 }: ProductCardProps) {
   const [isMobile, setIsMobile] = useState(false);
@@ -134,7 +133,6 @@ export default function ProductCard({
                       quality={90}
                       priority
                       loading='eager'
-                      // priority={priorityLoading && idx === 0}
                       className='object-cover p-[1px]'
                       sizes='(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, 50vw'
                     />
