@@ -7,7 +7,7 @@ import {CartItemWithProduct} from '@/lib/types/db';
 import {DeliveryFormData, deliverySchema} from '@/lib/validators';
 import {db} from '@/drizzle/index';
 import {ordersTable, orderItemsTable} from '@/drizzle/db/schema';
-import {eq, desc, inArray} from 'drizzle-orm';
+import {eq, desc /* inArray */} from 'drizzle-orm';
 import {PaymentInfo} from '@/lib/types/query';
 
 export async function createOrder(
@@ -79,7 +79,7 @@ export async function createOrder(
   }
 }
 
-// NIVÅ 1: DRIZZLE-RELATIONER query
+// drizzle relations join query
 export async function getUserOrderById(orderId: string) {
   try {
     const order = await db.query.ordersTable.findFirst({
@@ -100,27 +100,83 @@ export async function getUserOrderById(orderId: string) {
   }
 }
 
-// NIVÅ 3: Raw postgresql query pseudo
-/* export async function getUserOrderById(orderId: string) 
+// drizzle med egen join query
+/* export async function getUserOrderById(orderId: string) {
+  try {
+    // INNER JOIN query för att få order med dess items
+    const orderWithItems = await db
+      .select({
+        // Order fält
+        orderId: ordersTable.id,
+        orderUserId: ordersTable.user_id,
+        orderSessionId: ordersTable.session_id,
+        orderTotalAmount: ordersTable.total_amount,
+        orderPaymentInfo: ordersTable.payment_info,
+        orderStatus: ordersTable.status,
+        orderDeliveryInfo: ordersTable.delivery_info,
+        orderCreatedAt: ordersTable.created_at,
+        orderUpdatedAt: ordersTable.updated_at,
 
-    const orderQueryText = 'SELECT * FROM "orders" WHERE "id" = $1 LIMIT 1';
-    const orderResult = await pool.query(orderQueryText, [orderId]);
-    const orderData = orderResult.rows[0];
+        // Order items fält
+        itemId: orderItemsTable.id,
+        itemOrderId: orderItemsTable.order_id,
+        itemProductId: orderItemsTable.product_id,
+        itemQuantity: orderItemsTable.quantity,
+        itemPrice: orderItemsTable.price,
+        itemName: orderItemsTable.name,
+        itemSize: orderItemsTable.size,
+        itemColor: orderItemsTable.color,
+        itemSlug: orderItemsTable.slug,
+        itemCreatedAt: orderItemsTable.created_at,
+        itemImage: orderItemsTable.image,
+      })
+      .from(ordersTable)
+      .innerJoin(orderItemsTable, eq(ordersTable.id, orderItemsTable.order_id))
+      .where(eq(ordersTable.id, orderId));
 
 
-    const itemsQueryText = 'SELECT * FROM "order_items" WHERE "order_id" = $1';
-    const itemsResult = await pool.query(itemsQueryText, [orderId]);
-    const orderItems = itemsResult.rows;
+    if (orderWithItems.length === 0) {
+      return {success: false, error: 'Order not found'};
+    }
 
-    const combinedOrder = {
-      ...orderData,
-      order_items: orderItems,
+    // Bygg order-objektet från första raden (alla rader har samma order-data)
+    const firstRow = orderWithItems[0];
+    const order = {
+      id: firstRow.orderId,
+      user_id: firstRow.orderUserId,
+      session_id: firstRow.orderSessionId,
+      total_amount: firstRow.orderTotalAmount,
+      payment_info: firstRow.orderPaymentInfo,
+      status: firstRow.orderStatus,
+      delivery_info: firstRow.orderDeliveryInfo,
+      created_at: firstRow.orderCreatedAt,
+      updated_at: firstRow.orderUpdatedAt,
+
+      // Bygg items-arrayen från alla rader
+      order_items: orderWithItems.map((row) => ({
+        id: row.itemId,
+        order_id: row.itemOrderId,
+        product_id: row.itemProductId,
+        quantity: row.itemQuantity,
+        price: row.itemPrice,
+        name: row.itemName,
+        size: row.itemSize,
+        color: row.itemColor,
+        slug: row.itemSlug,
+        created_at: row.itemCreatedAt,
+        image: row.itemImage,
+      })),
     };
 
-    return {success: true, order: combinedOrder};
- */
+    return {success: true, order};
+  } catch (error) {
+    console.error('Error fetching order:', error);
+    return {success: false, error: 'Failed to fetch order'};
+  }
+} */
 
-//Nivå 2. Drizzle sql query
+// getUserOrdersOverview UTAN join
+/* 
 export async function getUserOrdersOverview() {
   try {
     const session = await getServerSession(authOptions);
@@ -162,33 +218,70 @@ export async function getUserOrdersOverview() {
     console.error('Unexpected error in getUserOrdersSummary:', error);
     return {success: false, error: 'Unexpected error', orders: []};
   }
-}
+} */
 
-//Nivå 3. Raw postgresql query pseudo
-/* 
-export async function getUserOrdersOverview() 
-
+export async function getUserOrdersOverview() {
+  try {
     const session = await getServerSession(authOptions);
     const user = session?.user;
 
-    const ordersQueryText =
-      'SELECT "id", "created_at" FROM "orders" WHERE "user_id" = $1 ORDER BY "created_at" DESC';
-    const ordersResult = await pool.query(ordersQueryText, [user.id]);
-    const orders = ordersResult.rows;
+    if (!user) {
+      console.error(
+        'Authentication error fetching user orders: User not authenticated'
+      );
+      return {success: false, error: 'User not authenticated', orders: []};
+    }
 
+    const ordersWithItems = await db
+      .select({
+        orderId: ordersTable.id,
+        orderCreatedAt: ordersTable.created_at,
 
-    const orderIds = orders.map((order) => order.id);
-    const placeholders = orderIds.map((_, index) => `$${index + 1}`).join(', ');
-    const itemsQueryText = `SELECT "order_id", "image", "name" FROM "order_items" WHERE "order_id" IN (${placeholders})`;
+        itemOrderId: orderItemsTable.order_id,
+        itemImage: orderItemsTable.image,
+        itemName: orderItemsTable.name,
+      })
+      .from(ordersTable)
+      .innerJoin(orderItemsTable, eq(ordersTable.id, orderItemsTable.order_id))
+      .where(eq(ordersTable.user_id, user.id))
+      .orderBy(desc(ordersTable.created_at));
 
+    const orderMap = new Map<
+      string,
+      {
+        id: string;
+        created_at: Date;
+        order_items: Array<{
+          order_id: string;
+          image: string | null;
+          name: string;
+        }>;
+      }
+    >();
 
-    const itemsResult = await pool.query(itemsQueryText, orderIds);
-    const orderItems = itemsResult.rows;
+    ordersWithItems.forEach((row) => {
+      const orderId = row.orderId;
 
-    const ordersWithItems = orders.map((order) => ({
-      ...order,
-      order_items: orderItems.filter((item) => item.order_id === order.id),
-    }));
+      if (!orderMap.has(orderId)) {
+        orderMap.set(orderId, {
+          id: row.orderId,
+          created_at: row?.orderCreatedAt || new Date(),
+          order_items: [],
+        });
+      }
 
-    return {success: true, orders: ordersWithItems};
- */
+      orderMap.get(orderId)!.order_items.push({
+        order_id: row.itemOrderId,
+        image: row.itemImage,
+        name: row.itemName,
+      });
+    });
+
+    const orders = Array.from(orderMap.values());
+
+    return {success: true, orders};
+  } catch (error) {
+    console.error('Unexpected error in getUserOrdersOverview:', error);
+    return {success: false, error: 'Unexpected error', orders: []};
+  }
+}

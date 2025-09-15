@@ -2,7 +2,6 @@
 
 import {Link} from '@/components/shared/ui/link';
 import {formatPrice} from '@/utils/format';
-import {getCheckoutUrl} from '@/components/checkout/utils/steps';
 
 type CartSummaryProps = {
   totalPrice: number;
@@ -57,7 +56,7 @@ export default function CartSummary({
         </span>
       </div>
       <Link
-        href={getCheckoutUrl('delivery')}
+        href='/checkout'
         variant='primary'
         width='full'
         className='mt-6 h-15 text-sm lg:text-sm font-medium'

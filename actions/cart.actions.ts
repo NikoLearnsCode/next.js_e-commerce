@@ -71,6 +71,7 @@ export async function getCart() {
     const user = session?.user;
 
     let cart;
+
     if (user) {
       const cartData = await db
         .select()
@@ -83,6 +84,7 @@ export async function getCart() {
       if (!sessionId) {
         return {cart: null, cartItems: [], totalPrice: 0, itemCount: 0};
       }
+
       const cartData = await db
         .select()
         .from(cartsTable)
@@ -355,7 +357,6 @@ export async function transferCartOnLogin(userId: string) {
 
     await Promise.all(promises);
 
-    // Ta slutligen bort den nu tomma sessionskorgen
     await db.delete(cartsTable).where(eq(cartsTable.id, sessionCart.id));
 
     console.log('Cart transferred successfully');

@@ -79,7 +79,7 @@ export default function Homepage({
                 loading={index === 0 ? 'eager' : 'lazy'}
                 sizes='90vw'
                 quality={90}
-                className={`object-cover w-full h-full absolute transition-opacity duration-200 top-0 left-0  ${
+                className={`object-cover w-full h-full absolute transition-opacity duration-500 top-0 left-0  ${
                   currentView === category.slug ? 'opacity-100' : 'opacity-0'
                 }`}
               />

@@ -23,10 +23,19 @@ export type OrderWithItems = Order & {
   order_items: OrderItem[];
 };
 
-// Overview carousel för profile
 export type OrderOverview = Pick<OrderWithItems, 'id' | 'created_at'> & {
   order_items: Pick<OrderItem, 'order_id' | 'image' | 'name'>[];
 };
+
+/* export type OrderOverview = {
+  id: string;
+  created_at: Date;
+  order_items: {
+    order_id: string;
+    image: string | null;
+    name: string;
+  }[];
+}; */
 
 export type NewCart = typeof cartsTable.$inferInsert;
 

@@ -12,51 +12,77 @@ const ALLOWED_IMAGE_TYPES = [
   'image/avif',
 ];
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-const MAX_IMAGES = 10;
+const MAX_PRODUCT_IMAGES = 10;
 
 interface ValidationError {
   fileName: string;
   error: string;
 }
 
-export async function uploadCategoryImages(
-  desktopImage: File | null,
-  mobileImage: File | null,
-  categorySlug: string
-): Promise<{desktopImageUrl?: string; mobileImageUrl?: string}> {
-  const images = [desktopImage, mobileImage].filter(Boolean) as File[];
+interface UploadOptions {
+  destinationPath: string;
+  fileNameGenerator: (file: File, index: number) => string;
+}
 
-  if (images.length === 0) {
-    throw new Error('Minst en bild måste väljas');
+interface UploadResult {
+  publicUrl: string;
+  savedPath: string;
+}
+
+// HJÄLPFUNKTIONER
+
+// Validerar en enskild fil mot de globala reglerna.
+function validateImage(image: File): ValidationError | null {
+  if (!ALLOWED_IMAGE_TYPES.includes(image.type)) {
+    return {
+      fileName: image.name,
+      error: `Filtyp ${image.type} är inte tillåten.`,
+    };
+  }
+  if (image.size > MAX_FILE_SIZE) {
+    return {
+      fileName: image.name,
+      error: `Filen är för stor (${(image.size / 1024 / 1024).toFixed(1)}MB). Max ${MAX_FILE_SIZE / 1024 / 1024}MB.`,
+    };
+  }
+  if (image.size === 0) {
+    return {
+      fileName: image.name,
+      error: 'Filen är tom.',
+    };
+  }
+  return null;
+}
+
+/**
+ * Genererar ett unikt och säkert filnamn för produktbilder.
+ */
+function generateProductFileName(file: File): string {
+  const sanitizedName = file.name
+    .replace(/[^a-zA-Z0-9.-]/g, '_')
+    .replace(/_{2,}/g, '_')
+    .toLowerCase();
+
+  const fileExtension = path.extname(sanitizedName);
+  const baseName = path.basename(sanitizedName, fileExtension);
+  return `${baseName}_${randomUUID()}${fileExtension}`;
+}
+
+// HUVUDFUNKTIONER
+
+// En generell funktion för att validera och ladda upp bilder.
+async function handleImageUpload(
+  files: File[],
+  options: UploadOptions
+): Promise<UploadResult[]> {
+  if (files.length === 0) {
+    throw new Error('Inga bilder att ladda upp.');
   }
 
-  const validationErrors: ValidationError[] = [];
-
-  for (const image of images) {
-    if (!ALLOWED_IMAGE_TYPES.includes(image.type)) {
-      validationErrors.push({
-        fileName: image.name,
-        error: `Filtyp ${image.type} är inte tillåten. Endast JPEG, PNG och WebP tillåts.`,
-      });
-      continue;
-    }
-
-    if (image.size > MAX_FILE_SIZE) {
-      validationErrors.push({
-        fileName: image.name,
-        error: `Filen är ${(image.size / 1024 / 1024).toFixed(1)}MB. Maximal storlek är ${MAX_FILE_SIZE / 1024 / 1024}MB.`,
-      });
-      continue;
-    }
-
-    if (image.size === 0) {
-      validationErrors.push({
-        fileName: image.name,
-        error: 'Filen är tom',
-      });
-    }
-  }
-
+  // Validera alla filer
+  const validationErrors = files
+    .map(validateImage)
+    .filter(Boolean) as ValidationError[];
   if (validationErrors.length > 0) {
     const errorMessage = validationErrors
       .map((err) => `${err.fileName}: ${err.error}`)
@@ -64,65 +90,93 @@ export async function uploadCategoryImages(
     throw new Error(`Bildvalidering misslyckades:\n${errorMessage}`);
   }
 
+  // Skapa målmapp
   const uploadDir = path.join(
     process.cwd(),
     'public',
     'uploads',
-    'categories',
-    categorySlug
+    options.destinationPath
   );
-
-  // Skapa upload-mapp
   try {
     await fs.mkdir(uploadDir, {recursive: true});
   } catch (error) {
     throw new Error(`Kunde inte skapa upload-mapp: ${error}`);
   }
 
-  const uploadedFiles: string[] = [];
-  const result: {desktopImageUrl?: string; mobileImageUrl?: string} = {};
+  //  Ladda upp filerna
+  const uploadedFiles: UploadResult[] = [];
+  const results: UploadResult[] = [];
 
   try {
-    // Ladda upp desktop-bild
-    if (desktopImage) {
-      // Rådata till buffer
-      const buffer = Buffer.from(await desktopImage.arrayBuffer());
-      const fileExtension = path.extname(desktopImage.name);
-      const finalFileName = `desktop${fileExtension}`;
+    for (const [index, file] of files.entries()) {
+      const buffer = Buffer.from(await file.arrayBuffer());
+      const finalFileName = options.fileNameGenerator(file, index);
       const savePath = path.join(uploadDir, finalFileName);
 
       await fs.writeFile(savePath, buffer);
-      uploadedFiles.push(savePath);
-      result.desktopImageUrl = `/uploads/categories/${categorySlug}/${finalFileName}`;
+
+      const result = {
+        publicUrl: `/uploads/${options.destinationPath}/${finalFileName}`,
+        savedPath: savePath,
+      };
+      uploadedFiles.push(result);
+      results.push(result);
     }
-
-    // Ladda upp mobile-bild
-    if (mobileImage) {
-      const buffer = Buffer.from(await mobileImage.arrayBuffer());
-      const fileExtension = path.extname(mobileImage.name);
-      const finalFileName = `mobile${fileExtension}`;
-      const savePath = path.join(uploadDir, finalFileName);
-
-      await fs.writeFile(savePath, buffer);
-      uploadedFiles.push(savePath);
-      result.mobileImageUrl = `/uploads/categories/${categorySlug}/${finalFileName}`;
-    }
-
-    return result;
+    return results;
   } catch (error) {
-    // Cleanup vid fel
-    for (const filePath of uploadedFiles) {
+    // 4. Städa upp filer om något går fel
+    for (const file of uploadedFiles) {
       try {
-        await fs.unlink(filePath);
+        await fs.unlink(file.savedPath);
       } catch (cleanupError) {
         console.warn(
-          `Kunde inte ta bort fil vid cleanup: ${filePath}`,
+          `Kunde inte ta bort fil vid cleanup: ${file.savedPath}`,
           cleanupError
         );
       }
     }
+
     throw error;
   }
+}
+
+// EXPORTERADE FUNKTIONER
+
+export async function uploadCategoryImages(
+  desktopImage: File | null,
+  mobileImage: File | null,
+  categorySlug: string
+): Promise<{desktopImageUrl?: string; mobileImageUrl?: string}> {
+  const imagesWithKeys = [
+    {key: 'desktop', file: desktopImage},
+    {key: 'mobile', file: mobileImage},
+  ].filter((item) => item.file) as {key: 'desktop' | 'mobile'; file: File}[];
+
+  const files = imagesWithKeys.map((item) => item.file);
+
+  if (files.length === 0) {
+    throw new Error('Minst en bild måste väljas');
+  }
+
+  const results = await handleImageUpload(files, {
+    destinationPath: path.join('categories', categorySlug),
+    fileNameGenerator: (file, index) => {
+      const fileExtension = path.extname(file.name);
+      // Använd nyckeln från `imagesWithKeys` för att bestämma namnet
+      const key = imagesWithKeys[index].key;
+      return `${key}${fileExtension}`;
+    },
+  });
+
+  // Mappa tillbaka resultatet till det förväntade formatet
+  const urls: {desktopImageUrl?: string; mobileImageUrl?: string} = {};
+  results.forEach((result, index) => {
+    const key = imagesWithKeys[index].key;
+    if (key === 'desktop') urls.desktopImageUrl = result.publicUrl;
+    if (key === 'mobile') urls.mobileImageUrl = result.publicUrl;
+  });
+
+  return urls;
 }
 
 export async function uploadProductImages(
@@ -130,106 +184,14 @@ export async function uploadProductImages(
   gender: string,
   category: string
 ): Promise<string[]> {
-  if (images.length === 0) {
-    throw new Error('Inga bilder att ladda upp');
+  if (images.length > MAX_PRODUCT_IMAGES) {
+    throw new Error(`Maximalt ${MAX_PRODUCT_IMAGES} bilder tillåtna.`);
   }
 
-  if (images.length > MAX_IMAGES) {
-    throw new Error(`Maximalt ${MAX_IMAGES} bilder tillåtna`);
-  }
+  const results = await handleImageUpload(images, {
+    destinationPath: path.join(gender, category),
+    fileNameGenerator: generateProductFileName,
+  });
 
-  const validationErrors: ValidationError[] = [];
-
-  for (const image of images) {
-    if (!ALLOWED_IMAGE_TYPES.includes(image.type)) {
-      validationErrors.push({
-        fileName: image.name,
-        error: `Filtyp ${image.type} är inte tillåten. Endast JPEG, PNG och WebP tillåts.`,
-      });
-      continue;
-    }
-
-    if (image.size > MAX_FILE_SIZE) {
-      validationErrors.push({
-        fileName: image.name,
-        error: `Filen är ${(image.size / 1024 / 1024).toFixed(1)}MB. Maximal storlek är ${MAX_FILE_SIZE / 1024 / 1024}MB.`,
-      });
-      continue;
-    }
-
-    if (image.size === 0) {
-      validationErrors.push({
-        fileName: image.name,
-        error: 'Filen är tom',
-      });
-    }
-  }
-
-  if (validationErrors.length > 0) {
-    const errorMessage = validationErrors
-      .map((err) => `${err.fileName}: ${err.error}`)
-      .join('\n');
-    throw new Error(`Bildvalidering misslyckades:\n${errorMessage}`);
-  }
-
-  const uploadDir = path.join(
-    process.cwd(),
-    'public',
-    'uploads',
-    gender,
-    category
-  );
-
-  // Skapa upload-mapp
-  try {
-    await fs.mkdir(uploadDir, {recursive: true});
-  } catch (error) {
-    throw new Error(`Kunde inte skapa upload-mapp: ${error}`);
-  }
-
-  const imageUrls: string[] = [];
-  const uploadedFiles: string[] = [];
-
-  try {
-    // Ladda upp alla bilder
-    for (const image of images) {
-      const buffer = Buffer.from(await image.arrayBuffer());
-
-      const sanitizedName = image.name
-        .replace(/[^a-zA-Z0-9.-]/g, '_') // Ersätt alla icke-alfanumeriska tecken
-        .replace(/_{2,}/g, '_') // Ersätt flera understreck med ett
-        .toLowerCase();
-
-      const fileExtension = path.extname(sanitizedName);
-      const baseName = path.basename(sanitizedName, fileExtension);
-      const finalFileName = `${baseName}_${randomUUID()}${fileExtension}`;
-
-      const savePath = path.join(uploadDir, finalFileName);
-
-      try {
-        await fs.writeFile(savePath, buffer);
-        uploadedFiles.push(savePath);
-
-        const publicUrl = `/uploads/${gender}/${category}/${finalFileName}`;
-        imageUrls.push(publicUrl);
-      } catch (writeError) {
-        throw new Error(`Kunde inte spara ${image.name}: ${writeError}`);
-      }
-    }
-
-    return imageUrls;
-  } catch (error) {
-    for (const filePath of uploadedFiles) {
-      try {
-        await fs.unlink(filePath);
-      } catch (cleanupError) {
-        console.warn(
-          `Kunde inte ta bort fil vid cleanup: ${filePath}`,
-          cleanupError
-        );
-      }
-    }
-
-    throw error;
-  }
+  return results.map((result) => result.publicUrl);
 }

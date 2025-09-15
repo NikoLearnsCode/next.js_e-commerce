@@ -1,8 +1,7 @@
 'use client';
 
-import {useState} from 'react';
-import {useRouter, useSearchParams} from 'next/navigation';
 import {useCart} from '@/context/CartProvider';
+import {useCheckout} from '@/context/CheckoutProvider';
 import DeliveryStep from '@/components/checkout/steps/DeliveryStep';
 import PaymentStep from '@/components/checkout/steps/PaymentStep';
 
@@ -11,44 +10,14 @@ import Steps from './StepBar';
 import CheckoutLayoutDesktop from './desktop/CheckoutLayoutDesktop';
 import CheckoutLayoutMobile from './mobile/CheckoutLayoutMobile';
 import {useMediaQuery} from '@/hooks/useMediaQuery';
-import {DeliveryFormData} from '@/lib/validators';
-import {
-  CheckoutStep,
-  validateStep,
-  getCheckoutUrl,
-} from '@/components/checkout/utils/steps';
 import SpinningLoader from '@/components/shared/ui/SpinningLogo';
 import {Toaster} from 'sonner';
 
 export default function CheckoutPage() {
   const {loading} = useCart();
   const isDesktop = useMediaQuery('(min-width: 768px)');
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
-  const [completedSteps, setCompletedSteps] = useState<CheckoutStep[]>([]);
-  const [deliveryData, setDeliveryData] = useState<DeliveryFormData | null>(
-    null
-  );
-
-  // URL state
-  const stepParam = searchParams.get('step');
-  const isGuest = searchParams.get('guest') === 'true';
-
-  // Validerat aktuellt steg
-  const currentStep = validateStep(stepParam, completedSteps);
-
-  // Navigation functions
-  const saveDeliveryAndProceed = (data: DeliveryFormData) => {
-    setDeliveryData(data);
-    setCompletedSteps((prev) => [...prev, 'delivery']);
-    router.push(getCheckoutUrl('payment', isGuest));
-  };
-
-  const completePaymentAndProceed = () => {
-    setCompletedSteps((prev) => [...prev, 'payment']);
-    router.push(getCheckoutUrl('confirmation', isGuest));
-  };
+  const {currentStep, deliveryData, completeDeliveryStep, completePaymentStep} =
+    useCheckout();
 
   if (loading) {
     return (
@@ -63,14 +32,14 @@ export default function CheckoutPage() {
       case 'delivery':
         return (
           <DeliveryStep
-            onNext={saveDeliveryAndProceed}
+            onNext={completeDeliveryStep}
             initialData={deliveryData}
           />
         );
       case 'payment':
         return (
           <PaymentStep
-            onNext={completePaymentAndProceed}
+            onNext={completePaymentStep}
             deliveryData={deliveryData}
           />
         );

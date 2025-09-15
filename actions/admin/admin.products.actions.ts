@@ -26,7 +26,7 @@ export async function getAllProducts(searchTerm?: string) {
     .from(productsTable)
     .where(
       or(
-        // För UUID, använd like istället för ilike och konvertera till text
+        // For UUID, use like instead of ilike and convert to text
         sql`${productsTable.id}::text ILIKE ${searchPattern}`,
         ilike(productsTable.name, searchPattern),
         ilike(productsTable.brand, searchPattern),
@@ -69,7 +69,6 @@ export async function createProduct(
       };
     }
 
-    // Insert into database
     const now = new Date();
     const publishedAt = data.publishedAt || now;
     const [newProduct] = await db
@@ -93,7 +92,6 @@ export async function createProduct(
       .returning();
 
     revalidatePath('/admin/products');
-    // revalidatePath(`/c/${newProduct.gender}/${newProduct.category}`);
 
     return {success: true, data: newProduct};
   } catch (error) {
@@ -120,7 +118,7 @@ export async function createProduct(
 
 export async function updateProduct(
   id: string,
-  data: ProductFormData & {images?: string[]} // images optional for updates
+  data: ProductFormData & {images?: string[]}
 ): Promise<ActionResult> {
   try {
     const validationResult = productFormSchema.safeParse(data);
@@ -132,7 +130,6 @@ export async function updateProduct(
       };
     }
 
-    // Hämta befintlig produkt för att jämföra bilder
     const [currentProduct] = await db
       .select()
       .from(productsTable)
@@ -176,14 +173,11 @@ export async function updateProduct(
       updated_at: new Date(),
     };
 
-    // Hantera publishedAt - om det finns i data, använd det
     if (data.publishedAt !== undefined) {
       updateData.published_at = data.publishedAt;
     }
 
-    // Hantera bilduppdateringar
     if (data.images !== undefined) {
-      // Validera att det finns minst en bild
       if (data.images.length === 0) {
         return {
           success: false,
@@ -191,11 +185,9 @@ export async function updateProduct(
         };
       }
 
-      // Om nya bilder skickas, ersätt alla befintliga bilder
       const oldImages = currentProduct.images || [];
       const newImages = data.images;
 
-      // Ta bort endast gamla bilder från uploads-mappen som inte längre används
       const imagesToDelete = oldImages.filter(
         (img) => !newImages.includes(img) && isUploadedImage(img)
       );
@@ -219,7 +211,6 @@ export async function updateProduct(
       .returning();
 
     revalidatePath('/admin/products');
-    // revalidatePath(`/c/${updatedProduct.gender}/${updatedProduct.category}`);
 
     return {success: true, data: updatedProduct};
   } catch (error) {
@@ -258,10 +249,9 @@ export async function deleteProduct(id: string): Promise<ActionResult> {
       };
     }
 
-    // Delete only uploaded images from filesystem (not testdata from public/images)
     if (product.images && product.images.length > 0) {
       for (const imageUrl of product.images) {
-        // Only delete images from uploads directory
+        // Only delete images from uploads directory (not testdata from public/images)
         if (isUploadedImage(imageUrl)) {
           try {
             const imagePath = path.join(process.cwd(), 'public', imageUrl);
