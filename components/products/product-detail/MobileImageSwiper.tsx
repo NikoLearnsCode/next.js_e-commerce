@@ -57,7 +57,7 @@ export default function MobileImageSwiper({
           nextEl: `.${nextButtonClass}`,
         }}
         onSlideChange={(swiper) => onSlideChange(swiper.activeIndex)}
-        className='aspect-7/9'
+        className='aspect-7/9 w-full h-full relative'
         initialSlide={initialSlide}
       >
         {images.map((imgSrc, idx) => (
@@ -68,8 +68,8 @@ export default function MobileImageSwiper({
               fill
               quality={100}
               sizes='(max-width: 768px) 100vw, 0px'
-              priority={idx === 0}
-              loading={idx === 0 ? 'eager' : 'lazy'}
+              priority
+              loading='eager'
               className='object-cover w-full h-full'
             />
           </SwiperSlide>

@@ -12,22 +12,20 @@ import {useNavigatedHistory} from '@/context/NavigatedHistoryProvider';
 
 type CarouselProductCardProps = {
   product: CarouselCard;
-  priorityLoading?: boolean;
 };
 
 export default function CarouselProductCard({
   product,
-  priorityLoading = false,
 }: CarouselProductCardProps) {
   const {name, price, images, slug, isNew} = product;
   const hasImage = images && images.length > 0;
   const {handleSaveNavigated} = useNavigatedHistory();
   return (
     <div className='flex flex-col relative w-full h-full pb-6 group '>
-      <div className='w-full relative bg-white aspect-[7/9]'>
+      <div className='w-full h-full relative bg-white aspect-[7/9]'>
         <Link
           href={`/${slug}`}
-          className='block h-full w-full'
+          className='block h-full w-full relative'
           tabIndex={-1}
           onClick={() => handleSaveNavigated({slug, image: images[0], name})}
         >
@@ -37,7 +35,7 @@ export default function CarouselProductCard({
               alt={name}
               fill
               quality={90}
-              priority={priorityLoading}
+              loading='lazy'
               className='object-cover'
               sizes='(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, 50vw'
             />

@@ -6,7 +6,7 @@ import {getOrCreateSessionId, getSessionId} from '@/utils/cookies';
 import type {NewFavorite} from '@/lib/types/db';
 import {db} from '@/drizzle/index';
 import {favoritesTable, productsTable} from '@/drizzle/db/schema';
-import {eq, and, isNull, sql} from 'drizzle-orm';
+import {eq, and, isNull, sql, inArray} from 'drizzle-orm';
 import {NEW_PRODUCT_DAYS} from '@/lib/constants';
 
 export async function getFavorites() {
@@ -187,19 +187,9 @@ export async function toggleFavorite(productId: string) {
 export async function transferFavoritesOnLogin(userId: string) {
   try {
     const sessionId = await getSessionId();
+    if (!sessionId) return {success: true, message: 'No session_id found'};
 
-    if (!sessionId) {
-      console.log('No session_id found, nothing to transfer');
-      return {success: true, message: 'No session_id found'};
-    }
-
-    console.log(
-      'Starting favorites transfer with sessionId:',
-      sessionId,
-      'and userId:',
-      userId
-    );
-
+    // Hämta båda listorna
     const sessionFavorites = await db
       .select()
       .from(favoritesTable)
@@ -210,13 +200,11 @@ export async function transferFavoritesOnLogin(userId: string) {
         )
       );
 
-    if (!sessionFavorites.length) {
-      console.log('No session favorites found');
+    if (!sessionFavorites.length)
       return {success: true, message: 'No session favorites found'};
-    }
 
     const userFavorites = await db
-      .select()
+      .select({product_id: favoritesTable.product_id})
       .from(favoritesTable)
       .where(eq(favoritesTable.user_id, userId));
 
@@ -224,31 +212,42 @@ export async function transferFavoritesOnLogin(userId: string) {
       userFavorites.map((fav) => fav.product_id)
     );
 
+    // Sortera i minnet vad som ska göras, utan databasanrop
+    const idsToUpdate: string[] = [];
+    const idsToDelete: string[] = [];
+
     for (const sessionFav of sessionFavorites) {
       if (!existingProductIds.has(sessionFav.product_id)) {
-        await db
-          .update(favoritesTable)
-          .set({
-            user_id: userId,
-            session_id: null,
-          })
-          .where(eq(favoritesTable.id, sessionFav.id));
+        // Denna favorit är unik och ska kopplas till användaren
+        idsToUpdate.push(sessionFav.id);
       } else {
-        await db
-          .delete(favoritesTable)
-          .where(eq(favoritesTable.id, sessionFav.id));
+        // Denna favorit är en dubblett och ska tas bort
+        idsToDelete.push(sessionFav.id);
       }
+    }
+
+    // Kör en bulk-update för ALLA favoriter som ska uppdateras
+    if (idsToUpdate.length > 0) {
+      await db
+        .update(favoritesTable)
+        .set({user_id: userId, session_id: null})
+        .where(inArray(favoritesTable.id, idsToUpdate));
+    }
+
+    // Kör en bulk-delete för ALLA favoriter som ska tas bort
+    if (idsToDelete.length > 0) {
+      await db
+        .delete(favoritesTable)
+        .where(inArray(favoritesTable.id, idsToDelete));
     }
 
     console.log('Favorites transferred successfully');
     return {
       success: true,
       message: `Favorites transferred successfully (${sessionFavorites.length} items processed)`,
-      transferred: true,
-      itemCount: sessionFavorites.length,
     };
   } catch (error) {
     console.error('Unexpected error transferring favorites on login:', error);
-    return {success: false, error, message: 'Failed to transfer favorites'};
+    return {success: false, error: 'Failed to transfer favorites'};
   }
 }

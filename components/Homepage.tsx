@@ -54,7 +54,7 @@ export default function Homepage({
                 loading={index === 0 ? 'eager' : 'lazy'}
                 sizes='90vw'
                 quality={90}
-                className={`object-cover object-top w-full h-full absolute top-0 left-0 transition-opacity duration-500 ${
+                className={`object-cover object-top w-full h-full absolute top-0 left-0 delay-500 ${
                   currentView === category.slug ? 'opacity-100' : 'opacity-0'
                 }`}
               />
@@ -81,7 +81,7 @@ export default function Homepage({
                 loading={index === 0 ? 'eager' : 'lazy'}
                 sizes='90vw'
                 quality={90}
-                className={`object-cover w-full h-full absolute top-0 left-0 transition-opacity duration-700 ${
+                className={`object-cover w-full h-full absolute transition-opacity duration-200 top-0 left-0  ${
                   currentView === category.slug ? 'opacity-100' : 'opacity-0'
                 }`}
               />
@@ -90,23 +90,21 @@ export default function Homepage({
         </div>
       </div>
       <div className='absolute left-0 top-5/8 w-full px-6'>
-        <div className='flex justify-center items-center space-x-1 uppercase'>
+        <div className='flex justify-center items-center  uppercase'>
           {navLinks
             .filter((link) => link.href !== '/')
             .map((link) => {
               // Extrahera kategorislug från href (/c/dam -> dam)
               const categorySlug = link.href.replace('/c/', '');
-              const isActive = currentView === categorySlug;
 
               return (
                 <Link
                   variant='underline'
-                  className={`focus:no-underline h-8 decoration-1 underline-offset-6 text-white text-[15px] tracking-wide font-syne font-semibold relative z-10 ${
-                    isActive ? 'underline' : ''
-                  }`}
+                  className={`focus:no-underline h-8 decoration-1 underline-offset-6 text-white text-sm tracking-wide font-syne font-semibold relative z-10 `}
                   key={link.href}
                   href={link.href}
                   onMouseEnter={() => handleLinkHover(categorySlug)}
+                  onTouchStart={() => handleLinkHover(categorySlug)}
                 >
                   {link.title}
                 </Link>

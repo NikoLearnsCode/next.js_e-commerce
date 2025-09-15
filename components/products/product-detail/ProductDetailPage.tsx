@@ -59,9 +59,9 @@ export default function ProductPage({
                 </div>
 
                 {/* Desktop view - Display all images in a grid */}
-                <div className='hidden flex-1 lg:grid md lg:grid-cols-2 lg:gap-0.5 '>
+                <div className='hidden flex-1 relative lg:grid md lg:grid-cols-2 lg:gap-0.5 '>
                   {product.images.map((img: string, idx: number) => (
-                    <div key={idx} className='relative  aspect-[7/9]'>
+                    <div key={idx} className='relative  aspect-[7/9] w-full h-full'>
                       <Image
                         src={img}
                         alt={`${product.name} - bild ${idx + 1}`}
@@ -84,7 +84,7 @@ export default function ProductPage({
           </div>
 
           {/* Right column - product info */}
-          <div className='flex  flex-col lg:pt-12 px-5 lg:px-0 2xl:px-4 lg:mr-7 sticky top-18 h-full   gap-3 lg:gap-1 mb-10   lg:w-[35%] transition-all duration-300'>
+          <div className='flex  flex-col lg:pt-12 px-4 lg:px-0 2xl:px-4 lg:mr-7 sticky top-18 h-full   gap-3 lg:gap-1 mb-10   lg:w-[35%] transition-all duration-300'>
             {/* Product name */}
             <div className='flex relative items-center justify-between gap-1'>
               <h1 className='text-lg sm:text-xl mt-2 lg:mt-4 font-medium'>
@@ -175,9 +175,7 @@ export default function ProductPage({
             items={categoryProducts}
             titelDivClassName='px-4 md:px-6'
             title='Liknande produkter'
-            renderItem={(product) => (
-              <CarouselProductCard product={product} priorityLoading={false} />
-            )}
+            renderItem={(product) => <CarouselProductCard product={product} />}
             id='carousel-one'
           />
         </div>
@@ -190,9 +188,7 @@ export default function ProductPage({
             items={genderProducts}
             title='Du kanske också gillar'
             titelDivClassName='px-4 md:px-6'
-            renderItem={(product) => (
-              <CarouselProductCard product={product} priorityLoading={false} />
-            )}
+            renderItem={(product) => <CarouselProductCard product={product} />}
             id='carousel-two'
           />
         </div>

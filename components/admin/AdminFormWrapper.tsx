@@ -7,6 +7,8 @@ import {AnimatePresence} from 'framer-motion';
 import ProductForm from './products/ProductForm';
 import CategoryForm from './categories/CategoryForm';
 import {useAdmin} from '@/context/AdminContextProvider';
+import {Product} from '@/lib/types/db';
+import {Category} from '@/lib/types/category';
 
 export default function FormWrapper({onClose}: {onClose: () => void}) {
   const {activeSidebar, editData} = useAdmin();
@@ -14,19 +16,31 @@ export default function FormWrapper({onClose}: {onClose: () => void}) {
   const renderForm = () => {
     const isEditMode = editData !== null;
 
+    // Type guards to ensure correct types
+    const isProduct = (data: Category | Product | null): data is Product => {
+      return data !== null && 'price' in data;
+    };
+
+    const isCategory = (data: Category | Product | null): data is Category => {
+      return data !== null && 'type' in data;
+    };
+
     switch (activeSidebar) {
       case 'product':
+        const productData = isEditMode && isProduct(editData) ? editData : null;
         return (
           <ProductForm
             mode={isEditMode ? 'edit' : 'create'}
-            initialData={isEditMode && editData ? (editData as any) : null}
+            initialData={productData}
           />
         );
       case 'category':
+        const categoryData =
+          isEditMode && isCategory(editData) ? editData : null;
         return (
           <CategoryForm
             mode={isEditMode ? 'edit' : 'create'}
-            initialData={isEditMode && editData ? (editData as any) : null}
+            initialData={categoryData}
           />
         );
       default:

@@ -115,13 +115,13 @@ export default function ProductCard({
                     }
                   : false
               }
-              className='h-full w-full'
+              className='h-full w-full relative'
             >
               {images.map((imgSrc, idx) => (
                 <SwiperSlide key={idx}>
                   <Link
                     href={`/${slug}`}
-                    className='block h-full w-full'
+                    className='block h-full w-full relative'
                     tabIndex={-1}
                     onClick={() =>
                       handleSaveNavigated({slug, image: imgSrc, name})
@@ -132,7 +132,9 @@ export default function ProductCard({
                       alt={`${name} - bild ${idx + 1}`}
                       fill
                       quality={90}
-                      priority={priorityLoading && idx === 0}
+                      priority
+                      loading='eager'
+                      // priority={priorityLoading && idx === 0}
                       className='object-cover p-[1px]'
                       sizes='(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, 50vw'
                     />
@@ -177,7 +179,8 @@ export default function ProductCard({
               src={images[0]}
               alt={name}
               fill
-              priority={priorityLoading}
+              priority
+              loading='eager'
               className='object-cover'
               sizes='(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, 50vw'
             />

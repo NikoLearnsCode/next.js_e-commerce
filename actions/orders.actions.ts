@@ -45,13 +45,18 @@ export async function createOrder(
       updated_at: now,
     };
 
-    const order = await db.insert(ordersTable).values(newOrder).returning();
+    // const order = await db.insert(ordersTable).values(newOrder).returning();
+    const [newlyCreatedOrder] = await db
+      .insert(ordersTable)
+      .values(newOrder)
+      .returning();
 
-    if (!order[0]) throw new Error('Failed to create order');
+    // if (!order[0]) throw new Error('Failed to create order');
+    if (!newlyCreatedOrder) throw new Error('Failed to create order');
 
-    // Create order items
     const orderItems = cartItems.map((item) => ({
-      order_id: order[0].id,
+      // order_id: order[0].id,
+      order_id: newlyCreatedOrder.id,
       product_id: item.product_id,
       quantity: item.quantity,
       price: item.price,
@@ -63,15 +68,17 @@ export async function createOrder(
       created_at: now,
     }));
 
+    // await db.insert(orderItemsTable).values(orderItems);
     await db.insert(orderItemsTable).values(orderItems);
-
-    return {success: true, orderId: order[0].id};
+    // return {success: true, orderId: order[0].id};
+    return {success: true, orderId: newlyCreatedOrder.id};
   } catch (error) {
     console.error('Error creating order:', error);
     return {success: false, error: 'Failed to create order'};
   }
 }
 
+// NIVÅ 1: DRIZZLE-RELATIONER
 export async function getUserOrderById(orderId: string) {
   try {
     const order = await db.query.ordersTable.findFirst({
@@ -91,6 +98,8 @@ export async function getUserOrderById(orderId: string) {
     return {success: false, error: 'Failed to fetch order'};
   }
 }
+
+
 
 export async function getUserOrdersOverview() {
   try {

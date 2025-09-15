@@ -85,6 +85,7 @@ export async function uploadCategoryImages(
   try {
     // Ladda upp desktop-bild
     if (desktopImage) {
+      // Rådata till buffer
       const buffer = Buffer.from(await desktopImage.arrayBuffer());
       const fileExtension = path.extname(desktopImage.name);
       const finalFileName = `desktop${fileExtension}`;

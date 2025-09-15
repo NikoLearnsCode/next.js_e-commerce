@@ -50,7 +50,7 @@ export default function CartCard({
     >
       {/* Image section */}
       <div className='relative min-w-2/3 w-full h-full aspect-7/9 group'>
-        <Link tabIndex={-1} href={`/${slug}`}>
+        <Link className='block h-full w-full relative' tabIndex={-1} href={`/${slug}`}>
           {images && images[0] ? (
             <Image
               src={images[0]}

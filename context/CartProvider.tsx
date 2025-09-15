@@ -161,6 +161,7 @@ export function CartProvider({children}: {children: React.ReactNode}) {
     refreshCart();
   }, []);
 
+  
   /*   useEffect(() => {
     if (userIdRef.current !== user?.id) {
       userIdRef.current = user?.id;

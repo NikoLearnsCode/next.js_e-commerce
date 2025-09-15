@@ -210,7 +210,10 @@ export default function CategoryForm({mode, initialData}: CategoryFormProps) {
   const availableParents = getValidParentOptions();
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className='space-y-5 h-full flex flex-col'>
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className='space-y-5 h-full flex flex-col'
+    >
       <div className='flex-1  space-y-4 overflow-y-auto pt-5 pb-2 scrollbar-hide pr-5 -mr-5'>
         {/* Select 1 - Kategori-typ */}
         <div>
@@ -315,13 +318,12 @@ export default function CategoryForm({mode, initialData}: CategoryFormProps) {
 
         {/* BILDUPPLADDNING */}
         {watchedType === 'MAIN-CATEGORY' && (
-          <div
-            className='z-10 pb-2.5 pt-7 bg-white space-y-2'
-          >
+          <div className='z-10 pb-2.5 pt-7 bg-white space-y-2'>
             {/* Desktop bild */}
             <div>
               <label className='block -mb-2 text-sm font-medium text-gray-700'>
-                <span className=' font-semibold'>Desktop-bild</span> (16:9 format rekommenderas)
+                <span className=' font-semibold'>Desktop-bild</span> (16:9
+                format rekommenderas)
               </label>
               <FileInput
                 onFilesSelected={handleDesktopImageSelect}
@@ -330,7 +332,10 @@ export default function CategoryForm({mode, initialData}: CategoryFormProps) {
                 id='desktop-image-upload'
               >
                 <div className='flex flex-col items-center justify-center w-full p-3 border-2 border-dashed border-gray-300 rounded-lg text-center hover:border-gray-500 transition-colors'>
-                  <UploadCloud strokeWidth={1.25} className='w-8 h-8 text-gray-600' />
+                  <UploadCloud
+                    strokeWidth={1.25}
+                    className='w-8 h-8 text-gray-600'
+                  />
                   {/*   <p className='font-semibold text-gray-700 uppercase text-xs'>
                     Desktop-bild
                   </p> */}
@@ -341,8 +346,8 @@ export default function CategoryForm({mode, initialData}: CategoryFormProps) {
                   <Image
                     src={desktopPreview}
                     alt='Desktop förhandsgranskning'
-                    className='w-full h-full object-cover aspect-16/9'
-                    width={200}
+                    className='w-full h-full object-cover'
+                    width={700}
                     height={300}
                     quality={100}
                   />
@@ -360,7 +365,8 @@ export default function CategoryForm({mode, initialData}: CategoryFormProps) {
             {/* Mobile bild */}
             <div className='mt-6'>
               <label className='block -mb-2 text-sm font-medium text-gray-700 '>
-               <span className=' font-semibold'>Mobile-bild</span> (9:16 format rekommenderas)
+                <span className=' font-semibold'>Mobile-bild</span> (9:16 format
+                rekommenderas)
               </label>
               <FileInput
                 onFilesSelected={handleMobileImageSelect}
@@ -369,7 +375,10 @@ export default function CategoryForm({mode, initialData}: CategoryFormProps) {
                 id='mobile-image-upload'
               >
                 <div className='flex flex-col items-center justify-center w-full p-3 border-2 border-dashed border-gray-300 rounded-lg text-center hover:border-gray-500 transition-colors'>
-                  <UploadCloud strokeWidth={1.25} className='w-8 h-8 text-gray-600 ' />
+                  <UploadCloud
+                    strokeWidth={1.25}
+                    className='w-8 h-8 text-gray-600 '
+                  />
                   {/*  <p className='font-semibold text-gray-700 uppercase text-xs'>
                     Mobile-bild
                   </p> */}
@@ -380,9 +389,9 @@ export default function CategoryForm({mode, initialData}: CategoryFormProps) {
                   <Image
                     src={mobilePreview}
                     alt='Mobile förhandsgranskning'
-                    className='w-full full object-cover '
-                    width={200}
-                    height={300}
+                    className='w-full full object-contain'
+                    width={300}
+                    height={700}
                     quality={100}
                   />
                   <button

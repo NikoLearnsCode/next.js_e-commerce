@@ -16,7 +16,7 @@ import type {
 
 import {db} from '@/drizzle/index';
 import {cartsTable, cartItemsTable, productsTable} from '@/drizzle/db/schema';
-import {eq, and, isNull, asc} from 'drizzle-orm';
+import {eq, and, isNull, asc, inArray} from 'drizzle-orm';
 import {cookies} from 'next/headers';
 import Decimal from 'decimal.js';
 
@@ -266,90 +266,103 @@ export async function clearCart() {
 export async function transferCartOnLogin(userId: string) {
   try {
     const sessionId = await getSessionId();
-    if (!sessionId) {
-      return {success: true, message: 'No session_id found'};
-    }
+    if (!sessionId) return {success: true, message: 'No session_id found'};
 
-    // Hitta session cart
-    const sessionCartData = await db
+    // Hämta all data i förväg
+    const sessionCartResult = await db
       .select()
       .from(cartsTable)
       .where(
         and(eq(cartsTable.session_id, sessionId), isNull(cartsTable.user_id))
       )
       .limit(1);
-    const sessionCart = sessionCartData[0] || null;
+    const sessionCart = sessionCartResult[0];
 
-    if (!sessionCart) {
-      return {success: true, message: 'No session cart found'};
+    if (!sessionCart) return {success: true, message: 'No session cart found'};
+
+    const userCartResult = await db
+      .select()
+      .from(cartsTable)
+      .where(eq(cartsTable.user_id, userId))
+      .limit(1);
+    const userCart = userCartResult[0];
+
+    // om ingen användarkorg finns, adoptera sessionskorgen
+    if (!userCart) {
+      await db
+        .update(cartsTable)
+        .set({user_id: userId, session_id: null, updated_at: new Date()})
+        .where(eq(cartsTable.id, sessionCart.id));
+      return {success: true, message: 'Cart transferred successfully'};
     }
 
-    // Hämta session cart items för att räkna dem
+    // annars, hämta alla items från båda korgarna
     const sessionItems = await db
       .select()
       .from(cartItemsTable)
       .where(eq(cartItemsTable.cart_id, sessionCart.id));
 
-    // Hitta user cart
-    const userCartData = await db
+    const userItems = await db
       .select()
-      .from(cartsTable)
-      .where(eq(cartsTable.user_id, userId))
-      .limit(1);
-    const userCart = userCartData[0] || null;
+      .from(cartItemsTable)
+      .where(eq(cartItemsTable.cart_id, userCart.id));
 
-    if (userCart) {
-      // Merge session cart items into user cart
-      for (const sessionItem of sessionItems) {
-        // Kolla om samma produkt + storlek redan finns i user cart
-        const existingUserItem = await db
-          .select()
-          .from(cartItemsTable)
-          .where(
-            and(
-              eq(cartItemsTable.cart_id, userCart.id),
-              eq(cartItemsTable.product_id, sessionItem.product_id),
-              eq(cartItemsTable.size, sessionItem.size)
-            )
-          )
-          .limit(1);
+    // Förbered för snabba uppslag
+    const userItemsMap = new Map(
+      userItems.map((item) => [`${item.product_id}_${item.size}`, item])
+    );
 
-        if (existingUserItem[0]) {
-          // Uppdatera kvantiteten
-          await db
-            .update(cartItemsTable)
-            .set({
-              quantity: existingUserItem[0].quantity + sessionItem.quantity,
-              updated_at: new Date(),
-            })
-            .where(eq(cartItemsTable.id, existingUserItem[0].id));
-        } else {
-          // Flytta item till user cart
-          await db
-            .update(cartItemsTable)
-            .set({cart_id: userCart.id, updated_at: new Date()})
-            .where(eq(cartItemsTable.id, sessionItem.id));
-        }
+    // Sortera i minnet VAD som ska göras
+    const itemsToUpdateQuantity: {id: string; newQuantity: number}[] = [];
+    const idsToMove: string[] = [];
+
+    for (const sessionItem of sessionItems) {
+      const key = `${sessionItem.product_id}_${sessionItem.size}`;
+      const existingUserItem = userItemsMap.get(key);
+
+      if (existingUserItem) {
+        itemsToUpdateQuantity.push({
+          id: existingUserItem.id,
+          newQuantity: existingUserItem.quantity + sessionItem.quantity,
+        });
+      } else {
+        idsToMove.push(sessionItem.id);
       }
-
-      // Ta bort session cart
-      await db.delete(cartsTable).where(eq(cartsTable.id, sessionCart.id));
-    } else {
-      // Bara uppdatera session cart till user cart
-      await db
-        .update(cartsTable)
-        .set({user_id: userId, session_id: null, updated_at: new Date()})
-        .where(eq(cartsTable.id, sessionCart.id));
     }
 
-    return {
-      success: true,
-      message: `Cart transferred successfully`,
-      transferred: true,
-      itemCount: sessionItems.length,
-    };
+    // Utför operationerna i bulk
+    const promises = [];
+
+    if (itemsToUpdateQuantity.length > 0) {
+      const updatePromise = db.transaction(async (tx) => {
+        for (const item of itemsToUpdateQuantity) {
+          await tx
+            .update(cartItemsTable)
+            .set({quantity: item.newQuantity, updated_at: new Date()})
+            .where(eq(cartItemsTable.id, item.id));
+        }
+      });
+      promises.push(updatePromise);
+    }
+
+    if (idsToMove.length > 0) {
+      const movePromise = db
+        .update(cartItemsTable)
+        .set({cart_id: userCart.id, updated_at: new Date()})
+        .where(inArray(cartItemsTable.id, idsToMove));
+      promises.push(movePromise);
+    }
+
+    await Promise.all(promises);
+
+    // Ta slutligen bort den nu tomma sessionskorgen
+    await db.delete(cartsTable).where(eq(cartsTable.id, sessionCart.id));
+
+    console.log('Cart transferred successfully');
+
+    return {success: true, message: `Cart merged successfully`};
   } catch (error) {
     console.error('Unexpected error transferring cart on login:', error);
-    return {success: false, error, message: 'Failed to transfer cart'};
+    return {success: false, message: 'Failed to transfer cart'};
   }
 }

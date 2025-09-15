@@ -78,7 +78,7 @@ const Carousel = <T,>({
       {(title || showNavigation) && (
         <div
           className={twMerge(
-            'flex justify-between items-center mb-4',
+            'flex justify-between items-center mb-4 ',
             titelDivClassName
           )}
         >
