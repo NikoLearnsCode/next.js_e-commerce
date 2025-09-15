@@ -23,6 +23,7 @@ export type OrderWithItems = Order & {
   order_items: OrderItem[];
 };
 
+// Overview carousel för profile
 export type OrderOverview = Pick<OrderWithItems, 'id' | 'created_at'> & {
   order_items: Pick<OrderItem, 'order_id' | 'image' | 'name'>[];
 };
@@ -50,7 +51,7 @@ export type CarouselCard = Pick<
   isNew?: boolean;
 };
 
-// För grids och favorites
+// För produktsidor och favorites
 export type ProductCard = Pick<
   Product,
   | 'id'

@@ -16,69 +16,70 @@ export async function createOrder(
   paymentInfo: PaymentInfo,
   totalPrice: number
 ) {
-  try {
-    const deliveryValidation = deliverySchema.safeParse(deliveryInfo);
-    if (!deliveryValidation.success) {
-      console.error(
-        'Delivery validation failed:',
-        deliveryValidation.error.flatten()
-      );
-      return {
-        success: false,
-        error: 'Leveransinformationen är ogiltig. Kontrollera alla fält.',
-      };
-    }
-
-    const session = await getServerSession(authOptions);
-    const user = session?.user;
-
-    // Create order
-    const now = new Date();
-    const newOrder = {
-      user_id: user?.id,
-      session_id: user ? null : await getSessionId(),
-      status: 'pending',
-      total_amount: totalPrice.toString(),
-      delivery_info: deliveryInfo,
-      payment_info: paymentInfo.method,
-      created_at: now,
-      updated_at: now,
+  const deliveryValidation = deliverySchema.safeParse(deliveryInfo);
+  if (!deliveryValidation.success) {
+    console.error(
+      'Delivery validation failed:',
+      deliveryValidation.error.flatten()
+    );
+    return {
+      success: false,
+      error: 'Leveransinformationen är ogiltig. Kontrollera alla fält.',
     };
+  }
 
-    // const order = await db.insert(ordersTable).values(newOrder).returning();
-    const [newlyCreatedOrder] = await db
-      .insert(ordersTable)
-      .values(newOrder)
-      .returning();
+  const session = await getServerSession(authOptions);
+  const user = session?.user;
 
-    // if (!order[0]) throw new Error('Failed to create order');
-    if (!newlyCreatedOrder) throw new Error('Failed to create order');
+  try {
+    // Create order
+    const orderId = await db.transaction(async (tx) => {
+      const now = new Date();
+      const newOrder = {
+        user_id: user?.id,
+        session_id: user ? null : await getSessionId(),
+        status: 'betald',
+        total_amount: totalPrice.toString(),
+        delivery_info: deliveryInfo,
+        payment_info: paymentInfo.method,
+        created_at: now,
+        updated_at: now,
+      };
 
-    const orderItems = cartItems.map((item) => ({
-      // order_id: order[0].id,
-      order_id: newlyCreatedOrder.id,
-      product_id: item.product_id,
-      quantity: item.quantity,
-      price: item.price,
-      name: item.name,
-      size: item.size,
-      color: item.color,
-      slug: item.slug,
-      image: item.images[0],
-      created_at: now,
-    }));
+      const [newlyCreatedOrder] = await tx
+        .insert(ordersTable)
+        .values(newOrder)
+        .returning();
 
-    // await db.insert(orderItemsTable).values(orderItems);
-    await db.insert(orderItemsTable).values(orderItems);
-    // return {success: true, orderId: order[0].id};
-    return {success: true, orderId: newlyCreatedOrder.id};
+      if (!newlyCreatedOrder) throw new Error('Failed to create order');
+
+      const orderItems = cartItems.map((item) => ({
+        order_id: newlyCreatedOrder.id,
+        product_id: item.product_id,
+        quantity: item.quantity,
+        price: item.price,
+        name: item.name,
+        size: item.size,
+        color: item.color,
+        slug: item.slug,
+        image: item.images[0],
+        created_at: now,
+      }));
+
+      await tx.insert(orderItemsTable).values(orderItems);
+      // Om koden når hit utan fel, kommer Drizzle automatiskt att 'COMMIT'
+      // och returnera värdet nedan.
+      return newlyCreatedOrder.id;
+    });
+    console.log('Order created:', orderId);
+    return {success: true, orderId: orderId};
   } catch (error) {
     console.error('Error creating order:', error);
     return {success: false, error: 'Failed to create order'};
   }
 }
 
-// NIVÅ 1: DRIZZLE-RELATIONER
+// NIVÅ 1: DRIZZLE-RELATIONER query
 export async function getUserOrderById(orderId: string) {
   try {
     const order = await db.query.ordersTable.findFirst({
@@ -99,8 +100,27 @@ export async function getUserOrderById(orderId: string) {
   }
 }
 
+// NIVÅ 3: Raw postgresql query pseudo
+/* export async function getUserOrderById(orderId: string) 
+
+    const orderQueryText = 'SELECT * FROM "orders" WHERE "id" = $1 LIMIT 1';
+    const orderResult = await pool.query(orderQueryText, [orderId]);
+    const orderData = orderResult.rows[0];
 
 
+    const itemsQueryText = 'SELECT * FROM "order_items" WHERE "order_id" = $1';
+    const itemsResult = await pool.query(itemsQueryText, [orderId]);
+    const orderItems = itemsResult.rows;
+
+    const combinedOrder = {
+      ...orderData,
+      order_items: orderItems,
+    };
+
+    return {success: true, order: combinedOrder};
+ */
+
+//Nivå 2. Drizzle sql query
 export async function getUserOrdersOverview() {
   try {
     const session = await getServerSession(authOptions);
@@ -143,3 +163,32 @@ export async function getUserOrdersOverview() {
     return {success: false, error: 'Unexpected error', orders: []};
   }
 }
+
+//Nivå 3. Raw postgresql query pseudo
+/* 
+export async function getUserOrdersOverview() 
+
+    const session = await getServerSession(authOptions);
+    const user = session?.user;
+
+    const ordersQueryText =
+      'SELECT "id", "created_at" FROM "orders" WHERE "user_id" = $1 ORDER BY "created_at" DESC';
+    const ordersResult = await pool.query(ordersQueryText, [user.id]);
+    const orders = ordersResult.rows;
+
+
+    const orderIds = orders.map((order) => order.id);
+    const placeholders = orderIds.map((_, index) => `$${index + 1}`).join(', ');
+    const itemsQueryText = `SELECT "order_id", "image", "name" FROM "order_items" WHERE "order_id" IN (${placeholders})`;
+
+
+    const itemsResult = await pool.query(itemsQueryText, orderIds);
+    const orderItems = itemsResult.rows;
+
+    const ordersWithItems = orders.map((order) => ({
+      ...order,
+      order_items: orderItems.filter((item) => item.order_id === order.id),
+    }));
+
+    return {success: true, orders: ordersWithItems};
+ */

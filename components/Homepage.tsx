@@ -3,14 +3,12 @@
 import Image from 'next/image';
 import {Link} from '@/components/shared/ui/link';
 import {useState} from 'react';
-import {NavLink, MainCategoryWithImages} from '@/lib/types/category';
+import {CategoryWithChildren} from '@/lib/types/category';
 
 export default function Homepage({
-  navLinks,
   mainCategories,
 }: {
-  navLinks: NavLink[];
-  mainCategories: MainCategoryWithImages[];
+  mainCategories: CategoryWithChildren[];
 }) {
   const [currentView, setCurrentView] = useState<string>(() => {
     // Försök Dam först
@@ -91,25 +89,20 @@ export default function Homepage({
       </div>
       <div className='absolute left-0 top-5/8 w-full px-6'>
         <div className='flex justify-center items-center  uppercase'>
-          {navLinks
-            .filter((link) => link.href !== '/')
-            .map((link) => {
-              // Extrahera kategorislug från href (/c/dam -> dam)
-              const categorySlug = link.href.replace('/c/', '');
-
-              return (
-                <Link
-                  variant='underline'
-                  className={`focus:no-underline h-8 decoration-1 underline-offset-6 text-white text-sm tracking-wide font-syne font-semibold relative z-10 `}
-                  key={link.href}
-                  href={link.href}
-                  onMouseEnter={() => handleLinkHover(categorySlug)}
-                  onTouchStart={() => handleLinkHover(categorySlug)}
-                >
-                  {link.title}
-                </Link>
-              );
-            })}
+          {mainCategories.map((category) => {
+            return (
+              <Link
+                variant='underline'
+                className={`focus:no-underline h-8 decoration-1 underline-offset-6 text-white text-sm tracking-wide font-syne font-semibold relative z-10 `}
+                key={category.id}
+                href={`/c/${category.slug}`}
+                onMouseEnter={() => handleLinkHover(category.slug)}
+                onTouchStart={() => handleLinkHover(category.slug)}
+              >
+                {category.name}
+              </Link>
+            );
+          })}
         </div>
       </div>
     </div>
