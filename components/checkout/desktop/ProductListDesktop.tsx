@@ -55,7 +55,7 @@ export default function ProductListDesktop() {
                 />
               </div>
               <div className='flex-1 text-xs'>
-                <h3 className='font-medium text-sm'>{item.name}</h3>
+                <h3 className='font-medium '>{item.name}</h3>
                 <p className='text-gray-600'>Storlek: {item.size}</p>
                 <p className='text-gray-600'>{item.color}</p>
                 <p className='text-gray-600'>Antal: {item.quantity}</p>

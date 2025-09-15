@@ -3,12 +3,12 @@
 import Image from 'next/image';
 import {Link} from '@/components/shared/ui/link';
 import {useState} from 'react';
-import {CategoryWithChildren} from '@/lib/types/category';
+import {Category} from '@/lib/types/category';
 
 export default function Homepage({
   mainCategories,
 }: {
-  mainCategories: CategoryWithChildren[];
+  mainCategories: Category[];
 }) {
   const [currentView, setCurrentView] = useState<string>(() => {
     // Försök Dam först

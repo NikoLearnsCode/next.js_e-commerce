@@ -144,7 +144,7 @@ export default function ProductCard({
               <>
                 <button
                   className={twMerge(
-                    `${prevButtonClass} absolute left-1 top-1/2 -translate-y-1/2 pr-2 pl-1 py-2 transition-all duration-800 z-10 opacity-0 group-hover:opacity-100  hover:bg-white/50 group-focus-within:opacity-100 outline-black `
+                    `${prevButtonClass} absolute left-1 top-1/2 -translate-y-1/2 pr-5 pl-1 py-3 transition-all duration-800 z-10 opacity-0 group-hover:opacity-100   group-focus-within:opacity-100 outline-black `
                   )}
                   aria-label='Föregående bild'
                   type='button'
@@ -152,12 +152,12 @@ export default function ProductCard({
                   <ChevronLeft
                     size={20}
                     strokeWidth={1.25}
-                    className='text-black '
+                    className='text-gray-700 '
                   />
                 </button>
                 <button
                   className={twMerge(
-                    `${nextButtonClass} absolute right-1 top-1/2 -translate-y-1/2 pl-2 pr-1 py-2 transition-opacity duration-800 z-10 opacity-0 group-hover:opacity-100 hover:bg-white/50 group-focus-within:opacity-100 outline-black`
+                    `${nextButtonClass} absolute right-1 top-1/2 -translate-y-1/2 pl-5 pr-1 py-3 transition-opacity duration-800 z-10 opacity-0 group-hover:opacity-100  group-focus-within:opacity-100 outline-black`
                   )}
                   aria-label='Nästa bild'
                   type='button'
@@ -165,7 +165,7 @@ export default function ProductCard({
                   <ChevronRight
                     size={20}
                     strokeWidth={1.25}
-                    className='text-black'
+                    className='text-gray-700'
                   />
                 </button>
               </>
@@ -188,14 +188,14 @@ export default function ProductCard({
         {/* button only for list layout */}
         {isListLayout && (
           <button
-            className='absolute transition-all duration-300 top-1 group-active:bg-white/50 hover:bg-white/50 right-1 z-1 hover:text-red-900 p-2 cursor-pointer'
+            className='absolute transition-all duration-300 top-0 group-active:bg-white/50  right-0 z-1 hover:text-red-900 p-4 '
             onClick={() => handleRemoveItem(id)}
             disabled={isUpdating}
           >
             {isUpdating ? (
               <SpinningLogo width='22' height='16' />
             ) : (
-              <X size={20} strokeWidth={1} />
+              <X size={20} strokeWidth={1} className='text-gray-700' />
             )}
           </button>
         )}

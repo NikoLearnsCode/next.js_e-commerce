@@ -22,7 +22,7 @@ function LogoutButton() {
     setTimeout(async () => {
       await signOut();
       setIsPending(false);
-    }, 1000);
+    }, 300);
   };
 
   return (

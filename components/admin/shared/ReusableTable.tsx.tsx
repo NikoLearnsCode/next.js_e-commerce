@@ -27,7 +27,7 @@ export default function ReusableTable<T extends {id: string | number}>({
   getRowClassName,
 }: ReusableTableProps<T>) {
   return (
-    <div className='bg-white rounded-lg  text-sm  '>
+    <div className='bg-white rounded-lg pb-24 text-sm  '>
       <div className='overflow-x-auto border border-gray-100 '>
         <table className='min-w-full divide-y divide-gray-00'>
           <thead className='bg-gray-50  border-gray-200'>
