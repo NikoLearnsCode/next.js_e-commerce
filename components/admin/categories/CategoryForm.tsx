@@ -10,6 +10,11 @@ import {
   CATEGORY_TYPE_OPTIONS,
 } from '@/lib/form-validators';
 import {useEffect, useState} from 'react';
+import {
+  createCategoryWithImages,
+  updateCategoryWithImages,
+} from '@/actions/admin/admin.categories.actions';
+import {toast} from 'sonner';
 import {FloatingLabelInput} from '@/components/shared/ui/floatingLabelInput';
 import {Button} from '@/components/shared/ui/button';
 import {CheckboxOption} from '@/components/shared/ui/CheckboxOption';
@@ -21,7 +26,6 @@ import {
 } from '@/components/admin/utils/admin.form-helpers';
 import {UploadCloud, X} from 'lucide-react';
 import FileInput from '../shared/FileInput';
-import {uploadCategoryImages} from '@/actions/admin/admin.image-upload.actions';
 import Image from 'next/image';
 
 type CategoryFormProps = {
@@ -30,8 +34,8 @@ type CategoryFormProps = {
 };
 
 export default function CategoryForm({mode, initialData}: CategoryFormProps) {
-  const {createCategory, updateCategory, closeSidebar, isLoading, categories} =
-    useAdmin();
+  const {closeSidebar, categories} = useAdmin();
+  const [isLoading, setIsLoading] = useState(false);
 
   // State för bilduppladdning
   const [desktopImage, setDesktopImage] = useState<File | null>(null);
@@ -176,34 +180,59 @@ export default function CategoryForm({mode, initialData}: CategoryFormProps) {
   };
 
   const onSubmit = async (data: CategoryFormData) => {
+    setIsLoading(true);
+
     try {
-      let finalData = {...data};
+      // Create FormData object
+      const formData = new FormData();
 
-      // Ladda upp bilder om det är en MAIN-CATEGORY och bilder har valts
-      if (data.type === 'MAIN-CATEGORY' && (desktopImage || mobileImage)) {
-        try {
-          const imageUrls = await uploadCategoryImages(
-            desktopImage,
-            mobileImage,
-            data.slug
-          );
+      // Add text fields to FormData
+      formData.append('name', data.name);
+      formData.append('slug', data.slug);
+      formData.append('type', data.type);
+      formData.append('displayOrder', data.displayOrder.toString());
+      formData.append('isActive', data.isActive.toString());
+      formData.append(
+        'parentId',
+        data.parentId ? data.parentId.toString() : 'null'
+      );
 
-          finalData.desktopImage = imageUrls.desktopImageUrl || '';
-          finalData.mobileImage = imageUrls.mobileImageUrl || '';
-        } catch (uploadError) {
-          console.error('Image upload error:', uploadError);
-          alert(`Bilduppladdning misslyckades: ${uploadError}`);
-          return;
+      // Add existing image URLs if in edit mode and no new files
+      if (mode === 'edit') {
+        formData.append('desktopImage', data.desktopImage || '');
+        formData.append('mobileImage', data.mobileImage || '');
+      }
+
+      // Add image files if provided for MAIN-CATEGORY
+      if (data.type === 'MAIN-CATEGORY') {
+        if (desktopImage) {
+          formData.append('desktopImageFile', desktopImage);
+        }
+        if (mobileImage) {
+          formData.append('mobileImageFile', mobileImage);
         }
       }
 
-      if (mode === 'edit' && initialData) {
-        await updateCategory(initialData.id.toString(), finalData);
+      // Call the appropriate atomic server action
+      const result =
+        mode === 'edit' && initialData
+          ? await updateCategoryWithImages(initialData.id, formData)
+          : await createCategoryWithImages(formData);
+
+      if (result.success) {
+        closeSidebar();
+        toast.success(
+          mode === 'edit' ? 'Kategori uppdaterad' : 'Kategori skapad'
+        );
       } else {
-        await createCategory(finalData);
+        toast.error(result.error);
+        console.error('Category submission failed:', result.error);
       }
     } catch (error) {
       console.error('Category form submission error:', error);
+      toast.error('Ett oväntat fel uppstod på servern.');
+    } finally {
+      setIsLoading(false);
     }
   };
 

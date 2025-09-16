@@ -3,18 +3,8 @@
 import {createContext, useContext, useEffect, useState} from 'react';
 import {Category, CategoryWithChildren} from '@/lib/types/category';
 import {Product} from '@/lib/types/db';
-import {ProductFormData, CategoryFormData} from '@/lib/form-validators';
-import {uploadProductImages} from '@/actions/admin/admin.image-upload.actions';
-import {
-  createProduct as createProductAction,
-  updateProduct as updateProductAction,
-  deleteProduct as deleteProductAction,
-} from '@/actions/admin/admin.products.actions';
-import {
-  createCategory as createCategoryAction,
-  updateCategory as updateCategoryAction,
-  deleteCategory as deleteCategoryAction,
-} from '@/actions/admin/admin.categories.actions';
+import {deleteProduct as deleteProductAction} from '@/actions/admin/admin.products.actions';
+import {deleteCategory as deleteCategoryAction} from '@/actions/admin/admin.categories.actions';
 import {toast} from 'sonner';
 
 type CRUDOperationType = 'create' | 'update' | 'delete' | null;
@@ -30,16 +20,7 @@ type AdminContextType = {
   categories: CategoryWithChildren[];
   isCollapsed: boolean;
   toggleSidebar: () => void;
-  createProduct: (data: ProductFormData, images: File[]) => Promise<void>;
-  updateProduct: (
-    id: string,
-    data: ProductFormData,
-    newImages?: File[],
-    existingImages?: string[]
-  ) => Promise<void>;
   deleteProduct: (id: string) => Promise<void>;
-  createCategory: (data: CategoryFormData) => Promise<void>;
-  updateCategory: (id: string, data: CategoryFormData) => Promise<void>;
   deleteCategory: (id: string) => Promise<void>;
   isLoading: boolean;
   operationType: CRUDOperationType;
@@ -98,102 +79,6 @@ export default function AdminContextProvider({
     setIsCollapsed(!isCollapsed);
   };
 
-  const createProduct = async (data: ProductFormData, images: File[]) => {
-    setIsLoading(true);
-    setOperationType('create');
-    try {
-      // Validera att det finns bilder
-      if (images.length === 0) {
-        toast.error('Minst en bild måste laddas upp.');
-        return;
-      }
-
-      const imageUrls = await uploadProductImages(
-        images,
-        data.gender,
-        data.category
-      );
-
-      const productData = {
-        ...data,
-        images: imageUrls,
-      };
-
-      const result = await createProductAction(productData);
-
-      if (result.success) {
-        closeSidebar();
-        toast.success('Produkt skapad');
-      } else {
-        toast.error(result.error);
-        console.error('Product creation failed:', result.error);
-      }
-    } catch (error) {
-      console.error('Error creating product:', error);
-
-      toast.error(
-        'Ett oväntat fel uppstod på servern. Produkten kunde inte sparas.'
-      );
-    } finally {
-      setIsLoading(false);
-      setOperationType(null);
-    }
-  };
-
-  const updateProduct = async (
-    id: string,
-    data: ProductFormData,
-    newImages?: File[],
-    existingImages?: string[]
-  ) => {
-    setIsLoading(true);
-    setOperationType('update');
-    try {
-      // Validera att det finns minst en bild totalt
-      const totalImageCount =
-        (existingImages?.length || 0) + (newImages?.length || 0);
-      if (totalImageCount === 0) {
-        toast.error('Minst en bild måste finnas kvar.');
-        return;
-      }
-
-      const productData: ProductFormData & {images?: string[]} = {...data};
-
-      // Kombinera befintliga bilder med nya uppladdade bilder
-      let finalImages: string[] = existingImages || [];
-
-      if (newImages && newImages.length > 0) {
-        const newImageUrls = await uploadProductImages(
-          newImages,
-          data.gender,
-          data.category
-        );
-        finalImages = [...finalImages, ...newImageUrls];
-      }
-
-      // Sätt images (vi vet att det finns minst en efter validering)
-      productData.images = finalImages;
-
-      const result = await updateProductAction(id, productData);
-
-      if (result.success) {
-        closeSidebar();
-        toast.success('Produkt uppdaterad');
-      } else {
-        toast.error(result.error);
-        console.error('Product update failed:', result.error);
-      }
-    } catch (error) {
-      console.error('Error updating product:', error);
-      toast.error(
-        'Ett oväntat fel uppstod på servern. Produkten kunde inte uppdateras.'
-      );
-    } finally {
-      setIsLoading(false);
-      setOperationType(null);
-    }
-  };
-
   const deleteProduct = async (id: string) => {
     setIsLoading(true);
     setOperationType('delete');
@@ -213,54 +98,6 @@ export default function AdminContextProvider({
       console.error('Error deleting product:', error);
       toast.error(
         'Ett oväntat fel uppstod på servern. Produkten kunde inte raderas.'
-      );
-    } finally {
-      setIsLoading(false);
-      setOperationType(null);
-    }
-  };
-
-  const createCategory = async (data: CategoryFormData) => {
-    setIsLoading(true);
-    setOperationType('create');
-    try {
-      const result = await createCategoryAction(data);
-
-      if (result.success) {
-        closeSidebar();
-        toast.success('Kategori skapad');
-      } else {
-        toast.error(result.error);
-        console.error('Category creation failed:', result.error);
-      }
-    } catch (error) {
-      console.error('Error creating category:', error);
-      toast.error(
-        'Ett oväntat fel uppstod på servern. Kategorin kunde inte sparas.'
-      );
-    } finally {
-      setIsLoading(false);
-      setOperationType(null);
-    }
-  };
-
-  const updateCategory = async (id: string, data: CategoryFormData) => {
-    setIsLoading(true);
-    setOperationType('update');
-    try {
-      const result = await updateCategoryAction(parseInt(id), data);
-
-      if (result.success) {
-        closeSidebar();
-        toast.success('Kategori uppdaterad');
-      } else {
-        toast.error(result.error);
-        console.error('Category update failed:', result.error);
-      }
-    } catch (error) {
-      console.error('Error updating category:', error);
-      toast.error(
-        'Ett oväntat fel uppstod på servern. Kategorin kunde inte uppdateras.'
       );
     } finally {
       setIsLoading(false);
@@ -326,12 +163,7 @@ export default function AdminContextProvider({
         isCollapsed,
         toggleSidebar,
 
-        createProduct,
-        updateProduct,
         deleteProduct,
-
-        createCategory,
-        updateCategory,
         deleteCategory,
 
         isLoading,

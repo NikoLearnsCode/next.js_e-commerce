@@ -105,6 +105,7 @@ export async function getUserOrderById(orderId: string) {
       .select({
         orderId: ordersTable.id,
         orderUserId: ordersTable.user_id,
+        orderSessionId: ordersTable.session_id,
         orderTotalAmount: ordersTable.total_amount,
         orderPaymentInfo: ordersTable.payment_info,
         orderStatus: ordersTable.status,
@@ -137,6 +138,7 @@ export async function getUserOrderById(orderId: string) {
     const order = {
       id: firstRow.orderId,
       user_id: firstRow.orderUserId,
+      session_id: firstRow.orderSessionId,
       total_amount: firstRow.orderTotalAmount,
       payment_info: firstRow.orderPaymentInfo,
       status: firstRow.orderStatus,

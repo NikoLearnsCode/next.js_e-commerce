@@ -9,6 +9,7 @@ import path from 'path';
 import fs from 'fs/promises';
 import {revalidatePath} from 'next/cache';
 import {isUploadedImage} from '@/utils/image-helpers';
+import {uploadProductImages} from './admin.image-upload.actions';
 
 export async function getAllProducts(searchTerm?: string) {
   if (!searchTerm?.trim()) {
@@ -26,7 +27,6 @@ export async function getAllProducts(searchTerm?: string) {
     .from(productsTable)
     .where(
       or(
-        // For UUID, use like instead of ilike and convert to text
         sql`${productsTable.id}::text ILIKE ${searchPattern}`,
         ilike(productsTable.name, searchPattern),
         ilike(productsTable.gender, searchPattern),
@@ -251,11 +251,9 @@ export async function deleteProduct(id: string): Promise<ActionResult> {
 
     if (product.images && product.images.length > 0) {
       for (const imageUrl of product.images) {
-        // Only delete images from uploads directory (not testdata from public/images)
         if (isUploadedImage(imageUrl)) {
           try {
             const imagePath = path.join(process.cwd(), 'public', imageUrl);
-
             await fs.unlink(imagePath);
           } catch (error) {
             console.warn('Could not delete image:', imageUrl, error);
@@ -265,9 +263,7 @@ export async function deleteProduct(id: string): Promise<ActionResult> {
     }
 
     await db.delete(productsTable).where(eq(productsTable.id, id));
-
     revalidatePath('/admin/products');
-
     return {success: true};
   } catch (error) {
     console.error('Ett fel uppstod i deleteProduct:', error);
@@ -275,5 +271,208 @@ export async function deleteProduct(id: string): Promise<ActionResult> {
       success: false,
       error: 'Ett oväntat fel uppstod vid borttagning av produkten.',
     };
+  }
+}
+
+// FORMDATA-BASED ATOMIC ACTIONS
+
+function parseProductFormData(formData: FormData): ProductFormData {
+  const sizes = formData.get('sizes') as string;
+  const specs = formData.get('specs') as string;
+  const publishedAtStr = formData.get('publishedAt') as string;
+
+  const priceStr = formData.get('price') as string;
+  const price = priceStr ? parseInt(priceStr, 10) : 0;
+
+  return {
+    name: formData.get('name') as string,
+    slug: formData.get('slug') as string,
+    description: formData.get('description') as string,
+    price: isNaN(price) ? 0 : price,
+    brand: formData.get('brand') as string,
+    gender: formData.get('gender') as string,
+    category: formData.get('category') as string,
+    color: formData.get('color') as string,
+    sizes: sizes
+      ? sizes
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : [],
+    specs: specs
+      ? specs
+          .split('\n')
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : [],
+    publishedAt: publishedAtStr ? new Date(publishedAtStr) : undefined,
+  };
+}
+
+function extractImageFiles(formData: FormData): File[] {
+  return formData
+    .getAll('images')
+    .filter((file): file is File => file instanceof File && file.size > 0);
+}
+
+export async function createProductWithImages(
+  prevState: any,
+  formData: FormData
+): Promise<ActionResult> {
+  let uploadedImageUrls: string[] = [];
+  try {
+    const productData = parseProductFormData(formData);
+    const imageFiles = extractImageFiles(formData);
+
+    const validationResult = productFormSchema.safeParse(productData);
+    if (!validationResult.success) {
+      return {
+        success: false,
+        error: 'Formulärdata är ogiltig. Kontrollera fälten.',
+        errors: validationResult.error.flatten().fieldErrors,
+      };
+    }
+
+    const existingProduct = await db
+      .select()
+      .from(productsTable)
+      .where(eq(productsTable.slug, productData.slug))
+      .limit(1);
+    if (existingProduct.length > 0) {
+      return {
+        success: false,
+        error: `Slug "${productData.slug}" används redan.`,
+      };
+    }
+
+    if (imageFiles.length === 0) {
+      return {success: false, error: 'Minst en bild måste laddas upp.'};
+    }
+
+    uploadedImageUrls = await uploadProductImages(
+      imageFiles,
+      productData.gender,
+      productData.category
+    );
+
+    const now = new Date();
+    const publishedAt = productData.publishedAt || now;
+    const [newProduct] = await db
+      .insert(productsTable)
+      .values({
+        ...productData,
+        price: productData.price.toString(),
+        images: uploadedImageUrls,
+        created_at: now,
+        updated_at: now,
+        published_at: publishedAt,
+      })
+      .returning();
+
+    revalidatePath('/admin/products');
+    return {success: true, data: newProduct};
+  } catch (error) {
+    console.error('Fel i createProductWithImages:', error);
+    // Din städlogik för bilder...
+    return {success: false, error: 'Ett serverfel uppstod.'};
+  }
+}
+
+export async function updateProductWithImages(
+  id: string,
+  prevState: any,
+  formData: FormData
+): Promise<ActionResult> {
+  let newlyUploadedImageUrls: string[] = [];
+  try {
+    const productData = parseProductFormData(formData);
+    const newImageFiles = extractImageFiles(formData);
+    const existingImages = formData
+      .getAll('existingImages')
+      .filter(
+        (img): img is string => typeof img === 'string' && img.length > 0
+      );
+
+    const validationResult = productFormSchema.safeParse(productData);
+    if (!validationResult.success) {
+      return {
+        success: false,
+        error: 'Formulärdata är ogiltig. Kontrollera fälten.',
+        errors: validationResult.error.flatten().fieldErrors,
+      };
+    }
+
+    const [currentProduct] = await db
+      .select()
+      .from(productsTable)
+      .where(eq(productsTable.id, id))
+      .limit(1);
+    if (!currentProduct) {
+      return {success: false, error: 'Produkten kunde inte hittas.'};
+    }
+
+    const existingProductWithSlug = await db
+      .select()
+      .from(productsTable)
+      .where(eq(productsTable.slug, productData.slug))
+      .limit(1);
+    if (
+      existingProductWithSlug.length > 0 &&
+      existingProductWithSlug[0].id !== id
+    ) {
+      return {
+        success: false,
+        error: `Slug "${productData.slug}" används redan av en annan produkt.`,
+      };
+    }
+
+    if (existingImages.length + newImageFiles.length === 0) {
+      return {success: false, error: 'Minst en bild måste finnas kvar.'};
+    }
+
+    if (newImageFiles.length > 0) {
+      newlyUploadedImageUrls = await uploadProductImages(
+        newImageFiles,
+        productData.gender,
+        productData.category
+      );
+    }
+
+    const finalImages = [...existingImages, ...newlyUploadedImageUrls];
+
+    const oldImages = currentProduct.images || [];
+    const imagesToDelete = oldImages.filter(
+      (img) => !finalImages.includes(img) && isUploadedImage(img)
+    );
+
+    for (const imageUrl of imagesToDelete) {
+      try {
+        const imagePath = path.join(process.cwd(), 'public', imageUrl);
+        await fs.unlink(imagePath);
+      } catch (error) {
+        console.warn('Could not delete old image:', imageUrl, error);
+      }
+    }
+
+    const updateData: Partial<typeof productsTable.$inferInsert> = {
+      ...productData,
+      price: productData.price.toString(),
+      images: finalImages,
+      updated_at: new Date(),
+      published_at: productData.publishedAt,
+    };
+
+    const [updatedProduct] = await db
+      .update(productsTable)
+      .set(updateData)
+      .where(eq(productsTable.id, id))
+      .returning();
+
+    revalidatePath('/admin/products');
+    return {success: true, data: updatedProduct};
+  } catch (error) {
+    console.error('Fel i updateProductWithImages:', error);
+    // Din städlogik för nyligen uppladdade bilder...
+    return {success: false, error: 'Ett serverfel uppstod vid uppdatering.'};
   }
 }

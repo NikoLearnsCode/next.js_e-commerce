@@ -96,6 +96,7 @@ const FloatingLabelField = React.forwardRef<
           onFocus={(e) => {
             setIsFocused(true);
             onFocus?.(e);
+            
           }}
           onBlur={(e) => {
             setIsFocused(false);

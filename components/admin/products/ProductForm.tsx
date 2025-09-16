@@ -7,7 +7,7 @@ import {Button} from '@/components/shared/ui/button';
 import {FloatingLabelInput} from '@/components/shared/ui/floatingLabelInput';
 import {CustomDateInput} from '@/components/shared/ui/DateInput';
 import {useAdmin} from '@/context/AdminContextProvider';
-import {useState, useEffect} from 'react';
+import {useState, useEffect, useTransition, useRef} from 'react';
 import {
   DropdownOption,
   findCategoriesForDropdown,
@@ -18,6 +18,11 @@ import {Product} from '@/lib/types/db';
 import {UploadCloud, X} from 'lucide-react';
 import CustomSelect from '../shared/Select';
 import FileInput from '../shared/FileInput';
+import {
+  createProductWithImages,
+  updateProductWithImages,
+} from '@/actions/admin/admin.products.actions';
+import {toast} from 'sonner';
 
 type ProductFormProps = {
   mode: 'create' | 'edit';
@@ -25,10 +30,12 @@ type ProductFormProps = {
 };
 
 export default function ProductForm({mode, initialData}: ProductFormProps) {
-  const {categories, createProduct, updateProduct, isLoading} = useAdmin();
+  const {categories, closeSidebar} = useAdmin();
+  const [isPending, startTransition] = useTransition();
   const [newImageFiles, setNewImageFiles] = useState<File[]>([]);
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [newImagePreviews, setNewImagePreviews] = useState<string[]>([]);
+  const formRef = useRef<HTMLFormElement>(null);
 
   const [subCategoryOptions, setSubCategoryOptions] = useState<
     DropdownOption[]
@@ -37,7 +44,6 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
 
   const {
     register,
-    handleSubmit,
     formState: {errors, isDirty /* , isValid */},
     setValue,
     watch,
@@ -178,36 +184,49 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
     setNewImagePreviews((prevPreviews) => [...prevPreviews, ...newPreviews]);
   };
 
-  const onError = (errors: any) => {
-    console.error('Valideringsfel i formuläret:', errors);
-  };
+  // Handles form submission using FormData for server actions
+  const handleFormAction = async (formData: FormData) => {
+    startTransition(async () => {
+      try {
+        // Add new image files to FormData
+        newImageFiles.forEach((file) => {
+          formData.append('images', file);
+        });
 
-  // Handles form submission.
-  // The raw data for 'sizes' and 'specs' can be "dirty" (containing extra whitespace or empty entries)
-  // because we allow flexible user input in the 'onChange' handlers.
-  // To ensure data integrity, we clean it up here right before sending it to the server action.
-  const onSubmit = async (data: ProductFormData) => {
-    // Clean up sizes and specs before submitting
-    const cleanedData = {
-      ...data,
-      sizes: data.sizes.map((s) => s.trim()).filter(Boolean),
-      specs: data.specs ? data.specs.map((s) => s.trim()).filter(Boolean) : [],
-    };
+        // Add existing images to FormData (for edit mode)
+        if (mode === 'edit') {
+          existingImages.forEach((imageUrl) => {
+            formData.append('existingImages', imageUrl);
+          });
+        }
 
-    try {
-      if (mode === 'edit' && initialData) {
-        await updateProduct(
-          initialData.id,
-          cleanedData,
-          newImageFiles,
-          existingImages
-        );
-      } else {
-        await createProduct(cleanedData, newImageFiles);
+        let result;
+        if (mode === 'edit' && initialData) {
+          result = await updateProductWithImages(
+            initialData.id,
+            null,
+            formData
+          );
+        } else {
+          result = await createProductWithImages(null, formData);
+        }
+
+        if (result.success) {
+          toast.success(
+            mode === 'edit' ? 'Produkt uppdaterad!' : 'Produkt skapad!'
+          );
+          if (mode === 'create') {
+            handleReset();
+          }
+          closeSidebar();
+        } else {
+          toast.error(result.error || 'Ett fel uppstod');
+        }
+      } catch (error) {
+        console.error('Form submission error:', error);
+        toast.error('Ett oväntat fel uppstod');
       }
-    } catch (error) {
-      console.error('Form submission error:', error);
-    }
+    });
   };
 
   const handleReset = () => {
@@ -237,7 +256,8 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
 
   return (
     <form
-      onSubmit={handleSubmit(onSubmit, onError)}
+      ref={formRef}
+      action={handleFormAction}
       className='flex flex-col h-full'
     >
       {/* Scrollbart område för alla input-fält */}
@@ -420,20 +440,27 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
               />
             )}
           />
-          <CustomDateInput
-            id='product-published-at'
-            label='Publiceringsdatum (optional, default: nu)'
-            value={watch('publishedAt') || null}
-            onChange={(date) => {
-              setValue('publishedAt', date || undefined);
-              // Stoppa realtime update när användaren manuellt ändrar
-              if (mode === 'create') {
-                setRealtimeUpdate(false);
-              }
-            }}
-            className='w-full col-span-2 col-start-1 mb-2'
-            hasError={!!errors.publishedAt}
-            errorMessage={errors.publishedAt?.message}
+          <Controller
+            name='publishedAt'
+            control={control}
+            render={({field}) => (
+              <CustomDateInput
+                {...field}
+                id='product-published-at'
+                label='Publiceringsdatum (optional, default: nu)'
+                value={field.value || null}
+                onChange={(date) => {
+                  field.onChange(date || undefined);
+                  // Stoppa realtime update när användaren manuellt ändrar
+                  if (mode === 'create') {
+                    setRealtimeUpdate(false);
+                  }
+                }}
+                className='w-full col-span-2 col-start-1 mb-2'
+                hasError={!!errors.publishedAt}
+                errorMessage={errors.publishedAt?.message}
+              />
+            )}
           />
         </div>
 
@@ -535,16 +562,15 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
         <Button
           className='w-full mt-0 h-13'
           type='submit'
-          disabled={isLoading || !isDirty /* || !isValid */}
-          /*          disabled={
-            isLoading ||
+          disabled={
+            isPending ||
             !isDirty ||
             (mode === 'create' && newImageFiles.length === 0) ||
             (mode === 'edit' &&
               existingImages.length + newImageFiles.length === 0)
-          } */
+          }
         >
-          {isLoading
+          {isPending
             ? mode === 'edit'
               ? 'Uppdaterar...'
               : 'Sparar...'
@@ -557,7 +583,7 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
           variant='outline'
           type='button'
           onClick={handleReset}
-          disabled={isLoading}
+          disabled={isPending}
         >
           Rensa
         </Button>

@@ -1,4 +1,5 @@
 import type {ProductCard} from '@/lib/types/db';
+import { ProductFormData } from '../form-validators';
 
 export type SortField = 'id' | 'price' | 'name';
 
@@ -43,4 +44,7 @@ export type ActionResult = {
   success: boolean;
   data?: any;
   error?: string;
+  errors?: {
+    [key in keyof ProductFormData]?: string[];
+  };
 };

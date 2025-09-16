@@ -79,7 +79,7 @@ export const findCategoryById = (
     //  if (cat.children) {
     //   // Om kategorin har barn, anropa samma funktion för barnen.
     //   const found = findCategoryById(cat.children, id);
-    //   if (found) return found; 
+    //   if (found) return found;
     // }
   }
   return null;

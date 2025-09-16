@@ -7,6 +7,7 @@ interface FileInputProps {
   id: string;
   label?: string;
   multiple?: boolean;
+  name?: string;
   accept?: string;
   onFilesSelected: (files: File[]) => void;
   children: ReactNode; // För att kunna skicka in en egen design för knappen/ytan
@@ -17,6 +18,7 @@ const FileInput: React.FC<FileInputProps> = ({
   id,
   label = '',
   multiple = false,
+  name,
   accept,
   onFilesSelected,
   children,
@@ -57,6 +59,7 @@ const FileInput: React.FC<FileInputProps> = ({
       <input
         id={id}
         ref={inputRef}
+        name={name}
         type='file'
         multiple={multiple}
         accept={accept}

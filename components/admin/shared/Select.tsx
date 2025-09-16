@@ -61,6 +61,7 @@ const CustomSelect = forwardRef<HTMLSelectElement, CustomSelectProps>(
           target: {
             name: props.name,
             value: String(value),
+            
           },
         } as React.ChangeEvent<HTMLSelectElement>;
         props.onChange(syntheticEvent);

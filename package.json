@@ -1,7 +1,7 @@
 {
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "seed:c": "npx tsx scripts/seedCategories.ts",
@@ -36,7 +36,7 @@
     "prettier": "^3.3.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-hook-form": "^7.43.9",
+    "react-hook-form": "^7.62.0",
     "react-icons": "^5.5.0",
     "react-intersection-observer": "^9.16.0",
     "react-swipeable": "^7.0.2",
