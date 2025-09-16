@@ -19,7 +19,7 @@ export default function ProductManager({products}: ProductManagerProps) {
       <AdminSearch
         searchParam='search'
         maxLength={50}
-        placeholder='SÖK namn, pris, kategori, slug'
+        placeholder='SÖK produkt-id, namn, kategori, gender'
       />
 
       <ProductTable products={products} />

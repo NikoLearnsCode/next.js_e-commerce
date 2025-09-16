@@ -60,9 +60,10 @@ export default function OrdersClientContent({
                 {/* Order Items Carousel with date as title */}
                 <Carousel
                   items={order.order_items}
-                  title={formattedDate}
+                  title={formattedDate} 
+
                   slidesOffsetBefore={isDesktop ? 30 : 20}
-                  titleClassName='text-sm  text-gray-600 px-4 md:px-0 sm:text-base'
+                  titleClassName='text-sm  text-gray-600 px-4 lg:px-0 sm:text-base'
                   renderItem={(item, _index) => (
                     <div className='aspect-[7/9]'>
                       <Link

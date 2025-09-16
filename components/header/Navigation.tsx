@@ -123,10 +123,10 @@ function DesktopNavView({navLinks}: {navLinks: NavLink[]}) {
             onMouseLeave={handleMainMenuLeave}
             className='text-sm font-semibold cursor-pointer font-syne'
           >
-            <Link href={link.href} onClick={handleClick}>
+            <Link href={link.href || ''} onClick={handleClick}>
               <span
                 className={`pb-0.5 ${
-                  activePath.length === 0 && isActivePath(link.href)
+                  activePath.length === 0 && isActivePath(link.href || '')
                     ? 'text-black border-b delay-50 border-black'
                     : activePath[0] === index
                       ? 'text-black border-b border-black hover:border-black'
@@ -203,7 +203,7 @@ function DesktopNavView({navLinks}: {navLinks: NavLink[]}) {
                               </span>
                             ) : (
                               <Link
-                                href={item.href}
+                                href={item.href || ''}
                                 onClick={handleClick}
                                 className={`transition focus:border-black outline-none block text-sm font-medium border-b border-transparent hover:border-b hover:border-black w-fit ${
                                   columnsToRender.length > columnIndex + 1
@@ -242,7 +242,7 @@ const findInitialCategory = (navLinks: NavLink[], pathname: string): number => {
   for (let i = 0; i < navLinks.length; i++) {
     if (
       (navLinks[i].href === '/' && pathname === '/') ||
-      (navLinks[i].href !== '/' && pathname.startsWith(navLinks[i].href))
+      (navLinks[i].href !== '/' && pathname.startsWith(navLinks[i].href || ''))
     ) {
       return i;
     }
@@ -384,7 +384,7 @@ function MobileNavView({navLinks}: {navLinks: NavLink[]}) {
                         </button>
                       ) : (
                         <Link
-                          href={link.href}
+                          href={link.href || ''}
                           onClick={() => handleLinkClick(link)}
                           className={`block mx-4 font-medium border-b border-transparent active:border-b active:border-black w-fit transition ${
                             link.title === 'Nyheter'

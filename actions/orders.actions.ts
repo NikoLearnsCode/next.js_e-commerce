@@ -67,11 +67,9 @@ export async function createOrder(
       }));
 
       await tx.insert(orderItemsTable).values(orderItems);
-      // Om koden når hit utan fel, kommer Drizzle automatiskt att 'COMMIT'
-      // och returnera värdet nedan.
       return newlyCreatedOrder.id;
     });
-    console.log('Order created:', orderId);
+
     return {success: true, orderId: orderId};
   } catch (error) {
     console.error('Error creating order:', error);
@@ -79,8 +77,8 @@ export async function createOrder(
   }
 }
 
-// drizzle relations join query
-export async function getUserOrderById(orderId: string) {
+// 1. drizzle relations join query
+/* export async function getUserOrderById(orderId: string) {
   try {
     const order = await db.query.ordersTable.findFirst({
       where: eq(ordersTable.id, orderId),
@@ -98,18 +96,15 @@ export async function getUserOrderById(orderId: string) {
     console.error('Error fetching order:', error);
     return {success: false, error: 'Failed to fetch order'};
   }
-}
+} */
 
-// drizzle med egen join query
-/* export async function getUserOrderById(orderId: string) {
+// 2. drizzle med egen join query
+export async function getUserOrderById(orderId: string) {
   try {
-    // INNER JOIN query för att få order med dess items
     const orderWithItems = await db
       .select({
-        // Order fält
         orderId: ordersTable.id,
         orderUserId: ordersTable.user_id,
-        orderSessionId: ordersTable.session_id,
         orderTotalAmount: ordersTable.total_amount,
         orderPaymentInfo: ordersTable.payment_info,
         orderStatus: ordersTable.status,
@@ -117,7 +112,6 @@ export async function getUserOrderById(orderId: string) {
         orderCreatedAt: ordersTable.created_at,
         orderUpdatedAt: ordersTable.updated_at,
 
-        // Order items fält
         itemId: orderItemsTable.id,
         itemOrderId: orderItemsTable.order_id,
         itemProductId: orderItemsTable.product_id,
@@ -134,17 +128,15 @@ export async function getUserOrderById(orderId: string) {
       .innerJoin(orderItemsTable, eq(ordersTable.id, orderItemsTable.order_id))
       .where(eq(ordersTable.id, orderId));
 
-
     if (orderWithItems.length === 0) {
       return {success: false, error: 'Order not found'};
     }
 
-    // Bygg order-objektet från första raden (alla rader har samma order-data)
     const firstRow = orderWithItems[0];
+
     const order = {
       id: firstRow.orderId,
       user_id: firstRow.orderUserId,
-      session_id: firstRow.orderSessionId,
       total_amount: firstRow.orderTotalAmount,
       payment_info: firstRow.orderPaymentInfo,
       status: firstRow.orderStatus,
@@ -152,7 +144,6 @@ export async function getUserOrderById(orderId: string) {
       created_at: firstRow.orderCreatedAt,
       updated_at: firstRow.orderUpdatedAt,
 
-      // Bygg items-arrayen från alla rader
       order_items: orderWithItems.map((row) => ({
         id: row.itemId,
         order_id: row.itemOrderId,
@@ -173,52 +164,7 @@ export async function getUserOrderById(orderId: string) {
     console.error('Error fetching order:', error);
     return {success: false, error: 'Failed to fetch order'};
   }
-} */
-
-// getUserOrdersOverview UTAN join
-/* 
-export async function getUserOrdersOverview() {
-  try {
-    const session = await getServerSession(authOptions);
-    const user = session?.user;
-
-    if (!user) {
-      console.error(
-        'Authentication error fetching user orders: User not authenticated'
-      );
-      return {success: false, error: 'User not authenticated', orders: []};
-    }
-
-    const orders = await db
-      .select({
-        id: ordersTable.id,
-        created_at: ordersTable.created_at,
-      })
-      .from(ordersTable)
-      .where(eq(ordersTable.user_id, user.id))
-      .orderBy(desc(ordersTable.created_at));
-
-    const orderIds = orders.map((order) => order.id);
-    const orderItems = await db
-      .select({
-        order_id: orderItemsTable.order_id,
-        image: orderItemsTable.image,
-        name: orderItemsTable.name,
-      })
-      .from(orderItemsTable)
-      .where(inArray(orderItemsTable.order_id, orderIds));
-
-    const ordersWithItems = orders.map((order) => ({
-      ...order,
-      order_items: orderItems.filter((item) => item.order_id === order.id),
-    }));
-
-    return {success: true, orders: ordersWithItems};
-  } catch (error) {
-    console.error('Unexpected error in getUserOrdersSummary:', error);
-    return {success: false, error: 'Unexpected error', orders: []};
-  }
-} */
+}
 
 export async function getUserOrdersOverview() {
   try {
@@ -253,7 +199,7 @@ export async function getUserOrdersOverview() {
         created_at: Date;
         order_items: Array<{
           order_id: string;
-          image: string | null;
+          image: string;
           name: string;
         }>;
       }

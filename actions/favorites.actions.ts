@@ -22,7 +22,7 @@ export async function getFavorites() {
         session_id: favoritesTable.session_id,
         product_id: favoritesTable.product_id,
         created_at: favoritesTable.created_at,
-        // Product data via join
+
         product: {
           id: productsTable.id,
           name: productsTable.name,
@@ -60,7 +60,6 @@ export async function getFavorites() {
       );
       return {favorites};
     } else {
-      // Om varken användare eller session finns, returnera en tom lista
       return {favorites: []};
     }
   } catch (error) {

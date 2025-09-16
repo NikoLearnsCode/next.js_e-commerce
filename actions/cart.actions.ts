@@ -20,10 +20,11 @@ import {eq, and, isNull, asc, inArray} from 'drizzle-orm';
 import {cookies} from 'next/headers';
 import Decimal from 'decimal.js';
 
+// Hjälpfunktioner
+
 async function getCartItemsWithProducts(cartId: string) {
   const cartItems = await db
     .select({
-      // Cart item fields
       id: cartItemsTable.id,
       cart_id: cartItemsTable.cart_id,
       product_id: cartItemsTable.product_id,
@@ -31,7 +32,7 @@ async function getCartItemsWithProducts(cartId: string) {
       size: cartItemsTable.size,
       created_at: cartItemsTable.created_at,
       updated_at: cartItemsTable.updated_at,
-      // Product fields via JOIN
+
       name: productsTable.name,
       price: productsTable.price,
       brand: productsTable.brand,
@@ -64,6 +65,8 @@ function calculateItemCount(items: CartItemWithProduct[]): number {
   }
   return items.reduce((sum, item) => sum + item.quantity, 0);
 }
+
+// Kärnfunktioner
 
 export async function getCart() {
   try {
@@ -117,7 +120,6 @@ export async function addToCart(newItem: AddToCartItem) {
     const sessionId = user ? null : await getOrCreateSessionId();
     let {cart} = await getCart();
 
-    // Skapa cart om den inte finns
     if (!cart) {
       const newCart: NewCart = {
         session_id: user ? null : sessionId,
@@ -135,7 +137,6 @@ export async function addToCart(newItem: AddToCartItem) {
       if (!createdCart[0]) throw new Error('Failed to create cart');
       cart = createdCart[0];
     }
-
     // Kolla om samma produkt + storlek redan finns
     const existingItem = await db
       .select()
@@ -174,7 +175,6 @@ export async function addToCart(newItem: AddToCartItem) {
       });
     }
 
-    // Hämta uppdaterade data
     const cartItems = await getCartItemsWithProducts(cart.id);
     const totalPrice = calculateCartTotal(cartItems);
     const itemCount = calculateItemCount(cartItems);
@@ -195,21 +195,18 @@ export async function removeFromCart(itemId: string) {
 
     await db.delete(cartItemsTable).where(eq(cartItemsTable.id, itemId));
 
-    // Kolla om cart är tom nu
     const remainingItems = await db
       .select()
       .from(cartItemsTable)
       .where(eq(cartItemsTable.cart_id, cart.id));
 
     if (remainingItems.length === 0) {
-      // Ta bort cart om inga items finns kvar
       await db.delete(cartsTable).where(eq(cartsTable.id, cart.id));
       const cookieStore = await cookies();
       cookieStore.delete(CART_SESSION_COOKIE);
       return {success: true, cartItems: [], totalPrice: 0, itemCount: 0};
     }
 
-    // Hämta uppdaterade data
     const cartItems = await getCartItemsWithProducts(cart.id);
     const totalPrice = calculateCartTotal(cartItems);
     const itemCount = calculateItemCount(cartItems);
@@ -235,7 +232,6 @@ export async function updateCartItemQuantity(itemId: string, quantity: number) {
       .set({quantity, updated_at: new Date()})
       .where(eq(cartItemsTable.id, itemId));
 
-    // Hämta uppdaterade data
     const cartItems = await getCartItemsWithProducts(cart.id);
     const totalPrice = calculateCartTotal(cartItems);
     const itemCount = calculateItemCount(cartItems);

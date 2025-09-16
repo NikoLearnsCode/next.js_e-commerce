@@ -29,7 +29,7 @@ export async function getAllProducts(searchTerm?: string) {
         // For UUID, use like instead of ilike and convert to text
         sql`${productsTable.id}::text ILIKE ${searchPattern}`,
         ilike(productsTable.name, searchPattern),
-        ilike(productsTable.brand, searchPattern),
+        ilike(productsTable.gender, searchPattern),
         ilike(productsTable.category, searchPattern)
       )
     )

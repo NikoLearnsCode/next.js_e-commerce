@@ -2,7 +2,7 @@ import {categories} from '@/drizzle/db/schema';
 
 export interface NavLink {
   title: string;
-  href: string;
+  href: string | null;
   displayOrder: number;
   children?: NavLink[];
   isFolder?: boolean;
