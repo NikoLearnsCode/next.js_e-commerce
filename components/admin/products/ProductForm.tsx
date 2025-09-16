@@ -44,6 +44,7 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
 
   const {
     register,
+    handleSubmit,
     formState: {errors, isDirty /* , isValid */},
     setValue,
     watch,
@@ -54,21 +55,16 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
     resolver: zodResolver(productFormSchema),
     mode: 'onChange',
     defaultValues: {
-      name: 'TEST NAME',
-      slug: 'TEST SLUG',
-      description: 'TEST DESCRIPTION',
-      price: 123,
-      brand: 'TEST BRAND',
-      color: 'TEST COLOR',
-      gender: 'TEST GENDER',
-      category: 'TEST CATEGORY',
-      sizes: ['xxs', 'xs', 's', 'm', 'l', 'xl', 'xxl'],
-      specs: [
-        'Normal passform',
-        'Material: 100% linne',
-        'Maskintvätt högst 30°C',
-        'Tål ej strykning',
-      ],
+      name: '',
+      slug: '',
+      description: '',
+      price: 0,
+      brand: '',
+      color: '',
+      gender: '',
+      category: '',
+      sizes: [],
+      specs: [],
       publishedAt: new Date(),
     },
   });
@@ -184,10 +180,16 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
     setNewImagePreviews((prevPreviews) => [...prevPreviews, ...newPreviews]);
   };
 
-  // Handles form submission using FormData for server actions
-  const handleFormAction = async (formData: FormData) => {
+  // Handles form submission - called after react-hook-form validation passes
+  const onSubmit = async (
+    data: ProductFormData,
+    event?: React.BaseSyntheticEvent
+  ) => {
     startTransition(async () => {
       try {
+        // Get FormData from the actual form element
+        const formData = new FormData(event?.target);
+
         // Add new image files to FormData
         newImageFiles.forEach((file) => {
           formData.append('images', file);
@@ -229,6 +231,11 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
     });
   };
 
+  const onError = (errors: any) => {
+    console.log('Valideringsfel:', errors);
+    toast.error('Vänligen fyll i alla obligatoriska fält korrekt');
+  };
+
   const handleReset = () => {
     reset({
       name: '',
@@ -257,7 +264,7 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
   return (
     <form
       ref={formRef}
-      action={handleFormAction}
+      onSubmit={handleSubmit(onSubmit, onError)}
       className='flex flex-col h-full'
     >
       {/* Scrollbart område för alla input-fält */}
@@ -562,13 +569,13 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
         <Button
           className='w-full mt-0 h-13'
           type='submit'
-          disabled={
+          /*  disabled={
             isPending ||
             !isDirty ||
             (mode === 'create' && newImageFiles.length === 0) ||
             (mode === 'edit' &&
               existingImages.length + newImageFiles.length === 0)
-          }
+          } */
         >
           {isPending
             ? mode === 'edit'
