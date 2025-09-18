@@ -7,10 +7,11 @@ import {CalendarCheck} from 'lucide-react';
 interface CustomDateInputProps
   extends Omit<
     React.InputHTMLAttributes<HTMLInputElement>,
-    'type' | 'onChange' | 'value'
+    'type' | 'onChange' | 'value' | 'name'
   > {
   label: string;
   id: string;
+  name: string;
   hasError?: boolean;
   errorMessage?: string;
   value?: Date | null;
@@ -25,6 +26,7 @@ const CustomDateInput = React.forwardRef<
     {
       label,
       id,
+      name,
       hasError,
       errorMessage,
       className,
@@ -39,7 +41,6 @@ const CustomDateInput = React.forwardRef<
   ) => {
     const elementRef = React.useRef<HTMLInputElement | null>(null);
 
-    // Kombinera den externa ref med den interna elementRef
     const combinedRef = React.useCallback(
       (node: HTMLInputElement | null) => {
         elementRef.current = node;
@@ -52,9 +53,9 @@ const CustomDateInput = React.forwardRef<
       [ref]
     );
 
-    // Funktion för att formatera datum till input-värde (YYYY-MM-DDTHH:MM)
     const formatDateForInput = (date: Date | null): string => {
       if (!date) return '';
+
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, '0');
       const day = String(date.getDate()).padStart(2, '0');
@@ -63,19 +64,19 @@ const CustomDateInput = React.forwardRef<
       return `${year}-${month}-${day}T${hours}:${minutes}`;
     };
 
-    // Funktion för att parse input-värde till Date
     const parseDateFromInput = (inputValue: string): Date | null => {
       if (!inputValue) return null;
       const date = new Date(inputValue);
       return isNaN(date.getTime()) ? null : date;
     };
 
-    // Hantera klick på hela containern för att öppna date picker
     const handleContainerClick = () => {
       if (!disabled && elementRef.current) {
         elementRef.current.showPicker?.();
       }
     };
+
+    const isoDateString = value instanceof Date ? value.toISOString() : '';
 
     return (
       <div className={cn('relative', className)}>
@@ -96,29 +97,25 @@ const CustomDateInput = React.forwardRef<
             value={formatDateForInput(value || null)}
             disabled={disabled}
             className={cn(
-              'w-full bg-transparent text-gray-500  font-medium px-3 h-12.5 pt-4.5 text-sm pr-12',
+              'w-full bg-transparent text-gray-500 font-medium px-3 h-12.5 pt-4.5 text-sm pr-12',
               'outline-none',
               'disabled:cursor-not-allowed',
-              // Dölj standard calendar icon
               '[&::-webkit-calendar-picker-indicator]:opacity-0',
               '[&::-webkit-calendar-picker-indicator]:absolute',
               '[&::-webkit-calendar-picker-indicator]:inset-0',
               '[&::-webkit-calendar-picker-indicator]:cursor-pointer'
             )}
             placeholder={label}
-            onFocus={(e) => {
-              onFocus?.(e);
-            }}
-            onBlur={(e) => {
-              onBlur?.(e);
-            }}
+            onFocus={onFocus}
+            onBlur={onBlur}
             onChange={(e) => {
               const newDate = parseDateFromInput(e.target.value);
               onChange?.(newDate);
             }}
           />
 
-          {/* Custom calendar icon */}
+          <input type='hidden' name={name} value={isoDateString} />
+
           <div className='absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none'>
             <CalendarCheck
               strokeWidth={1.25}
@@ -130,13 +127,11 @@ const CustomDateInput = React.forwardRef<
             />
           </div>
 
-          {/* Label som alltid är synlig */}
           <label
             htmlFor={id}
             className={cn(
               'absolute left-3 top-1.5 text-xs text-gray-500 pointer-events-none',
-              hasError ? 'text-destructive' : '',
-              'disabled:opacity-50'
+              hasError ? 'text-destructive' : ''
             )}
           >
             {label}

@@ -66,22 +66,27 @@ export const categoryFormSchema = insertCategorySchema
 export type CategoryFormData = z.infer<typeof categoryFormSchema>;
 
 // valideringsschema för produkter
+// valideringsschema för produkter
 export const productSchema = createInsertSchema(productsTable, {
+  // definierar/överstyr fält från databas-schemat
   price: z.coerce
     .number({required_error: 'Pris måste anges.'})
     .positive('Priset måste vara ett positivt tal.'),
   images: z.array(z.string()),
   sizes: z.array(z.string()).min(1, {message: 'Minst en storlek måste anges.'}),
   specs: z.array(z.string()).optional(),
+
+  published_at: z.date().optional(),
 })
   .omit({
     images: true,
     id: true,
     created_at: true,
     updated_at: true,
-    published_at: true,
   })
   .extend({
+    // lägger till/överstyr fält som INTE är i databasen,
+    // eller förfinar validering för befintliga fält.
     name: z.string().min(3, 'Produktnamnet måste vara minst 3 tecken.'),
     slug: z
       .string()
@@ -99,8 +104,6 @@ export const productSchema = createInsertSchema(productsTable, {
       .string({required_error: 'Du måste välja en underkategori.'})
       .min(1, 'Du måste välja en underkategori.'),
     color: z.string().min(1, 'Färg får inte vara tom.'),
-
-    publishedAt: z.date().optional(),
   });
 
 export type ProductFormData = z.infer<typeof productSchema>;

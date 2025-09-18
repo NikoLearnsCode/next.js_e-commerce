@@ -78,7 +78,7 @@ export default function AdminUIWrapper({children}: AdminUIWrapperProps) {
           setTriggerElement(null);
         }}
       />
-      <Toaster />
+      
     </div>
   );
 }

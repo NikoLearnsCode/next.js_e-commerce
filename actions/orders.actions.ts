@@ -60,7 +60,7 @@ export async function createOrder(
         order_id: newlyCreatedOrder.id,
         product_id: item.product_id,
         quantity: item.quantity,
-        price: item.price,
+        price: item.price.toString(),
         name: item.name,
         size: item.size,
         color: item.color,

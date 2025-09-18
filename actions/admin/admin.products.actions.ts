@@ -79,6 +79,7 @@ export async function createProductWithImages(
   // destrukturera ut images som hanteras separat
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const {images, ...rawData} = Object.fromEntries(formData.entries());
+
   const preparedData = {
     ...rawData,
     // konvertera price till number
@@ -99,9 +100,9 @@ export async function createProductWithImages(
           .map((s) => s.trim())
           .filter(Boolean)
       : [],
-    // konvertera publishedAt till date
-    publishedAt: rawData.publishedAt
-      ? new Date(rawData.publishedAt.toString())
+    // konvertera published_at till date
+    published_at: rawData.published_at
+      ? new Date(rawData.published_at.toString())
       : undefined,
   };
 
@@ -144,12 +145,11 @@ export async function createProductWithImages(
     );
 
     // konstruera final data
-    const {publishedAt, ...dbInsertData} = validatedData;
+    const dbInsertData = validatedData;
     const finalDbData = {
       ...dbInsertData,
       price: dbInsertData.price.toString(),
       images: uploadedImageUrls,
-      published_at: publishedAt || new Date(),
     };
 
     const [newProduct] = await db
@@ -157,7 +157,6 @@ export async function createProductWithImages(
       .values(finalDbData)
       .returning();
 
-    console.log('newProduct', newProduct);
     revalidatePath('/admin/products');
     return {success: true, data: newProduct};
   } catch (error) {
@@ -189,7 +188,7 @@ export async function updateProductWithImages(
 
   const preparedData = {
     ...rawData,
-    price: Number(rawData.price) || 0,
+    price: rawData.price ? Number(rawData.price) : 0,
     sizes: rawData.sizes
       ? rawData.sizes
           .toString()
@@ -204,8 +203,9 @@ export async function updateProductWithImages(
           .map((s) => s.trim())
           .filter(Boolean)
       : [],
-    publishedAt: rawData.publishedAt
-      ? new Date(rawData.publishedAt.toString())
+    // konvertera published_at till date
+    published_at: rawData.published_at
+      ? new Date(rawData.published_at.toString())
       : undefined,
   };
 
@@ -265,12 +265,12 @@ export async function updateProductWithImages(
     );
     await cleanupProductImages(imagesToDelete);
 
-    const {publishedAt, ...dbUpdateData} = validatedData;
+    const dbUpdateData = validatedData;
     const finalUpdateData = {
       ...dbUpdateData,
       price: dbUpdateData.price.toString(),
       images: finalImages,
-      published_at: publishedAt || currentProduct.published_at,
+
       updated_at: new Date(),
     };
 

@@ -273,11 +273,15 @@ export default function CategoryForm({mode, initialData}: CategoryFormProps) {
           {...register('displayOrder')}
           id='category-display-order'
           label='Sorteringsordning'
+          className='mb-8'
           type='number'
           hasError={!!errors.displayOrder}
           errorMessage={errors.displayOrder?.message}
         />
         <CheckboxOption
+          svgClassName='h-5 w-5'
+          labelClassName=' font-medium '
+          className='ml-1 w-7 h-6'
           {...register('isActive')}
           id='category-is-active'
           label={watch('isActive') ? 'Aktiv' : 'Inaktiv'}

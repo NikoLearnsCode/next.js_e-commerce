@@ -45,7 +45,7 @@ export type AddToCartItem = Omit<NewCartItem, 'cart_id'>;
 
 export type CartItemWithProduct = typeof cartItemsTable.$inferSelect & {
   name: string;
-  price: string;
+  price: number;
   brand: string;
   color: string;
   slug: string;

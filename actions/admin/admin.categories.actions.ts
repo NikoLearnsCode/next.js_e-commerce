@@ -103,7 +103,7 @@ export async function updateCategoryWithImages(
     console.log('formData', formData);
 
     const editedData = Object.fromEntries(formData.entries());
-    console.log('editedData', editedData);
+
     const formResult = categoryFormSchema.parse(editedData);
 
     await checkCategoryConflicts(formResult, id);
@@ -138,7 +138,7 @@ export async function updateCategoryWithImages(
 
     revalidatePath('/admin/categories');
     revalidatePath('/admin');
-    console.log('updatedCategory', updatedCategory);
+
     return {success: true, data: updatedCategory};
   } catch (error: any) {
     console.error('Error updating category:', error);

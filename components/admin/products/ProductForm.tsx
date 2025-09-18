@@ -75,7 +75,7 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
         'och en till riktigt bra testspecifikation',
         'och till sist en riktigt bra testspecifikation',
       ],
-      publishedAt: new Date(),
+      published_at: new Date(),
     },
   });
 
@@ -96,7 +96,7 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
         category: initialData.category || '',
         sizes: initialData.sizes,
         specs: initialData.specs || [],
-        publishedAt: initialData.published_at
+        published_at: initialData.published_at
           ? new Date(initialData.published_at)
           : undefined,
       });
@@ -152,7 +152,7 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
   useEffect(() => {
     if (mode === 'create' && realtimeUpdate) {
       const interval = setInterval(
-        () => setValue('publishedAt', new Date()),
+        () => setValue('published_at', new Date()),
         1000
       );
       return () => clearInterval(interval);
@@ -176,7 +176,7 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
       category: '',
       sizes: [],
       specs: [],
-      publishedAt: new Date(),
+      published_at: new Date(),
     });
     setExistingImages([]);
     setNewImageFiles([]);
@@ -381,12 +381,12 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
             )}
           />
           <Controller
-            name='publishedAt'
+            name='published_at'
             control={control}
             render={({field}) => (
               <CustomDateInput
                 {...field}
-                id='product-published-at'
+                id='product-published_at'
                 label='Publiceringsdatum'
                 value={field.value || null}
                 onChange={(date) => {
@@ -394,8 +394,8 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
                   if (mode === 'create') setRealtimeUpdate(false);
                 }}
                 className='w-full col-span-2 mb-4'
-                hasError={!!errors.publishedAt}
-                errorMessage={errors.publishedAt?.message}
+                hasError={!!errors.published_at}
+                errorMessage={errors.published_at?.message}
               />
             )}
           />
@@ -403,6 +403,7 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
         <div className='sticky -top-5 z-10 pb-2.5 bg-white'>
           <FileInput
             id='image-upload'
+          
             multiple
             accept='image/*'
             onFilesSelected={handleImageChange}
