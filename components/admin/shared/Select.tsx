@@ -4,7 +4,6 @@ import {ChevronDown} from 'lucide-react';
 interface Option {
   value: string | number;
   label: string;
-  
 }
 
 interface CustomSelectProps
@@ -61,7 +60,6 @@ const CustomSelect = forwardRef<HTMLSelectElement, CustomSelectProps>(
           target: {
             name: props.name,
             value: String(value),
-            
           },
         } as React.ChangeEvent<HTMLSelectElement>;
         props.onChange(syntheticEvent);
@@ -112,7 +110,6 @@ const CustomSelect = forwardRef<HTMLSelectElement, CustomSelectProps>(
 
           {isOpen && (
             <div className='absolute  max-h-64 overflow-y-auto top-full left-0 right-0 z-50 -mt-1 border-t-0 bg-white border  text-gray-500  border-gray-400/70 group-hover:border-gray-500 shadow-sm'>
-              
               {options.map((option) => (
                 <div
                   key={option.value}

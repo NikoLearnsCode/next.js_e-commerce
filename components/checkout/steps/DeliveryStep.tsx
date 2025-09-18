@@ -4,7 +4,10 @@ import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {Button} from '@/components/shared/ui/button';
 import {FloatingLabelInput} from '@/components/shared/ui/floatingLabelInput';
-import {DeliveryFormData, deliverySchema} from '@/lib/validators';
+import {
+  DeliveryFormData,
+  deliverySchema,
+} from '@/lib/validators/checkout-validators';
 import {RadioOption} from '@/components/shared/ui/RadioOption';
 
 interface DeliveryStepProps {

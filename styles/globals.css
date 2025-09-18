@@ -2,6 +2,7 @@
 
 body {
   margin-top: var(--header-height);
+  scroll-behavior: smooth;
 }
 
 .scrollbar-hide {

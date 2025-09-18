@@ -1,7 +1,7 @@
 import {Metadata} from 'next';
 import Newsletter from '@/components/shared/Newsletter';
 import Homepage from '@/components/Homepage';
-import {getMainCategoriesForHomepage} from '@/actions/admin/admin.categories.actions';
+import {getMainCategoriesForHomepage} from '@/actions/navigation.actions';
 
 export const metadata: Metadata = {
   title: 'E-commerce Next.js 2025',

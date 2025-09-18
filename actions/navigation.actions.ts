@@ -2,7 +2,7 @@
 
 import {db} from '@/drizzle/index';
 import {categories} from '@/drizzle/db/schema';
-import {asc, eq} from 'drizzle-orm';
+import {asc, eq, and} from 'drizzle-orm';
 import {NavLink} from '@/lib/types/category';
 
 import {
@@ -27,4 +27,14 @@ export async function getNavigationData(): Promise<NavLink[]> {
     console.error('Fel vid hämtning av navigation:', error);
     return [];
   }
+}
+
+export async function getMainCategoriesForHomepage() {
+  return await db
+    .select()
+    .from(categories)
+    .where(
+      and(eq(categories.type, 'MAIN-CATEGORY'), eq(categories.isActive, true))
+    )
+    .orderBy(asc(categories.displayOrder));
 }

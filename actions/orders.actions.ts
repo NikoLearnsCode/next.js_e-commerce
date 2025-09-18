@@ -4,7 +4,10 @@ import {getServerSession} from 'next-auth';
 import {authOptions} from '@/lib/auth';
 import {getSessionId} from '@/utils/cookies';
 import {CartItemWithProduct} from '@/lib/types/db';
-import {DeliveryFormData, deliverySchema} from '@/lib/validators';
+import {
+  DeliveryFormData,
+  deliverySchema,
+} from '@/lib/validators/checkout-validators';
 import {db} from '@/drizzle/index';
 import {ordersTable, orderItemsTable} from '@/drizzle/db/schema';
 import {eq, desc /* inArray */} from 'drizzle-orm';

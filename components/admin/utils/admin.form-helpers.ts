@@ -1,6 +1,5 @@
 import {CategoryWithChildren} from '@/lib/types/category';
 
-// Du behöver fortfarande din DropdownOption-typ
 export interface DropdownOption {
   value: number;
   slug: string;
@@ -20,67 +19,56 @@ export function findCategoriesForDropdown(
   allowedTypes: string[],
   parentName: string | null = null
 ): DropdownOption[] {
-  // Starta med en tom lista som vi kommer att fylla på under resans gång.
   let options: DropdownOption[] = [];
 
   // Loopa igenom varje kategori (nod) på den nuvarande nivån i trädet.
   for (const node of nodes) {
-    // Steg 1: Kontrollera om den nuvarande nodens typ är tillåten.
-    // Detta fungerar som ett filter eller en "gatekeeper".
-    // Bara om `node.type` finns i `allowedTypes` fortsätter vi.
+    // Olika allowedTypes för products/categories
     if (allowedTypes.includes(node.type)) {
-      // Om typen är godkänd, skapa ett nytt `DropdownOption`-objekt...
       options.push({
-        value: node.id, // Värdet som skickas, t.ex. till en databas.
-        slug: node.slug, // URL-sluggen, kan vara användbar.
-        // Steg 2: Skapa en användarvänlig etikett.
-        // Om `parentName` finns (dvs. vi är inte på toppnivån),
+        value: node.id,
+        slug: node.slug,
+        // Om parentName finns (dvs.inte på toppnivån),
         // skapa en etikett som "Barnets Namn - Förälderns Namn".
         // Annars, använd bara kategorins eget namn.
-        // Detta är superbra för att skilja på t.ex. 'Byxor - Dam' och 'Byxor - Herr'.
         label: parentName ? `${node.name} - ${parentName}` : node.name,
       });
     }
-
-    // Steg 3: "Dyk ner" och gör samma sak för alla barn.
-    // Om den nuvarande noden har en `children`-array som inte är tom...
     if (node.children && node.children.length > 0) {
-      // ...anropa då denna funktion igen för barnen (rekursion).
-      // Resultatet från det anropet (en platt lista med barnens alternativ)
-      // slås ihop med vår nuvarande `options`-lista.
+      // fortsätter och gör samma sak för alla barn.
       options = options.concat(
         findCategoriesForDropdown(
           node.children,
           allowedTypes,
-          node.name // VIKTIGT: skicka med den *nuvarande* nodens namn som `parentName` till nästa nivå.
+          node.name // skicka med den nuvarande nodens namn som parentName till nästa nivå.
         )
       );
     }
   }
 
-  // När loopen har gått igenom alla noder (och deras barn via rekursion)
-  // på denna nivå, returnera den kompletta, platta listan med alternativ.
   return options;
 }
 
 /**
- * En hjälpfunktion för att hitta en specifik kategori i den nästlade `categories`-trädstrukturen.
- *
- * @param cats - En array av kategorier i kategoriträdet.
- * @param id - Kategoris ID.
- * @returns En array av DropdownOption som kan användas i en <select>-lista.
+ * Skapar en Map för snabb uppslagning av kategorier via deras ID.
+ * Går rekursivt igenom hela trädstrukturen.
+ * @param cats Den nästade listan med kategorier.
+ * @returns En Map<number, CategoryWithChildren>
  */
-export const findCategoryById = (
-  cats: CategoryWithChildren[],
-  id: number
-): CategoryWithChildren | null => {
-  for (const cat of cats) {
-    if (cat.id === id) return cat;
-    //  if (cat.children) {
-    //   // Om kategorin har barn, anropa samma funktion för barnen.
-    //   const found = findCategoryById(cat.children, id);
-    //   if (found) return found;
-    // }
+export const createCategoryLookupMap = (
+  cats: CategoryWithChildren[]
+): Map<number, CategoryWithChildren> => {
+  const map = new Map<number, CategoryWithChildren>();
+
+  function buildMap(nodes: CategoryWithChildren[]) {
+    for (const node of nodes) {
+      map.set(node.id, node);
+      if (node.children && node.children.length > 0) {
+        buildMap(node.children);
+      }
+    }
   }
-  return null;
+
+  buildMap(cats);
+  return map;
 };

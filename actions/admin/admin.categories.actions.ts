@@ -2,302 +2,163 @@
 
 import {db} from '@/drizzle/index';
 import {categories, productsTable} from '@/drizzle/db/schema';
-import {asc, eq, and, isNull, or, sql} from 'drizzle-orm';
-import {buildCategoryTree} from '@/actions/lib/categoryTree-builder';
-import {categoryFormSchema, CategoryFormData} from '@/lib/form-validators';
+import {asc, eq, and, isNull, or, sql, not} from 'drizzle-orm';
 import {revalidatePath} from 'next/cache';
-import {ActionResult} from '@/lib/types/query';
 import path from 'path';
 import fs from 'fs/promises';
+
+import {buildCategoryTree} from '@/actions/lib/categoryTree-builder';
+import {
+  categoryFormSchema,
+  insertCategorySchema,
+  CategoryFormData,
+} from '@/lib/validators/admin-validators';
+import {ActionResult} from '@/lib/types/query';
 import {isUploadedImage} from '@/utils/image-helpers';
 import {uploadCategoryImages} from './admin.image-upload.actions';
+import {Category} from '@/lib/types/category';
+import {z} from 'zod';
 
+// hämta alla kategorier med barn i trädstruktur
 export async function getCategoriesWithChildren() {
   const flatCategories = await db
     .select()
     .from(categories)
     .orderBy(asc(categories.displayOrder));
-
-  const categoryTree = buildCategoryTree(flatCategories);
-
-  return categoryTree;
+  return buildCategoryTree(flatCategories);
 }
 
-export async function getMainCategoriesForHomepage() {
-  const mainCategories = await db
-    .select()
-    .from(categories)
-    .where(
-      and(eq(categories.type, 'MAIN-CATEGORY'), eq(categories.isActive, true))
-    )
-    .orderBy(asc(categories.displayOrder));
-
-  return mainCategories;
-}
-
-export async function createCategory(
-  data: CategoryFormData
+export async function createCategoryWithImages(
+  formData: FormData
 ): Promise<ActionResult> {
+  let uploadedImages: {desktop?: string; mobile?: string} = {};
   try {
-    // Validera inkommande data
-    const validatedData = categoryFormSchema.parse(data);
+    const rawData = Object.fromEntries(formData.entries());
 
-    // Kontrollera att slug och name är unikt inom samma parent
-    const existingCategories = await db
-      .select()
-      .from(categories)
-      .where(
-        and(
-          or(
-            eq(
-              sql`lower(${categories.slug})`,
-              validatedData.slug.toLowerCase()
-            ),
-            eq(sql`lower(${categories.name})`, validatedData.name.toLowerCase())
-          ),
-          validatedData.parentId
-            ? eq(categories.parentId, validatedData.parentId)
-            : isNull(categories.parentId)
-        )
+    const formResult = categoryFormSchema.parse(rawData);
+
+    await checkCategoryConflicts(formResult);
+
+    const {desktopImage: desktopFile, mobileImage: mobileFile} = {
+      desktopImage: rawData.desktopImageFile as File | null,
+      mobileImage: rawData.mobileImageFile as File | null,
+    };
+    if (formResult.type === 'MAIN-CATEGORY' && (desktopFile || mobileFile)) {
+      const {desktopImageUrl, mobileImageUrl} = await uploadCategoryImages(
+        desktopFile,
+        mobileFile,
+        formResult.slug
       );
-
-    if (existingCategories.length > 0) {
-      const slugConflict = existingCategories.some(
-        (c) => c.slug.toLowerCase() === validatedData.slug.toLowerCase()
-      );
-      const nameConflict = existingCategories.some(
-        (c) => c.name.toLowerCase() === validatedData.name.toLowerCase()
-      );
-
-      const conflictParts = [];
-      if (slugConflict) conflictParts.push('slug');
-      if (nameConflict) conflictParts.push('name');
-
-      return {
-        success: false,
-        error: `En kategori med detta ${conflictParts.join(
-          ' och '
-        )} finns redan på samma nivå.`,
-      };
+      if (desktopImageUrl) uploadedImages.desktop = desktopImageUrl;
+      if (mobileImageUrl) uploadedImages.mobile = mobileImageUrl;
     }
 
-    // Skapa ny kategori
-    const now = new Date();
+    const finalPayload = {
+      ...formResult,
+      desktopImage: uploadedImages.desktop || null,
+      mobileImage: uploadedImages.mobile || null,
+    };
+    const dbData = insertCategorySchema.parse(finalPayload);
+
     const [newCategory] = await db
       .insert(categories)
-      .values({
-        name: validatedData.name,
-        slug: validatedData.slug,
-        type: validatedData.type,
-        displayOrder: validatedData.displayOrder,
-        isActive: validatedData.isActive,
-        parentId: validatedData.parentId,
-        desktopImage: validatedData.desktopImage || null,
-        mobileImage: validatedData.mobileImage || null,
-        created_at: now,
-        updated_at: now,
-      })
+      .values(dbData)
       .returning();
 
-    // Revalidate relevanta paths
     revalidatePath('/admin/categories');
     revalidatePath('/admin');
 
-    return {
-      success: true,
-      data: newCategory,
-    };
-  } catch (error) {
+    return {success: true, data: newCategory};
+  } catch (error: any) {
     console.error('Error creating category:', error);
-    return {
-      success: false,
-      error: 'Ett fel uppstod vid skapandet av kategorin.',
-    };
+    await cleanupUploadedImagesOnError(Object.values(uploadedImages));
+    if (error instanceof z.ZodError) {
+      return {
+        success: false,
+        error: 'Valideringsfel.',
+        errors: error.flatten().fieldErrors,
+      };
+    }
+    if (error.message.startsWith('Conflict:')) {
+      return {success: false, error: error.message.replace('Conflict: ', '')};
+    }
+    return {success: false, error: 'Ett oväntat serverfel uppstod.'};
   }
 }
 
-export async function updateCategory(
+export async function updateCategoryWithImages(
   id: number,
-  data: CategoryFormData
+  formData: FormData
 ): Promise<ActionResult> {
+  let uploadedImages: {desktop?: string; mobile?: string} = {};
   try {
-    // Validera inkommande data
-    const validatedData = categoryFormSchema.parse(data);
-
-    // Kontrollera att kategorin existerar
     const [existingCategory] = await db
       .select()
       .from(categories)
       .where(eq(categories.id, id))
       .limit(1);
-
     if (!existingCategory) {
-      return {
-        success: false,
-        error: 'Kategorin kunde inte hittas.',
-      };
+      return {success: false, error: 'Kategorin kunde inte hittas.'};
     }
+    console.log('formData', formData);
 
-    if (existingCategory.type === 'COLLECTION') {
-      return {
-        success: false,
-        error: 'Collection kategorier kan inte uppdateras.',
-      };
-    }
+    const editedData = Object.fromEntries(formData.entries());
+    console.log('editedData', editedData);
+    const formResult = categoryFormSchema.parse(editedData);
 
-    // Kontrollera att slug och name är unikt inom samma parent (exklusive nuvarande kategori)
-    const potentialConflicts = await db
-      .select()
-      .from(categories)
-      .where(
-        and(
-          or(
-            eq(
-              sql`lower(${categories.slug})`,
-              validatedData.slug.toLowerCase()
-            ),
-            eq(sql`lower(${categories.name})`, validatedData.name.toLowerCase())
-          ),
-          validatedData.parentId
-            ? eq(categories.parentId, validatedData.parentId)
-            : isNull(categories.parentId)
-        )
-      );
+    await checkCategoryConflicts(formResult, id);
 
-    const conflicts = potentialConflicts.filter((cat) => cat.id !== id);
+    const {desktopImage: desktopFile, mobileImage: mobileFile} = {
+      desktopImage: editedData.desktopImageFile as File | null,
+      mobileImage: editedData.mobileImageFile as File | null,
+    };
 
-    if (conflicts.length > 0) {
-      const slugConflict = conflicts.some(
-        (c) => c.slug.toLowerCase() === validatedData.slug.toLowerCase()
-      );
-      const nameConflict = conflicts.some(
-        (c) => c.name.toLowerCase() === validatedData.name.toLowerCase()
-      );
+    const imageUpdateResult = await handleImageUpdates(
+      existingCategory,
+      desktopFile,
+      mobileFile,
+      formResult.slug,
+      formData
+    );
+    uploadedImages = imageUpdateResult.newlyUploaded;
 
-      const conflictParts = [];
-      if (slugConflict) conflictParts.push('slug');
-      if (nameConflict) conflictParts.push('name');
-
-      return {
-        success: false,
-        error: `En kategori med detta ${conflictParts.join(
-          ' och '
-        )} finns redan på samma nivå.`,
-      };
-    }
-
-    // Kontrollera att vi inte skapar cirkulära referenser
-    if (validatedData.parentId) {
-      // Hämta alla barn-kategorier rekursivt
-      const getAllChildIds = async (categoryId: number): Promise<number[]> => {
-        const children = await db
-          .select()
-          .from(categories)
-          .where(eq(categories.parentId, categoryId));
-
-        let allChildIds: number[] = children.map((child) => child.id);
-
-        for (const child of children) {
-          const grandChildren = await getAllChildIds(child.id);
-          allChildIds = [...allChildIds, ...grandChildren];
-        }
-
-        return allChildIds;
-      };
-
-      const childIds = await getAllChildIds(id);
-      if (childIds.includes(validatedData.parentId)) {
-        return {
-          success: false,
-          error:
-            'Du kan inte sätta en underkategori som förälder till sin egen överordnade kategori.',
-        };
-      }
-    }
-
-    // Hantera bilduppdateringar - radera gamla bilder om nya har laddats upp
-    if (validatedData.desktopImage || validatedData.mobileImage) {
-      const oldDesktopImage = existingCategory.desktopImage;
-      const oldMobileImage = existingCategory.mobileImage;
-      const newDesktopImage = validatedData.desktopImage;
-      const newMobileImage = validatedData.mobileImage;
-
-      // Radera gamla desktop-bild om en ny har laddats upp
-      if (
-        oldDesktopImage &&
-        newDesktopImage &&
-        oldDesktopImage !== newDesktopImage &&
-        isUploadedImage(oldDesktopImage)
-      ) {
-        try {
-          const imagePath = path.join(process.cwd(), 'public', oldDesktopImage);
-          await fs.unlink(imagePath);
-        } catch (error) {
-          console.warn(
-            'Could not delete old desktop image:',
-            oldDesktopImage,
-            error
-          );
-        }
-      }
-
-      // Radera gamla mobile-bild om en ny har laddats upp
-      if (
-        oldMobileImage &&
-        newMobileImage &&
-        oldMobileImage !== newMobileImage &&
-        isUploadedImage(oldMobileImage)
-      ) {
-        try {
-          const imagePath = path.join(process.cwd(), 'public', oldMobileImage);
-          await fs.unlink(imagePath);
-        } catch (error) {
-          console.warn(
-            'Could not delete old mobile image:',
-            oldMobileImage,
-            error
-          );
-        }
-      }
-    }
-
-    // Uppdatera kategorin
     const [updatedCategory] = await db
       .update(categories)
       .set({
-        name: validatedData.name,
-        slug: validatedData.slug,
-        type: validatedData.type,
-        displayOrder: validatedData.displayOrder,
-        isActive: validatedData.isActive,
-        parentId: validatedData.parentId,
-        desktopImage: validatedData.desktopImage || null,
-        mobileImage: validatedData.mobileImage || null,
+        name: formResult.name,
+        slug: formResult.slug,
+        displayOrder: formResult.displayOrder,
+        isActive: formResult.isActive,
+        desktopImage: imageUpdateResult.finalImageUrls.desktop,
+        mobileImage: imageUpdateResult.finalImageUrls.mobile,
         updated_at: new Date(),
       })
       .where(eq(categories.id, id))
       .returning();
 
-    // Revalidate relevanta paths
     revalidatePath('/admin/categories');
     revalidatePath('/admin');
-
-    return {
-      success: true,
-      data: updatedCategory,
-    };
-  } catch (error) {
+    console.log('updatedCategory', updatedCategory);
+    return {success: true, data: updatedCategory};
+  } catch (error: any) {
     console.error('Error updating category:', error);
-    return {
-      success: false,
-      error: 'Ett fel uppstod vid uppdateringen av kategorin.',
-    };
+    await cleanupUploadedImagesOnError(Object.values(uploadedImages));
+    if (error instanceof z.ZodError) {
+      return {
+        success: false,
+        error: 'Valideringsfel.',
+        errors: error.flatten().fieldErrors,
+      };
+    }
+    if (error.message.startsWith('Conflict:')) {
+      return {success: false, error: error.message.replace('Conflict: ', '')};
+    }
+    return {success: false, error: 'Ett oväntat serverfel uppstod.'};
   }
 }
 
 export async function deleteCategory(id: number): Promise<ActionResult> {
   try {
-    // Kontrollera att kategorin existerar
     const [categoryToDelete] = await db
       .select()
       .from(categories)
@@ -305,588 +166,144 @@ export async function deleteCategory(id: number): Promise<ActionResult> {
       .limit(1);
 
     if (!categoryToDelete) {
-      return {
-        success: false,
-        error: 'Kategorin kunde inte hittas.',
-      };
+      return {success: false, error: 'Kategorin kunde inte hittas.'};
     }
-
     if (categoryToDelete.type === 'COLLECTION') {
-      return {
-        success: false,
-        error: 'Collection kategorier kan inte raderas.',
-      };
+      return {success: false, error: 'Collection-kategorier kan inte raderas.'};
     }
 
-    // Kontrollera att inga produkter är kopplade till kategorin (baserat på slug)
     const linkedProducts = await db
-      .select()
+      .select({count: sql<number>`count(*)`})
       .from(productsTable)
-      .where(eq(productsTable.category, categoryToDelete.slug))
-      .limit(2);
-
-    if (linkedProducts.length > 0) {
+      .where(eq(productsTable.category, categoryToDelete.slug));
+    if (linkedProducts[0].count > 0) {
       return {
         success: false,
-        error: `Kategorin kan inte raderas eftersom ${linkedProducts.length > 1 ? 'flera produkter är' : 'en produkt är'} kopplade till den. Ta bort produkterna först.`,
+        error: `Kan inte raderas, ${linkedProducts[0].count} produkter är kopplade.`,
       };
     }
 
-    // Kontrollera om kategorin har barn-kategorier
     const childCategories = await db
-      .select()
+      .select({count: sql<number>`count(*)`})
       .from(categories)
       .where(eq(categories.parentId, id));
-
-    if (childCategories.length > 0) {
+    if (childCategories[0].count > 0) {
       return {
         success: false,
-        error: `Kategorin kan inte raderas eftersom den har ${childCategories.length} underkategorier. Ta bort eller flytta underkategorierna först.`,
+        error: `Kan inte raderas, ${childCategories[0].count} underkategorier finns.`,
       };
     }
 
-    // Radera associerade bilder från filsystemet
-    if (
-      categoryToDelete.desktopImage &&
-      isUploadedImage(categoryToDelete.desktopImage)
-    ) {
-      try {
-        const imagePath = path.join(
-          process.cwd(),
-          'public',
-          categoryToDelete.desktopImage
-        );
-        await fs.unlink(imagePath);
-      } catch (error) {
-        console.warn(
-          'Could not delete desktop image:',
-          categoryToDelete.desktopImage,
-          error
-        );
-      }
-    }
-
-    if (
-      categoryToDelete.mobileImage &&
-      isUploadedImage(categoryToDelete.mobileImage)
-    ) {
-      try {
-        const imagePath = path.join(
-          process.cwd(),
-          'public',
-          categoryToDelete.mobileImage
-        );
-        await fs.unlink(imagePath);
-      } catch (error) {
-        console.warn(
-          'Could not delete mobile image:',
-          categoryToDelete.mobileImage,
-          error
-        );
-      }
-    }
-
-    // Ta bort hela upload-mappen för kategorin om den finns
-    if (categoryToDelete.type === 'MAIN-CATEGORY') {
-      try {
-        const uploadDir = path.join(
-          process.cwd(),
-          'public',
-          'uploads',
-          'categories',
-          categoryToDelete.slug
-        );
-        await fs.rmdir(uploadDir);
-      } catch (error) {
-        console.warn(
-          'Could not delete category upload directory:',
-          categoryToDelete.slug,
-          error
-        );
-      }
-    }
-
-    // Ta bort kategorin
+    await cleanupUploadedImagesOnError([
+      categoryToDelete.desktopImage,
+      categoryToDelete.mobileImage,
+    ]);
     await db.delete(categories).where(eq(categories.id, id));
 
-    // Revalidate relevanta paths
     revalidatePath('/admin/categories');
     revalidatePath('/admin');
 
-    return {
-      success: true,
-      data: {deletedId: id},
-    };
+    return {success: true, data: {deletedId: id}};
   } catch (error) {
     console.error('Error deleting category:', error);
-    return {
-      success: false,
-      error: 'Ett fel uppstod vid borttagningen av kategorin.',
-    };
+    return {success: false, error: 'Ett serverfel uppstod vid radering.'};
   }
 }
 
-// FORMDATA-BASED ATOMIC ACTIONS
+// =================================================================================
+// INTERNAL HELPER FUNCTIONS
+// =================================================================================
 
-/**
- * Parses CategoryFormData from FormData object
- */
-function parseCategoryFormData(formData: FormData): CategoryFormData {
-  const parentIdStr = formData.get('parentId') as string;
+async function checkCategoryConflicts(
+  data: Pick<CategoryFormData, 'name' | 'slug' | 'parentId'>,
+  excludeId?: number
+) {
+  const conditions = [
+    or(
+      eq(sql`lower(${categories.slug})`, data.slug.toLowerCase()),
+      eq(sql`lower(${categories.name})`, data.name.toLowerCase())
+    ),
+    data.parentId
+      ? eq(categories.parentId, data.parentId)
+      : isNull(categories.parentId),
+  ];
 
-  return {
-    name: formData.get('name') as string,
-    slug: formData.get('slug') as string,
-    type: formData.get('type') as
-      | 'MAIN-CATEGORY'
-      | 'SUB-CATEGORY'
-      | 'CONTAINER',
-    displayOrder: parseInt(formData.get('displayOrder') as string) || 0,
-    isActive: formData.get('isActive') === 'true',
-    parentId:
-      parentIdStr && parentIdStr !== 'null' ? parseInt(parentIdStr) : null,
-    desktopImage: (formData.get('desktopImage') as string) || '',
-    mobileImage: (formData.get('mobileImage') as string) || '',
-  };
-}
+  if (excludeId) {
+    conditions.push(not(eq(categories.id, excludeId)));
+  }
 
-/**
- * Extracts image files from FormData for categories
- */
-function extractCategoryImageFiles(formData: FormData): {
-  desktopImage: File | null;
-  mobileImage: File | null;
-} {
-  const desktopFile = formData.get('desktopImageFile') as File | null;
-  const mobileFile = formData.get('mobileImageFile') as File | null;
+  const existing = await db
+    .select()
+    .from(categories)
+    .where(and(...conditions));
 
-  return {
-    desktopImage: desktopFile && desktopFile.size > 0 ? desktopFile : null,
-    mobileImage: mobileFile && mobileFile.size > 0 ? mobileFile : null,
-  };
-}
+  if (existing.length > 0) {
+    const isSlugConflict = existing.some(
+      (c) => c.slug.toLowerCase() === data.slug.toLowerCase()
+    );
+    const isNameConflict = existing.some(
+      (c) => c.name.toLowerCase() === data.name.toLowerCase()
+    );
+    let conflictField = '';
+    if (isSlugConflict && isNameConflict) conflictField = 'namn och slug';
+    else if (isSlugConflict) conflictField = 'slug';
+    else if (isNameConflict) conflictField = 'namn';
 
-/**
- * Atomic server action for creating a category with images
- */
-export async function createCategoryWithImages(
-  formData: FormData
-): Promise<ActionResult> {
-  let uploadedDesktopImage: string | undefined;
-  let uploadedMobileImage: string | undefined;
-
-  try {
-    // Parse form data
-    const categoryData = parseCategoryFormData(formData);
-    const {desktopImage, mobileImage} = extractCategoryImageFiles(formData);
-
-    // Validate form data
-    const validatedData = categoryFormSchema.parse(categoryData);
-
-    // Check for existing categories with same slug/name within parent
-    const existingCategories = await db
-      .select()
-      .from(categories)
-      .where(
-        and(
-          or(
-            eq(
-              sql`lower(${categories.slug})`,
-              validatedData.slug.toLowerCase()
-            ),
-            eq(sql`lower(${categories.name})`, validatedData.name.toLowerCase())
-          ),
-          validatedData.parentId
-            ? eq(categories.parentId, validatedData.parentId)
-            : isNull(categories.parentId)
-        )
-      );
-
-    if (existingCategories.length > 0) {
-      const slugConflict = existingCategories.some(
-        (c) => c.slug.toLowerCase() === validatedData.slug.toLowerCase()
-      );
-      const nameConflict = existingCategories.some(
-        (c) => c.name.toLowerCase() === validatedData.name.toLowerCase()
-      );
-
-      const conflictParts = [];
-      if (slugConflict) conflictParts.push('slug');
-      if (nameConflict) conflictParts.push('name');
-
-      return {
-        success: false,
-        error: `En kategori med detta ${conflictParts.join(
-          ' och '
-        )} finns redan på samma nivå.`,
-      };
-    }
-
-    // Upload images if provided and type is MAIN-CATEGORY
-    let finalData = {...validatedData};
-    if (
-      validatedData.type === 'MAIN-CATEGORY' &&
-      (desktopImage || mobileImage)
-    ) {
-      try {
-        const imageUrls = await uploadCategoryImages(
-          desktopImage,
-          mobileImage,
-          validatedData.slug
-        );
-
-        uploadedDesktopImage = imageUrls.desktopImageUrl;
-        uploadedMobileImage = imageUrls.mobileImageUrl;
-        finalData.desktopImage = uploadedDesktopImage || '';
-        finalData.mobileImage = uploadedMobileImage || '';
-      } catch (uploadError) {
-        console.error('Image upload error:', uploadError);
-        return {
-          success: false,
-          error: `Bilduppladdning misslyckades: ${uploadError}`,
-        };
-      }
-    }
-
-    // Create new category
-    const now = new Date();
-    const [newCategory] = await db
-      .insert(categories)
-      .values({
-        name: finalData.name,
-        slug: finalData.slug,
-        type: finalData.type,
-        displayOrder: finalData.displayOrder,
-        isActive: finalData.isActive,
-        parentId: finalData.parentId,
-        desktopImage: finalData.desktopImage || null,
-        mobileImage: finalData.mobileImage || null,
-        created_at: now,
-        updated_at: now,
-      })
-      .returning();
-
-    // Revalidate relevant paths
-    revalidatePath('/admin/categories');
-    revalidatePath('/admin');
-
-    return {
-      success: true,
-      data: newCategory,
-    };
-  } catch (error) {
-    console.error('Error creating category with images:', error);
-
-    // Clean up uploaded images if database operation failed
-    if (uploadedDesktopImage && isUploadedImage(uploadedDesktopImage)) {
-      try {
-        const imagePath = path.join(
-          process.cwd(),
-          'public',
-          uploadedDesktopImage
-        );
-        await fs.unlink(imagePath);
-        console.log('Cleaned up uploaded desktop image:', uploadedDesktopImage);
-      } catch (cleanupError) {
-        console.warn(
-          'Could not clean up uploaded desktop image:',
-          uploadedDesktopImage,
-          cleanupError
-        );
-      }
-    }
-
-    if (uploadedMobileImage && isUploadedImage(uploadedMobileImage)) {
-      try {
-        const imagePath = path.join(
-          process.cwd(),
-          'public',
-          uploadedMobileImage
-        );
-        await fs.unlink(imagePath);
-        console.log('Cleaned up uploaded mobile image:', uploadedMobileImage);
-      } catch (cleanupError) {
-        console.warn(
-          'Could not clean up uploaded mobile image:',
-          uploadedMobileImage,
-          cleanupError
-        );
-      }
-    }
-
-    return {
-      success: false,
-      error: 'Ett fel uppstod vid skapandet av kategorin.',
-    };
+    throw new Error(
+      `Conflict: En kategori med detta ${conflictField} finns redan på samma nivå.`
+    );
   }
 }
 
-/**
- * Atomic server action for updating a category with images
- */
-export async function updateCategoryWithImages(
-  id: number,
+async function handleImageUpdates(
+  existingCategory: Pick<Category, 'desktopImage' | 'mobileImage'>,
+  newDesktopFile: File | null,
+  newMobileFile: File | null,
+  slug: string,
   formData: FormData
-): Promise<ActionResult> {
-  let newlyUploadedDesktopImage: string | undefined;
-  let newlyUploadedMobileImage: string | undefined;
+) {
+  let finalDesktopUrl = existingCategory.desktopImage;
+  let finalMobileUrl = existingCategory.mobileImage;
+  const newlyUploaded: {desktop?: string; mobile?: string} = {};
 
-  try {
-    // Parse form data
-    const categoryData = parseCategoryFormData(formData);
-    const {desktopImage: newDesktopFile, mobileImage: newMobileFile} =
-      extractCategoryImageFiles(formData);
+  if (formData.get('desktopImage') === '') finalDesktopUrl = null;
+  if (formData.get('mobileImage') === '') finalMobileUrl = null;
 
-    // Validate form data
-    const validatedData = categoryFormSchema.parse(categoryData);
+  if (newDesktopFile || newMobileFile) {
+    const {desktopImageUrl, mobileImageUrl} = await uploadCategoryImages(
+      newDesktopFile,
+      newMobileFile,
+      slug
+    );
 
-    // Check if category exists
-    const [existingCategory] = await db
-      .select()
-      .from(categories)
-      .where(eq(categories.id, id))
-      .limit(1);
-
-    if (!existingCategory) {
-      return {
-        success: false,
-        error: 'Kategorin kunde inte hittas.',
-      };
+    if (desktopImageUrl) {
+      await cleanupUploadedImagesOnError([finalDesktopUrl]);
+      finalDesktopUrl = desktopImageUrl;
+      newlyUploaded.desktop = desktopImageUrl;
     }
-
-    if (existingCategory.type === 'COLLECTION') {
-      return {
-        success: false,
-        error: 'Collection kategorier kan inte uppdateras.',
-      };
+    if (mobileImageUrl) {
+      await cleanupUploadedImagesOnError([finalMobileUrl]);
+      finalMobileUrl = mobileImageUrl;
+      newlyUploaded.mobile = mobileImageUrl;
     }
+  }
 
-    // Check for conflicts (excluding current category)
-    const potentialConflicts = await db
-      .select()
-      .from(categories)
-      .where(
-        and(
-          or(
-            eq(
-              sql`lower(${categories.slug})`,
-              validatedData.slug.toLowerCase()
-            ),
-            eq(sql`lower(${categories.name})`, validatedData.name.toLowerCase())
-          ),
-          validatedData.parentId
-            ? eq(categories.parentId, validatedData.parentId)
-            : isNull(categories.parentId)
-        )
-      );
+  return {
+    finalImageUrls: {desktop: finalDesktopUrl, mobile: finalMobileUrl},
+    newlyUploaded,
+  };
+}
 
-    const conflicts = potentialConflicts.filter((cat) => cat.id !== id);
-
-    if (conflicts.length > 0) {
-      const slugConflict = conflicts.some(
-        (c) => c.slug.toLowerCase() === validatedData.slug.toLowerCase()
-      );
-      const nameConflict = conflicts.some(
-        (c) => c.name.toLowerCase() === validatedData.name.toLowerCase()
-      );
-
-      const conflictParts = [];
-      if (slugConflict) conflictParts.push('slug');
-      if (nameConflict) conflictParts.push('name');
-
-      return {
-        success: false,
-        error: `En kategori med detta ${conflictParts.join(
-          ' och '
-        )} finns redan på samma nivå.`,
-      };
-    }
-
-    // Check for circular references
-    if (validatedData.parentId) {
-      const getAllChildIds = async (categoryId: number): Promise<number[]> => {
-        const children = await db
-          .select()
-          .from(categories)
-          .where(eq(categories.parentId, categoryId));
-
-        let allChildIds: number[] = children.map((child) => child.id);
-
-        for (const child of children) {
-          const grandChildren = await getAllChildIds(child.id);
-          allChildIds = [...allChildIds, ...grandChildren];
-        }
-
-        return allChildIds;
-      };
-
-      const childIds = await getAllChildIds(id);
-      if (childIds.includes(validatedData.parentId)) {
-        return {
-          success: false,
-          error:
-            'Du kan inte sätta en underkategori som förälder till sin egen överordnade kategori.',
-        };
-      }
-    }
-
-    // Handle image uploads for MAIN-CATEGORY
-    let finalData = {...validatedData};
-
-    if (
-      validatedData.type === 'MAIN-CATEGORY' &&
-      (newDesktopFile || newMobileFile)
-    ) {
+async function cleanupUploadedImagesOnError(
+  imageUrls: (string | undefined | null)[]
+) {
+  for (const url of imageUrls) {
+    if (url && isUploadedImage(url)) {
       try {
-        const imageUrls = await uploadCategoryImages(
-          newDesktopFile,
-          newMobileFile,
-          validatedData.slug
-        );
-
-        newlyUploadedDesktopImage = imageUrls.desktopImageUrl;
-        newlyUploadedMobileImage = imageUrls.mobileImageUrl;
-
-        // Delete old images if new ones were uploaded
-        const oldDesktopImage = existingCategory.desktopImage;
-        const oldMobileImage = existingCategory.mobileImage;
-
-        if (
-          newDesktopFile &&
-          oldDesktopImage &&
-          isUploadedImage(oldDesktopImage)
-        ) {
-          try {
-            const imagePath = path.join(
-              process.cwd(),
-              'public',
-              oldDesktopImage
-            );
-            await fs.unlink(imagePath);
-          } catch (error) {
-            console.warn(
-              'Could not delete old desktop image:',
-              oldDesktopImage,
-              error
-            );
-          }
-        }
-
-        if (
-          newMobileFile &&
-          oldMobileImage &&
-          isUploadedImage(oldMobileImage)
-        ) {
-          try {
-            const imagePath = path.join(
-              process.cwd(),
-              'public',
-              oldMobileImage
-            );
-            await fs.unlink(imagePath);
-          } catch (error) {
-            console.warn(
-              'Could not delete old mobile image:',
-              oldMobileImage,
-              error
-            );
-          }
-        }
-
-        finalData.desktopImage =
-          newlyUploadedDesktopImage || existingCategory.desktopImage || '';
-        finalData.mobileImage =
-          newlyUploadedMobileImage || existingCategory.mobileImage || '';
-      } catch (uploadError) {
-        console.error('Image upload error:', uploadError);
-        return {
-          success: false,
-          error: `Bilduppladdning misslyckades: ${uploadError}`,
-        };
-      }
-    } else {
-      // Keep existing images if no new files uploaded
-      finalData.desktopImage = existingCategory.desktopImage || '';
-      finalData.mobileImage = existingCategory.mobileImage || '';
-    }
-
-    // Update category
-    const [updatedCategory] = await db
-      .update(categories)
-      .set({
-        name: finalData.name,
-        slug: finalData.slug,
-        type: finalData.type,
-        displayOrder: finalData.displayOrder,
-        isActive: finalData.isActive,
-        parentId: finalData.parentId,
-        desktopImage: finalData.desktopImage || null,
-        mobileImage: finalData.mobileImage || null,
-        updated_at: new Date(),
-      })
-      .where(eq(categories.id, id))
-      .returning();
-
-    // Revalidate relevant paths
-    revalidatePath('/admin/categories');
-    revalidatePath('/admin');
-
-    return {
-      success: true,
-      data: updatedCategory,
-    };
-  } catch (error) {
-    console.error('Error updating category with images:', error);
-
-    // Clean up newly uploaded images if database operation failed
-    if (
-      newlyUploadedDesktopImage &&
-      isUploadedImage(newlyUploadedDesktopImage)
-    ) {
-      try {
-        const imagePath = path.join(
-          process.cwd(),
-          'public',
-          newlyUploadedDesktopImage
-        );
-        await fs.unlink(imagePath);
-        console.log(
-          'Cleaned up newly uploaded desktop image:',
-          newlyUploadedDesktopImage
-        );
-      } catch (cleanupError) {
-        console.warn(
-          'Could not clean up newly uploaded desktop image:',
-          newlyUploadedDesktopImage,
-          cleanupError
-        );
+        await fs.unlink(path.join(process.cwd(), 'public', url));
+      } catch (error) {
+        console.warn(`Could not delete image file: ${url}`, error);
       }
     }
-
-    if (newlyUploadedMobileImage && isUploadedImage(newlyUploadedMobileImage)) {
-      try {
-        const imagePath = path.join(
-          process.cwd(),
-          'public',
-          newlyUploadedMobileImage
-        );
-        await fs.unlink(imagePath);
-        console.log(
-          'Cleaned up newly uploaded mobile image:',
-          newlyUploadedMobileImage
-        );
-      } catch (cleanupError) {
-        console.warn(
-          'Could not clean up newly uploaded mobile image:',
-          newlyUploadedMobileImage,
-          cleanupError
-        );
-      }
-    }
-
-    return {
-      success: false,
-      error: 'Ett fel uppstod vid uppdateringen av kategorin.',
-    };
   }
 }

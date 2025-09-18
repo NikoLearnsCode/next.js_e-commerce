@@ -15,7 +15,7 @@ import {
   pgEnum,
 } from 'drizzle-orm/pg-core';
 import {relations} from 'drizzle-orm';
-import type {DeliveryFormData} from '@/lib/validators';
+import type {DeliveryFormData} from '@/lib/validators/checkout-validators';
 import type {AdapterAccount} from '@/lib/types/auth';
 
 // LAGRAR INFO OM ANVÄNDARE

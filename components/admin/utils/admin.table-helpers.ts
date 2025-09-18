@@ -20,7 +20,6 @@ export const flattenCategoriesRecursive = (
   level = 0,
   parentName?: string
 ): FlattenedCategory[] => {
-  // Skapa en tom lista som vi kommer att fylla på och returnera.
   const flattened: FlattenedCategory[] = [];
 
   // Gå igenom varje kategori på den nuvarande nivån.
@@ -53,9 +52,24 @@ export const flattenCategoriesRecursive = (
     }
   });
 
-  // Returnera den färdigbyggda platta listan för denna nivå.
   return flattened;
 };
+
+// Används för expandAll/collapseAll i CategoryTable.tsx
+export const getAllCategoryIdsRecursive = (
+  cats: CategoryWithChildren[]
+): number[] => {
+  let ids: number[] = [];
+  for (const cat of cats) {
+    ids.push(cat.id);
+    if (cat.children && cat.children.length > 0) {
+      ids = ids.concat(getAllCategoryIdsRecursive(cat.children));
+    }
+  }
+  return ids;
+};
+
+// Används för att styla kategorier i CategoryTable.tsx
 export const categoryConfig = {
   'MAIN-CATEGORY': {
     name: 'Huvudkategori',
@@ -73,17 +87,4 @@ export const categoryConfig = {
     name: 'Container',
     className: 'text-emerald-900 font-syne uppercase  ',
   },
-};
-
-export const getAllCategoryIdsRecursive = (
-  cats: CategoryWithChildren[]
-): number[] => {
-  let ids: number[] = [];
-  for (const cat of cats) {
-    ids.push(cat.id);
-    if (cat.children && cat.children.length > 0) {
-      ids = ids.concat(getAllCategoryIdsRecursive(cat.children));
-    }
-  }
-  return ids;
 };

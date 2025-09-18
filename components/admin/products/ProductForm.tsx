@@ -2,7 +2,10 @@
 
 import {zodResolver} from '@hookform/resolvers/zod';
 import {useForm, Controller} from 'react-hook-form';
-import {productFormSchema, type ProductFormData} from '@/lib/form-validators';
+import {
+  productSchema,
+  type ProductFormData,
+} from '@/lib/validators/admin-validators';
 import {Button} from '@/components/shared/ui/button';
 import {FloatingLabelInput} from '@/components/shared/ui/floatingLabelInput';
 import {CustomDateInput} from '@/components/shared/ui/DateInput';
@@ -15,9 +18,10 @@ import {
 import {generateSlug} from '@/components/admin/utils/slug-generator';
 import Image from 'next/image';
 import {Product} from '@/lib/types/db';
-import {UploadCloud, X} from 'lucide-react';
+import {X} from 'lucide-react';
 import CustomSelect from '../shared/Select';
 import FileInput from '../shared/FileInput';
+import {UploadIcon} from '../shared/UploadIcon';
 import {
   createProductWithImages,
   updateProductWithImages,
@@ -31,45 +35,51 @@ type ProductFormProps = {
 
 export default function ProductForm({mode, initialData}: ProductFormProps) {
   const {categories, closeSidebar} = useAdmin();
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
   const [isPending, startTransition] = useTransition();
   const [newImageFiles, setNewImageFiles] = useState<File[]>([]);
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [newImagePreviews, setNewImagePreviews] = useState<string[]>([]);
-  const formRef = useRef<HTMLFormElement>(null);
-
   const [subCategoryOptions, setSubCategoryOptions] = useState<
     DropdownOption[]
   >([]);
   const [realtimeUpdate, setRealtimeUpdate] = useState(true);
+  const formRef = useRef<HTMLFormElement>(null);
 
   const {
     register,
     handleSubmit,
-    formState: {errors, isDirty /* , isValid */},
+    formState: {errors, isDirty},
     setValue,
     watch,
     reset,
-    resetField,
     control,
   } = useForm<ProductFormData>({
-    resolver: zodResolver(productFormSchema),
+    resolver: zodResolver(productSchema),
     mode: 'onChange',
+    // dummydata
     defaultValues: {
-      name: '',
-      slug: '',
-      description: '',
-      price: 0,
-      brand: '',
-      color: '',
+      name: 'riktigt bra testprodukt',
+      slug: 'riktigt-bra-test-produkt',
+      description: 'riktigt bra testbeskrivning',
+      price: 199,
+      brand: 'riktigt bra testmärke',
+      color: 'riktigt färgglad testfärg',
       gender: '',
       category: '',
-      sizes: [],
-      specs: [],
+      sizes: ['46', '32/32', 'XXL', '28/32', 'S'],
+      specs: [
+        'riktigt bra testspecifikation',
+        'ännu en riktigt bra testspecifikation',
+        'och en till riktigt bra testspecifikation',
+        'och till sist en riktigt bra testspecifikation',
+      ],
       publishedAt: new Date(),
     },
   });
 
-  // Populate form with initial data when editing
+  // sätter initial data
   useEffect(() => {
     if (mode === 'edit' && initialData) {
       reset({
@@ -78,13 +88,14 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
         description: initialData.description || '',
         price:
           typeof initialData.price === 'string'
-            ? parseInt(initialData.price)
+            ? parseFloat(initialData.price)
             : initialData.price,
         brand: initialData.brand,
         color: initialData.color,
+        gender: initialData.gender || '',
+        category: initialData.category || '',
         sizes: initialData.sizes,
         specs: initialData.specs || [],
-
         publishedAt: initialData.published_at
           ? new Date(initialData.published_at)
           : undefined,
@@ -92,27 +103,7 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
     }
   }, [mode, initialData, reset]);
 
-  // Separat useEffect för att hantera select-fält i edit mode (timing-fix)
-  useEffect(() => {
-    if (mode === 'edit' && initialData) {
-      setValue('gender', initialData.gender || '');
-    }
-  }, [mode, initialData, setValue]);
-
-  // Sätt category när subCategoryOptions har laddats (efter gender är satt)
-  useEffect(() => {
-    if (mode === 'edit' && initialData && subCategoryOptions.length > 0) {
-      const categoryExists = subCategoryOptions.some(
-        (option) => option.slug === initialData.category
-      );
-
-      if (categoryExists) {
-        setValue('category', initialData.category || '');
-      }
-    }
-  }, [mode, initialData, subCategoryOptions, setValue]);
-
-  // Ladda befintliga bilder vid edit mode
+  // sätter befintliga bilder
   useEffect(() => {
     if (mode === 'edit' && initialData?.images) {
       setExistingImages(initialData.images);
@@ -126,114 +117,51 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
   }, [mode, initialData]);
 
   const selectedMainCategorySlug = watch('gender');
-
-  // Auto-generate slug from name
   const watchedName = watch('name');
+  const watchedSlug = watch('slug');
+
+  // generera slug
   useEffect(() => {
     if (watchedName && mode === 'create') {
-      const slug = generateSlug(watchedName);
-      setValue('slug', slug);
+      setValue('slug', generateSlug(watchedName));
     }
   }, [watchedName, setValue, mode]);
 
-  // Hanterar select options
+  // rensar sub om main ändras samt hämtar sub options baserat på main
   useEffect(() => {
     if (!selectedMainCategorySlug) {
       setSubCategoryOptions([]);
-      if (mode === 'create') {
-        resetField('category');
-      }
       return;
     }
-
     const selectedMainCategory = categories.find(
       (cat) => cat.slug === selectedMainCategorySlug
     );
-
-    if (selectedMainCategory && selectedMainCategory.children) {
-      const options = findCategoriesForDropdown(selectedMainCategory.children, [
-        'MAIN-CATEGORY',
-        'SUB-CATEGORY',
-      ]);
-      setSubCategoryOptions(options);
+    if (selectedMainCategory?.children) {
+      setSubCategoryOptions(
+        findCategoriesForDropdown(selectedMainCategory.children, [
+          'MAIN-CATEGORY',
+          'SUB-CATEGORY',
+        ])
+      );
     } else {
       setSubCategoryOptions([]);
     }
-  }, [selectedMainCategorySlug, categories, resetField, mode]);
+  }, [selectedMainCategorySlug, categories]);
 
-  // Realtime clock update i create mode
+  // realtime date/tid update (nästan helt onödig)
   useEffect(() => {
     if (mode === 'create' && realtimeUpdate) {
-      const interval = setInterval(() => {
-        setValue('publishedAt', new Date());
-      }, 1000);
-
+      const interval = setInterval(
+        () => setValue('publishedAt', new Date()),
+        1000
+      );
       return () => clearInterval(interval);
     }
   }, [mode, realtimeUpdate, setValue]);
 
-  // Denna funktion tar emot filerna från FileInput-komponenten
   const handleImageChange = (files: File[]) => {
-    setNewImageFiles((prevFiles) => [...prevFiles, ...files]);
-
-    const newPreviews = files.map((file) => URL.createObjectURL(file));
-    setNewImagePreviews((prevPreviews) => [...prevPreviews, ...newPreviews]);
-  };
-
-  // Handles form submission - called after react-hook-form validation passes
-  const onSubmit = async (
-    data: ProductFormData,
-    event?: React.BaseSyntheticEvent
-  ) => {
-    startTransition(async () => {
-      try {
-        // Get FormData from the actual form element
-        const formData = new FormData(event?.target);
-
-        // Add new image files to FormData
-        newImageFiles.forEach((file) => {
-          formData.append('images', file);
-        });
-
-        // Add existing images to FormData (for edit mode)
-        if (mode === 'edit') {
-          existingImages.forEach((imageUrl) => {
-            formData.append('existingImages', imageUrl);
-          });
-        }
-
-        let result;
-        if (mode === 'edit' && initialData) {
-          result = await updateProductWithImages(
-            initialData.id,
-            null,
-            formData
-          );
-        } else {
-          result = await createProductWithImages(null, formData);
-        }
-
-        if (result.success) {
-          toast.success(
-            mode === 'edit' ? 'Produkt uppdaterad!' : 'Produkt skapad!'
-          );
-          if (mode === 'create') {
-            handleReset();
-          }
-          closeSidebar();
-        } else {
-          toast.error(result.error || 'Ett fel uppstod');
-        }
-      } catch (error) {
-        console.error('Form submission error:', error);
-        toast.error('Ett oväntat fel uppstod');
-      }
-    });
-  };
-
-  const onError = (errors: any) => {
-    console.log('Valideringsfel:', errors);
-    toast.error('Vänligen fyll i alla obligatoriska fält korrekt');
+    setNewImageFiles((prev) => [...prev, ...files]);
+    setNewImagePreviews((prev) => [...prev, ...files.map(URL.createObjectURL)]);
   };
 
   const handleReset = () => {
@@ -250,94 +178,125 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
       specs: [],
       publishedAt: new Date(),
     });
-
     setExistingImages([]);
     setNewImageFiles([]);
     setNewImagePreviews([]);
-
-    // Starta realtime update igen
-    if (mode === 'create') {
-      setRealtimeUpdate(true);
-    }
+    setSubCategoryOptions([]);
+    if (mode === 'create') setRealtimeUpdate(true);
   };
+
+  // form action + react-hook-form wrapper
+  // client-side validering först innan det skickas vidare till server
+  const onSubmit = () => {
+    startTransition(async () => {
+      if (!formRef.current) return;
+
+      const formData = new FormData(formRef.current);
+      newImageFiles.forEach((file) => formData.append('images', file));
+      if (mode === 'edit') {
+        existingImages.forEach((url) => formData.append('existingImages', url));
+      }
+
+      const result =
+        mode === 'edit' && initialData
+          ? await updateProductWithImages(initialData.id, formData)
+          : await createProductWithImages(formData);
+
+      if (result.success) {
+        toast.success(
+          mode === 'edit' ? 'Produkt uppdaterad!' : 'Produkt skapad!'
+        );
+        closeSidebar();
+      } else {
+        toast.error(result.error || 'Något gick galet.');
+      }
+    });
+  };
+
+  // scrollar till botten av form när nya bilder läggs till
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (container && newImagePreviews.length > 0) {
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: 'smooth',
+      });
+    }
+  }, [newImagePreviews]);
 
   return (
     <form
       ref={formRef}
-      onSubmit={handleSubmit(onSubmit, onError)}
+      onSubmit={handleSubmit(onSubmit)}
+      onReset={handleReset}
       className='flex flex-col h-full'
     >
-      {/* Scrollbart område för alla input-fält */}
-      <div className='flex-1 space-y-4 scrollbar-hide overflow-y-auto pt-5 pb-16 pr-5 -mr-5'>
-        <div className='grid grid-cols-1 md:grid-cols-1 gap-4  '>
-          {/* Huvudkategori Select */}
-          <div>
-            <label
-              htmlFor='gender-select'
-              className='block text-sm font-medium sr-only text-gray-700 mb-1'
-            >
-              Huvudkategori
-            </label>
-            <CustomSelect
-              hasError={!!errors.gender}
-              value={watch('gender')}
-              id='gender-select'
-              {...register('gender')}
-              options={categories.map((mainCat) => ({
-                value: mainCat.slug,
-                label: mainCat.name,
-              }))}
-              placeholder='Välj huvudkategori *'
-            />
-            {errors.gender && (
-              <p className='text-xs text-destructive font-medium ml-1 mt-1'>
-                {errors.gender.message}
-              </p>
+      <div
+        ref={scrollContainerRef}
+        className='flex-1 space-y-4 scrollbar-hide overflow-y-auto pt-5 pb-16 pr-5 -mr-5'
+      >
+        <div className='grid grid-cols-1 md:grid-cols-1 gap-4'>
+          <Controller
+            name='gender'
+            control={control}
+            render={({field}) => (
+              <CustomSelect
+                {...field}
+                hasError={!!errors.gender}
+                options={categories.map((c) => ({
+                  value: c.slug,
+                  label: c.name,
+                }))}
+                placeholder='Välj huvudkategori *'
+              />
             )}
-          </div>
+          />
+          {mode === 'edit' && initialData && (
+            <input type='hidden' {...register('gender')} />
+          )}
+          {errors.gender && (
+            <p className='text-xs text-destructive font-medium ml-1 -mt-2.5 '>
+              {errors.gender.message}
+            </p>
+          )}
+          <Controller
+            control={control}
+            name='category'
+            render={({field}) => (
+              <CustomSelect
+                {...field}
+                hasError={!!errors.category}
+                value={field.value}
+                disabled={
+                  !selectedMainCategorySlug || subCategoryOptions.length === 0
+                }
+                options={subCategoryOptions.map((o) => ({
+                  value: o.slug,
+                  label: o.label,
+                }))}
+                placeholder={
+                  !selectedMainCategorySlug
+                    ? 'Välj huvudkategori först'
+                    : 'Välj underkategori *'
+                }
+              />
+            )}
+          />
+          {mode === 'edit' && initialData && (
+            <input type='hidden' {...register('category')} />
+          )}
 
-          {/* Underkategori Select */}
-          <div>
-            <label
-              htmlFor='category-select'
-              className='block text-sm font-medium sr-only text-gray-700 mb-1'
-            >
-              Underkategori
-            </label>
-            <CustomSelect
-              hasError={!!errors.category}
-              value={watch('category')}
-              disabled={
-                !selectedMainCategorySlug || subCategoryOptions.length === 0
-              }
-              id='category-select'
-              {...register('category')}
-              options={subCategoryOptions.map((option) => ({
-                value: option.slug,
-                label: option.label,
-              }))}
-              placeholder={
-                !selectedMainCategorySlug
-                  ? 'Välj huvudkategori först'
-                  : 'Välj underkategori *'
-              }
-            />
-            {errors.category && (
-              <p className='text-xs text-destructive font-medium ml-1 mt-1'>
-                {errors.category.message}
-              </p>
-            )}
-          </div>
+          {errors.category && (
+            <p className='text-xs text-destructive font-medium ml-1 -mt-2.5'>
+              {errors.category.message}
+            </p>
+          )}
         </div>
-
-        {/* TEXT-INPUTS */}
         <div className='grid gap-4 grid-cols-2 w-full'>
           <FloatingLabelInput
             {...register('name')}
             id='product-name'
             label='Produktnamn *'
-            value={watch('name')}
-            as='input'
             type='text'
             hasError={!!errors.name}
             errorMessage={errors.name?.message}
@@ -345,9 +304,8 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
           <FloatingLabelInput
             {...register('slug')}
             id='product-slug'
+            value={watchedSlug}
             label='Slug *'
-            value={watch('slug')}
-            as='input'
             type='text'
             hasError={!!errors.slug}
             errorMessage={errors.slug?.message}
@@ -356,8 +314,6 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
             {...register('price')}
             id='product-price'
             label='Pris (SEK) *'
-            value={watch('price').toString()}
-            as='input'
             type='number'
             hasError={!!errors.price}
             errorMessage={errors.price?.message}
@@ -366,8 +322,6 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
             {...register('brand')}
             id='product-brand'
             label='Märke *'
-            value={watch('brand')}
-            as='input'
             type='text'
             hasError={!!errors.brand}
             errorMessage={errors.brand?.message}
@@ -376,21 +330,10 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
             {...register('color')}
             id='product-color'
             label='Färg *'
-            value={watch('color')}
-            as='input'
             type='text'
             hasError={!!errors.color}
-            // className='col-span-2 col-start-1'
             errorMessage={errors.color?.message}
           />
-
-          {/* SIZES INPUT */}
-          {/* We use a Controller here because react-hook-form's state for 'sizes' is an ARRAY, */}
-          {/* but a standard HTML input's value can only be a STRING. */}
-          {/* The Controller acts as a bridge: */}
-          {/* 1. `render > value`: It transforms the form's array state into a comma-separated string for display in the input. */}
-          {/* 2. `render > onChange`: It transforms the input's string value back into an array before saving it in the form's state. */}
-          {/* This allows for a flexible user input experience while maintaining correct data types internally. */}
           <Controller
             name='sizes'
             control={control}
@@ -399,11 +342,10 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
                 {...field}
                 id='product-sizes'
                 label='Storlekar * (kommaseparerade)'
-                value={Array.isArray(field.value) ? field.value.join(',') : ''}
-                onChange={(e) => {
-                  field.onChange(e.target.value.split(','));
-                }}
-                as='input'
+                value={Array.isArray(field.value) ? field.value.join(', ') : ''}
+                onChange={(e) =>
+                  field.onChange(e.target.value.split(',').map((s) => s.trim()))
+                }
                 type='text'
                 hasError={!!errors.sizes}
                 errorMessage={errors.sizes?.message}
@@ -414,19 +356,12 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
             {...register('description')}
             id='product-description'
             label='Beskrivning *'
-            value={watch('description')}
             as='textarea'
             rows={3}
-            className='w-full  col-span-2 col-start-1'
+            className='w-full col-span-2'
             hasError={!!errors.description}
             errorMessage={errors.description?.message}
           />
-
-          {/* SPECS INPUT */}
-          {/* Similar to the 'sizes' field, we use a Controller to manage the mismatch */}
-          {/* between the form's internal ARRAY state for 'specs' and the textarea's STRING value. */}
-          {/* 1. `render > value`: Transforms the array into a newline-separated string for the textarea. */}
-          {/* 2. `render > onChange`: Transforms the string from the textarea back into an array. */}
           <Controller
             name='specs'
             control={control}
@@ -436,11 +371,9 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
                 id='product-specs'
                 label='Specifikationer (en per rad)'
                 value={Array.isArray(field.value) ? field.value.join('\n') : ''}
-                onChange={(e) => {
-                  field.onChange(e.target.value.split('\n'));
-                }}
+                onChange={(e) => field.onChange(e.target.value.split('\n'))}
                 as='textarea'
-                className=' w-full col-span-2 col-start-1'
+                className='w-full col-span-2'
                 rows={5}
                 hasError={!!errors.specs}
                 errorMessage={errors.specs?.message}
@@ -454,106 +387,91 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
               <CustomDateInput
                 {...field}
                 id='product-published-at'
-                label='Publiceringsdatum (optional, default: nu)'
+                label='Publiceringsdatum'
                 value={field.value || null}
                 onChange={(date) => {
-                  field.onChange(date || undefined);
-                  // Stoppa realtime update när användaren manuellt ändrar
-                  if (mode === 'create') {
-                    setRealtimeUpdate(false);
-                  }
+                  field.onChange(date);
+                  if (mode === 'create') setRealtimeUpdate(false);
                 }}
-                className='w-full col-span-2 col-start-1 mb-2'
+                className='w-full col-span-2 mb-4'
                 hasError={!!errors.publishedAt}
                 errorMessage={errors.publishedAt?.message}
               />
             )}
           />
         </div>
-
-        {/* BILDUPPLADDNING */}
-        <div className='sticky -top-5 z-10 pb-2.5 bg-white '>
+        <div className='sticky -top-5 z-10 pb-2.5 bg-white'>
           <FileInput
             id='image-upload'
             multiple
             accept='image/*'
             onFilesSelected={handleImageChange}
           >
-            <div className='flex flex-col items-center justify-center w-full p-4 border-2 border-dashed border-gray-300 rounded-lg text-center hover:border-gray-500 transition-colors'>
-              <UploadCloud
-                strokeWidth={1.25}
-                className='w-8 h-8 text-gray-600 mb-1.5'
-              />
-              <p className='font-semibold text-gray-700 uppercase text-xs'>
-                Klicka för att ladda upp produktbilder
-              </p>
-            </div>
+            <UploadIcon
+              message={
+                newImageFiles.length === 0 && existingImages.length === 0
+                  ? 'Minst en bild krävs *'
+                  : ''
+              }
+            />
           </FileInput>
         </div>
         {(existingImages.length > 0 || newImagePreviews.length > 0) && (
-          <div className='mt-4 space-y-4'>
-            {/* Befintliga bilder */}
+          <div className='mt-2 space-y-4'>
             {existingImages.length > 0 && (
               <div>
-                <p className='text-sm  font-medium text-gray-700 ml-1 my-2'>
-                  Befintliga bilder:
-                </p>
-                <div className='grid grid-cols-2 sm:grid-cols-2 gap-1 mb-8'>
-                  {existingImages.map((src, index) => (
-                    <div key={`existing-${index}`} className='relative group '>
+                <p className='text-sm font-medium mb-1'>Befintliga bilder:</p>
+                <div className='grid grid-cols-2 gap-1 mb-8'>
+                  {existingImages.map((src, i) => (
+                    <div key={`existing-${i}`} className='relative group'>
                       <Image
                         src={src}
-                        height={250}
-                        width={160}
-                        alt={`Befintlig bild ${index + 1}`}
-                        className='w-full h-auto object-cover rounded-md '
+                        height={400}
+                        width={300}
+                        alt={`Bild ${i + 1}`}
                       />
                       <button
                         type='button'
-                        className='absolute cursor-pointer  group-hover:bg-white/50 group-active:bg-white/50 transition-all duration-300  text-gray-500 group-hover:text-black hover:text-red-800 p-2 top-1 right-1'
+                        className='absolute group-hover:opacity-100 opacity-0 group-active:opacity-100 transition-opacity duration-300 group-hover:bg-white/60 cursor-pointer top-1 right-1 p-2'
                         onClick={() =>
                           setExistingImages(
-                            existingImages.filter((_, i) => i !== index)
+                            existingImages.filter((_, idx) => i !== idx)
                           )
                         }
                       >
-                        <X size={12} strokeWidth={1.5} />
+                        <X size={12} />
                       </button>
                     </div>
                   ))}
                 </div>
               </div>
             )}
-
-            {/* Nya bilder */}
             {newImagePreviews.length > 0 && (
               <div>
-                <p className='text-sm  font-medium text-gray-700 ml-1 my-2'>
-                  Nya bilder:
-                </p>
-                <div className='grid grid-cols-2 sm:grid-cols-2 gap-1 mb-8'>
-                  {newImagePreviews.map((src, index) => (
-                    <div key={`new-${index}`} className='relative group'>
+                <p className='text-sm font-medium mb-1'>Nya bilder:</p>
+                <div className='grid grid-cols-2 gap-1 mb-8'>
+                  {newImagePreviews.map((src, i) => (
+                    <div key={`new-${i}`} className='relative group'>
                       <Image
                         src={src}
-                        height={250}
-                        width={160}
-                        alt={`Ny bild ${index + 1}`}
-                        className='w-full h-auto object-cover rounded-md '
+                        height={400}
+                        width={300}
+                        alt={`Ny bild ${i + 1}`}
                       />
                       <button
                         type='button'
-                        className='absolute cursor-pointer  group-hover:bg-white/50 group-active:bg-white/50 transition-all duration-300  text-gray-500 group-hover:text-black hover:text-red-800 p-2 top-1 right-1'
+                        className='absolute group-hover:opacity-100 opacity-0 group-active:opacity-100 transition-opacity duration-300 group-hover:bg-white/60 cursor-pointer top-1 right-1 p-2'
                         onClick={() => {
                           setNewImagePreviews(
-                            newImagePreviews.filter((_, i) => i !== index)
+                            newImagePreviews.filter((_, idx) => i !== idx)
                           );
+
                           setNewImageFiles(
-                            newImageFiles.filter((_, i) => i !== index)
+                            newImageFiles.filter((_, idx) => i !== idx)
                           );
                         }}
                       >
-                        <X size={12} strokeWidth={1.5} />
+                        <X size={12} />
                       </button>
                     </div>
                   ))}
@@ -563,24 +481,14 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
           </div>
         )}
       </div>
-
-      {/* Footer med knappar som alltid är synlig */}
-      <div className='flex w-full gap-2 pb-6 pt-3 '>
+      <div className='flex w-full gap-2 pb-6 pt-3'>
         <Button
           className='w-full mt-0 h-13'
           type='submit'
-          /*  disabled={
-            isPending ||
-            !isDirty ||
-            (mode === 'create' && newImageFiles.length === 0) ||
-            (mode === 'edit' &&
-              existingImages.length + newImageFiles.length === 0)
-          } */
+          disabled={isPending || (mode === 'edit' && !isDirty)}
         >
           {isPending
-            ? mode === 'edit'
-              ? 'Uppdaterar...'
-              : 'Sparar...'
+            ? 'Sparar...'
             : mode === 'edit'
               ? 'Uppdatera produkt'
               : 'Spara produkt'}
@@ -588,8 +496,7 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
         <Button
           className='w-full mt-0 h-13'
           variant='outline'
-          type='button'
-          onClick={handleReset}
+          type='reset'
           disabled={isPending}
         >
           Rensa

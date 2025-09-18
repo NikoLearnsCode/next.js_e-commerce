@@ -1,5 +1,5 @@
 import type {ProductCard} from '@/lib/types/db';
-import { ProductFormData } from '../form-validators';
+import {ProductFormData} from '../validators/admin-validators';
 
 export type SortField = 'id' | 'price' | 'name';
 
