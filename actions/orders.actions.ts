@@ -4,10 +4,7 @@ import {getServerSession} from 'next-auth';
 import {authOptions} from '@/lib/auth';
 import {getSessionId} from '@/utils/cookies';
 import {CartItemWithProduct} from '@/lib/types/db';
-import {
-  DeliveryFormData,
-  deliverySchema,
-} from '@/lib/validators/checkout-validators';
+import {DeliveryFormData, deliverySchema} from '@/lib/validators/checkout-validators';
 import {db} from '@/drizzle/index';
 import {ordersTable, orderItemsTable} from '@/drizzle/db/schema';
 import {eq, desc /* inArray */} from 'drizzle-orm';
@@ -42,7 +39,7 @@ export async function createOrder(
         user_id: user?.id,
         session_id: user ? null : await getSessionId(),
         status: 'betald',
-        total_amount: totalPrice.toString(),
+        total_amount: totalPrice,
         delivery_info: deliveryInfo,
         payment_info: paymentInfo.method,
         created_at: now,
@@ -60,7 +57,7 @@ export async function createOrder(
         order_id: newlyCreatedOrder.id,
         product_id: item.product_id,
         quantity: item.quantity,
-        price: item.price.toString(),
+        price: item.price,
         name: item.name,
         size: item.size,
         color: item.color,

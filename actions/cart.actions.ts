@@ -45,11 +45,7 @@ async function getCartItemsWithProducts(cartId: string) {
     .where(eq(cartItemsTable.cart_id, cartId))
     .orderBy(asc(cartItemsTable.created_at));
 
-  return cartItems.map((item) => ({
-    ...item,
-    // price: parseFloat(item.price as unknown as string),
-    price: parseFloat(item.price),
-  }));
+  return cartItems;
 }
 
 function calculateCartTotal(items: CartItemWithProduct[]): number {

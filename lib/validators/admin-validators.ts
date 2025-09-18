@@ -24,6 +24,8 @@ export const CATEGORY_TYPE_OPTIONS = CREATABLE_CATEGORY_TYPES.map((type) => ({
 
 export const insertCategorySchema = createInsertSchema(categories);
 
+// I din fil med validators
+
 export const categoryFormSchema = insertCategorySchema
   .extend({
     name: z.string().min(1, 'Namn får inte vara tomt.'),
@@ -34,10 +36,9 @@ export const categoryFormSchema = insertCategorySchema
     displayOrder: z.coerce.number().int().min(0),
     isActive: z.coerce.boolean(),
     parentId: z.preprocess(
-      (value) =>
+      value =>
         value === 'null' || value === '' || value === undefined ? null : value,
-
-      z.coerce.number().int().positive().nullable()
+      z.coerce.number().int().positive().nullable(),
     ),
   })
   .omit({
@@ -47,8 +48,33 @@ export const categoryFormSchema = insertCategorySchema
     created_at: true,
     updated_at: true,
   })
+  // =================================================================
+  // LÄGG TILL DETTA BLOCK FÖR ATT HANTERA FILERNA
+  // =================================================================
+  .extend({
+    desktopImageFile: z
+      .any()
+      .optional()
+      .refine(file => !file || file instanceof File, {
+        message: 'Ogiltig filtyp för desktop-bild.',
+      })
+      .transform(file =>
+        file instanceof File && file.size > 0 ? file : null,
+      ),
+
+    mobileImageFile: z
+      .any()
+      .optional()
+      .refine(file => !file || file instanceof File, {
+        message: 'Ogiltig filtyp för mobil-bild.',
+      })
+      .transform(file =>
+        file instanceof File && file.size > 0 ? file : null,
+      ),
+  })
+  // =================================================================
   .refine(
-    (data) => {
+    data => {
       if (
         (data.type === 'SUB-CATEGORY' || data.type === 'CONTAINER') &&
         data.parentId === null
@@ -60,7 +86,7 @@ export const categoryFormSchema = insertCategorySchema
     {
       message: 'En föräldrakategori måste väljas för denna typ.',
       path: ['parentId'],
-    }
+    },
   );
 
 export type CategoryFormData = z.infer<typeof categoryFormSchema>;

@@ -5,11 +5,9 @@ import {eq, desc, or, ilike, sql, not, and} from 'drizzle-orm';
 import {productSchema} from '@/lib/validators/admin-validators';
 import {productsTable} from '@/drizzle/db/schema';
 import {ActionResult} from '@/lib/types/query';
-import path from 'path';
-import fs from 'fs/promises';
 import {revalidatePath} from 'next/cache';
-import {isUploadedImage} from '@/utils/image-helpers';
 import {uploadProductImages} from './admin.image-upload.actions';
+import {cleanupUploadedImages} from './admin.categories.actions';
 
 // alla produkter + sök productsTable
 export async function getAllProducts(searchTerm?: string) {
@@ -34,19 +32,6 @@ export async function getAllProducts(searchTerm?: string) {
     .orderBy(desc(productsTable.updated_at));
 }
 
-// rensa bilder vid fel och delete
-async function cleanupProductImages(imageUrls: string[]) {
-  for (const url of imageUrls) {
-    if (url && isUploadedImage(url)) {
-      try {
-        await fs.unlink(path.join(process.cwd(), 'public', url));
-      } catch (error) {
-        console.warn(`Could not delete image on error: ${url}`, error);
-      }
-    }
-  }
-}
-
 export async function deleteProduct(id: string): Promise<ActionResult> {
   try {
     const [product] = await db
@@ -57,7 +42,7 @@ export async function deleteProduct(id: string): Promise<ActionResult> {
       return {success: false, error: 'Produkten kunde inte hittas.'};
     }
     if (product.images && product.images.length > 0) {
-      await cleanupProductImages(product.images);
+      await cleanupUploadedImages(product.images);
     }
     await db.delete(productsTable).where(eq(productsTable.id, id));
     revalidatePath('/admin/products');
@@ -82,7 +67,6 @@ export async function createProductWithImages(
 
   const preparedData = {
     ...rawData,
-    // konvertera price till number
     price: Number(rawData.price) || 0,
     // konvertera sizes till array
     sizes: rawData.sizes
@@ -148,7 +132,6 @@ export async function createProductWithImages(
     const dbInsertData = validatedData;
     const finalDbData = {
       ...dbInsertData,
-      price: dbInsertData.price.toString(),
       images: uploadedImageUrls,
     };
 
@@ -161,7 +144,7 @@ export async function createProductWithImages(
     return {success: true, data: newProduct};
   } catch (error) {
     console.error('Fel i createProductWithImages:', error);
-    await cleanupProductImages(uploadedImageUrls);
+    await cleanupUploadedImages(uploadedImageUrls);
     return {success: false, error: 'Ett serverfel uppstod.'};
   }
 }
@@ -188,7 +171,7 @@ export async function updateProductWithImages(
 
   const preparedData = {
     ...rawData,
-    price: rawData.price ? Number(rawData.price) : 0,
+    price: Number(rawData.price) || 0,
     sizes: rawData.sizes
       ? rawData.sizes
           .toString()
@@ -263,12 +246,11 @@ export async function updateProductWithImages(
     const imagesToDelete = (currentProduct.images || []).filter(
       (img) => !finalImages.includes(img)
     );
-    await cleanupProductImages(imagesToDelete);
+    await cleanupUploadedImages(imagesToDelete);
 
     const dbUpdateData = validatedData;
     const finalUpdateData = {
       ...dbUpdateData,
-      price: dbUpdateData.price.toString(),
       images: finalImages,
 
       updated_at: new Date(),
@@ -284,7 +266,7 @@ export async function updateProductWithImages(
     return {success: true, data: updatedProduct};
   } catch (error) {
     console.error('Fel i updateProductWithImages:', error);
-    await cleanupProductImages(newlyUploadedImageUrls);
+    await cleanupUploadedImages(newlyUploadedImageUrls);
     return {success: false, error: 'Ett serverfel uppstod vid uppdatering.'};
   }
 }

@@ -17,9 +17,11 @@ import {ActionResult} from '@/lib/types/query';
 import {isUploadedImage} from '@/utils/image-helpers';
 import {uploadCategoryImages} from './admin.image-upload.actions';
 import {Category} from '@/lib/types/category';
-import {z} from 'zod';
 
-// hämta alla kategorier med barn i trädstruktur
+// =================================================================================
+// PUBLIC API FUNCTIONS
+// =================================================================================
+
 export async function getCategoriesWithChildren() {
   const flatCategories = await db
     .select()
@@ -34,27 +36,26 @@ export async function createCategoryWithImages(
   let uploadedImages: {desktop?: string; mobile?: string} = {};
   try {
     const rawData = Object.fromEntries(formData.entries());
-
     const formResult = categoryFormSchema.parse(rawData);
+    const {desktopImageFile, mobileImageFile, ...categoryData} = formResult;
 
-    await checkCategoryConflicts(formResult);
+    await checkCategoryConflicts(categoryData);
 
-    const {desktopImage: desktopFile, mobileImage: mobileFile} = {
-      desktopImage: rawData.desktopImageFile as File | null,
-      mobileImage: rawData.mobileImageFile as File | null,
-    };
-    if (formResult.type === 'MAIN-CATEGORY' && (desktopFile || mobileFile)) {
+    if (
+      categoryData.type === 'MAIN-CATEGORY' &&
+      (desktopImageFile || mobileImageFile)
+    ) {
       const {desktopImageUrl, mobileImageUrl} = await uploadCategoryImages(
-        desktopFile,
-        mobileFile,
-        formResult.slug
+        desktopImageFile,
+        mobileImageFile,
+        categoryData.slug
       );
       if (desktopImageUrl) uploadedImages.desktop = desktopImageUrl;
       if (mobileImageUrl) uploadedImages.mobile = mobileImageUrl;
     }
 
     const finalPayload = {
-      ...formResult,
+      ...categoryData,
       desktopImage: uploadedImages.desktop || null,
       mobileImage: uploadedImages.mobile || null,
     };
@@ -71,14 +72,8 @@ export async function createCategoryWithImages(
     return {success: true, data: newCategory};
   } catch (error: any) {
     console.error('Error creating category:', error);
-    await cleanupUploadedImagesOnError(Object.values(uploadedImages));
-    if (error instanceof z.ZodError) {
-      return {
-        success: false,
-        error: 'Valideringsfel.',
-        errors: error.flatten().fieldErrors,
-      };
-    }
+    await cleanupUploadedImages(Object.values(uploadedImages));
+    // Zod-error block is now removed
     if (error.message.startsWith('Conflict:')) {
       return {success: false, error: error.message.replace('Conflict: ', '')};
     }
@@ -90,6 +85,7 @@ export async function updateCategoryWithImages(
   id: number,
   formData: FormData
 ): Promise<ActionResult> {
+  console.log('formData', formData);
   let uploadedImages: {desktop?: string; mobile?: string} = {};
   try {
     const [existingCategory] = await db
@@ -97,30 +93,29 @@ export async function updateCategoryWithImages(
       .from(categories)
       .where(eq(categories.id, id))
       .limit(1);
+
     if (!existingCategory) {
       return {success: false, error: 'Kategorin kunde inte hittas.'};
     }
-    console.log('formData', formData);
 
     const editedData = Object.fromEntries(formData.entries());
-
     const formResult = categoryFormSchema.parse(editedData);
 
-    await checkCategoryConflicts(formResult, id);
+    console.log('formResult', formResult);
+    const {desktopImageFile, mobileImageFile, ...categoryData} = formResult;
 
-    const {desktopImage: desktopFile, mobileImage: mobileFile} = {
-      desktopImage: editedData.desktopImageFile as File | null,
-      mobileImage: editedData.mobileImageFile as File | null,
-    };
+    await checkCategoryConflicts(categoryData, id);
 
     const imageUpdateResult = await handleImageUpdates(
       existingCategory,
-      desktopFile,
-      mobileFile,
-      formResult.slug,
+      desktopImageFile,
+      mobileImageFile,
+      categoryData.slug,
       formData
     );
     uploadedImages = imageUpdateResult.newlyUploaded;
+
+    console.log('imageUpdateResult', imageUpdateResult);
 
     const [updatedCategory] = await db
       .update(categories)
@@ -142,14 +137,8 @@ export async function updateCategoryWithImages(
     return {success: true, data: updatedCategory};
   } catch (error: any) {
     console.error('Error updating category:', error);
-    await cleanupUploadedImagesOnError(Object.values(uploadedImages));
-    if (error instanceof z.ZodError) {
-      return {
-        success: false,
-        error: 'Valideringsfel.',
-        errors: error.flatten().fieldErrors,
-      };
-    }
+    await cleanupUploadedImages(Object.values(uploadedImages));
+    // Zod-error block is now removed
     if (error.message.startsWith('Conflict:')) {
       return {success: false, error: error.message.replace('Conflict: ', '')};
     }
@@ -194,7 +183,7 @@ export async function deleteCategory(id: number): Promise<ActionResult> {
       };
     }
 
-    await cleanupUploadedImagesOnError([
+    await cleanupUploadedImages([
       categoryToDelete.desktopImage,
       categoryToDelete.mobileImage,
     ]);
@@ -277,12 +266,12 @@ async function handleImageUpdates(
     );
 
     if (desktopImageUrl) {
-      await cleanupUploadedImagesOnError([finalDesktopUrl]);
+      await cleanupUploadedImages([finalDesktopUrl]);
       finalDesktopUrl = desktopImageUrl;
       newlyUploaded.desktop = desktopImageUrl;
     }
     if (mobileImageUrl) {
-      await cleanupUploadedImagesOnError([finalMobileUrl]);
+      await cleanupUploadedImages([finalMobileUrl]);
       finalMobileUrl = mobileImageUrl;
       newlyUploaded.mobile = mobileImageUrl;
     }
@@ -294,7 +283,7 @@ async function handleImageUpdates(
   };
 }
 
-async function cleanupUploadedImagesOnError(
+export async function cleanupUploadedImages(
   imageUrls: (string | undefined | null)[]
 ) {
   for (const url of imageUrls) {
