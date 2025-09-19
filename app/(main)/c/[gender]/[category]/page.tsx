@@ -4,7 +4,7 @@ import ProductFilterWrapper from '@/components/products/product-grid/ProductFilt
 import {notFound} from 'next/navigation';
 import {Metadata} from 'next';
 import {parseSortParam} from '@/utils/filterSort';
-import {parseCollectionSlug} from '@/actions/lib/virtualCategories';
+import {parseCollectionSlug} from '@/actions/utils/virtualCategories';
 
 interface CategoryPageProps {
   params: Promise<{

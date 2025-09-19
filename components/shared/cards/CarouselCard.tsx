@@ -1,4 +1,3 @@
-// components/products/CarouselProductCard.tsx
 'use client';
 
 import Image from 'next/image';

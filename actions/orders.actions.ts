@@ -12,14 +12,16 @@ import {db} from '@/drizzle/index';
 import {ordersTable, orderItemsTable} from '@/drizzle/db/schema';
 import {eq, desc /* inArray */} from 'drizzle-orm';
 import {PaymentInfo} from '@/lib/types/query-types';
+import {CreateOrderResult} from '@/lib/types/db-types';
 
 export async function createOrder(
   cartItems: CartItemWithProduct[],
   deliveryInfo: DeliveryFormData,
   paymentInfo: PaymentInfo,
   totalPrice: number
-) {
+): Promise<CreateOrderResult> {
   const deliveryValidation = deliverySchema.safeParse(deliveryInfo);
+
   if (!deliveryValidation.success) {
     console.error(
       'Delivery validation failed:',

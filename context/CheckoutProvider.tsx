@@ -11,8 +11,9 @@ import {
 import {useRouter, useSearchParams} from 'next/navigation';
 import {useCart} from '@/context/CartProvider';
 import {DeliveryFormData} from '@/lib/validators/checkout-validation';
+import {CreateOrderResult, CartItemWithProduct} from '@/lib/types/db-types';
 
-// Checkout steps - en enda source of truth
+
 export const STEP_INFO = {
   delivery: 'Frakt',
   payment: 'Betalning',
@@ -22,7 +23,7 @@ export const STEP_INFO = {
 export type CheckoutStep = keyof typeof STEP_INFO;
 export const CHECKOUT_STEPS = Object.keys(STEP_INFO) as CheckoutStep[];
 
-// Enkel step-validering: kan bara gå till nästa steg om föregående är klart
+
 const canAccessStep = (
   step: CheckoutStep,
   completedSteps: CheckoutStep[]
@@ -33,7 +34,7 @@ const canAccessStep = (
   return false;
 };
 
-// Byggare checkout URL
+
 const getCheckoutUrl = (step: CheckoutStep, isGuest?: boolean): string => {
   return `/checkout?step=${step}${isGuest ? '&guest=true' : ''}`;
 };
@@ -41,13 +42,19 @@ const getCheckoutUrl = (step: CheckoutStep, isGuest?: boolean): string => {
 // Validera step från URL - om inte tillåtet, gå till senaste möjliga
 const validateStep = (
   urlStep: string | null,
-  completedSteps: CheckoutStep[]
+  completedSteps: CheckoutStep[],
+  hasCompletedOrder: boolean = false
 ): CheckoutStep => {
   const step = urlStep as CheckoutStep;
 
   // Om ogiltig step, börja med delivery
   if (!CHECKOUT_STEPS.includes(step)) {
     return 'delivery';
+  }
+
+  // Speciell hantering för confirmation step
+  if (step === 'confirmation' && hasCompletedOrder) {
+    return 'confirmation';
   }
 
   // Om kan inte komma åt steget, gå till senaste tillåtna
@@ -63,10 +70,15 @@ interface CheckoutContextType {
   currentStep: CheckoutStep;
   completedSteps: CheckoutStep[];
   deliveryData: DeliveryFormData | null;
+  completedOrder: CreateOrderResult | null;
+  orderSnapshot: {
+    items: CartItemWithProduct[];
+    totalPrice: number;
+  } | null;
   isGuest: boolean;
 
   completeDeliveryStep: (data: DeliveryFormData) => void;
-  completePaymentStep: () => void;
+  completePaymentStep: (orderData: CreateOrderResult) => void;
   goToStep: (step: CheckoutStep) => void;
   resetCheckout: () => void;
 }
@@ -78,17 +90,23 @@ const CheckoutContext = createContext<CheckoutContextType | undefined>(
 export function CheckoutProvider({children}: {children: ReactNode}) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const {cartItems, loading} = useCart();
+  const {cartItems, loading, totalPrice} = useCart();
 
   const [completedSteps, setCompletedSteps] = useState<CheckoutStep[]>([]);
   const [deliveryData, setDeliveryData] = useState<DeliveryFormData | null>(
     null
   );
+  const [completedOrder, setCompletedOrder] =
+    useState<CreateOrderResult | null>(null);
+  const [orderSnapshot, setOrderSnapshot] = useState<{
+    items: CartItemWithProduct[];
+    totalPrice: number;
+  } | null>(null);
 
   const stepParam = searchParams.get('step');
   const isGuest = searchParams.get('guest') === 'true';
 
-  const currentStep = validateStep(stepParam, completedSteps);
+  const currentStep = validateStep(stepParam, completedSteps, !!completedOrder);
 
   const completeDeliveryStep = useCallback(
     (data: DeliveryFormData) => {
@@ -99,10 +117,19 @@ export function CheckoutProvider({children}: {children: ReactNode}) {
     [router, isGuest]
   );
 
-  const completePaymentStep = useCallback(() => {
-    setCompletedSteps((prev) => [...prev, 'payment']);
-    router.push(getCheckoutUrl('confirmation', isGuest));
-  }, [router, isGuest]);
+  const completePaymentStep = useCallback(
+    (orderData: CreateOrderResult) => {
+      // Spara snapshot av order innan cart töms
+      setOrderSnapshot({
+        items: cartItems,
+        totalPrice: totalPrice,
+      });
+      setCompletedOrder(orderData);
+      setCompletedSteps((prev) => [...prev, 'payment']);
+      router.push(getCheckoutUrl('confirmation', isGuest));
+    },
+    [router, isGuest, cartItems, totalPrice]
+  );
 
   const goToStep = useCallback(
     (step: CheckoutStep) => {
@@ -118,11 +145,11 @@ export function CheckoutProvider({children}: {children: ReactNode}) {
   }, [router, isGuest]);
 
   useEffect(() => {
-    if (!loading && cartItems.length === 0) {
+    if (!loading && cartItems.length === 0 && currentStep !== 'confirmation') {
       router.push('/cart');
       return;
     }
-  }, [loading, cartItems.length, router]);
+  }, [loading, cartItems.length, router, currentStep]);
 
   useEffect(() => {
     if (!loading && cartItems.length > 0 && !stepParam) {
@@ -134,7 +161,7 @@ export function CheckoutProvider({children}: {children: ReactNode}) {
     return null;
   }
 
-  if (cartItems.length === 0) {
+  if (cartItems.length === 0 && currentStep !== 'confirmation') {
     return null;
   }
 
@@ -144,6 +171,8 @@ export function CheckoutProvider({children}: {children: ReactNode}) {
         currentStep,
         completedSteps,
         deliveryData,
+        completedOrder,
+        orderSnapshot,
         isGuest,
         completeDeliveryStep,
         completePaymentStep,

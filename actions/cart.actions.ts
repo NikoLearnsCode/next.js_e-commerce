@@ -21,7 +21,6 @@ import {cookies} from 'next/headers';
 import Decimal from 'decimal.js';
 
 // Hjälpfunktioner
-
 async function getCartItemsWithProducts(cartId: string) {
   const cartItems = await db
     .select({
@@ -67,7 +66,6 @@ function calculateItemCount(items: CartItemWithProduct[]): number {
 }
 
 // Kärnfunktioner
-
 export async function getCart() {
   try {
     const session = await getServerSession(authOptions);

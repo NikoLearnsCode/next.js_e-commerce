@@ -18,15 +18,23 @@ import {CiCreditCard1} from 'react-icons/ci';
 import {useCart} from '@/context/CartProvider';
 import {createOrder} from '@/actions/orders.actions';
 import {toast} from 'sonner';
+import {CreateOrderResult} from '@/lib/types/db-types';
+
+// Type guard för att kontrollera om resultatet är framgångsrikt
+function isSuccessfulOrder(
+  result: CreateOrderResult
+): result is {success: true; orderId: string} {
+  return result.success === true;
+}
 interface PaymentStepProps {
   onBack?: () => void;
-  onNext: () => void;
+  onNext: (orderData: CreateOrderResult) => void;
   deliveryData?: DeliveryFormData | null;
 }
 
 export default function PaymentStep({onNext, deliveryData}: PaymentStepProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const {cartItems, totalPrice, clearCart} = useCart();
+  const {cartItems, totalPrice} = useCart();
 
   const form = useForm<PaymentFormData>({
     resolver: zodResolver(paymentSchema),
@@ -58,11 +66,10 @@ export default function PaymentStep({onNext, deliveryData}: PaymentStepProps) {
         paymentInfo,
         totalPrice
       );
-      if (!result.success || !result.orderId) {
+      if (!isSuccessfulOrder(result)) {
         throw new Error(result.error || 'Failed to create order');
       }
-      await clearCart();
-      onNext();
+      onNext(result);
     } catch (error) {
       console.error('Error processing payment:', error);
       toast.error(

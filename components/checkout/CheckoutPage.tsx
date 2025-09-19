@@ -9,15 +9,21 @@ import OrderConfirmation from './steps/OrderConfirmation';
 import Steps from './StepBar';
 import CheckoutLayoutDesktop from './desktop/CheckoutLayoutDesktop';
 import CheckoutLayoutMobile from './mobile/CheckoutLayoutMobile';
-import {useMediaQuery} from '@/hooks/useMediaQuery';
+// import {useMediaQuery} from '@/hooks/useMediaQuery';
 import SpinningLoader from '@/components/shared/ui/SpinningLogo';
 import {Toaster} from 'sonner';
 
 export default function CheckoutPage() {
-  const {loading} = useCart();
-  const isDesktop = useMediaQuery('(min-width: 768px)');
-  const {currentStep, deliveryData, completeDeliveryStep, completePaymentStep} =
-    useCheckout();
+  const {loading, clearCart} = useCart();
+  // const isDesktop = useMediaQuery('(min-width: 768px)');
+  const {
+    currentStep,
+    deliveryData,
+    completedOrder,
+    orderSnapshot,
+    completeDeliveryStep,
+    completePaymentStep,
+  } = useCheckout();
 
   if (loading) {
     return (
@@ -44,7 +50,13 @@ export default function CheckoutPage() {
           />
         );
       case 'confirmation':
-        return <OrderConfirmation />;
+        return (
+          <OrderConfirmation
+            order={completedOrder}
+            orderSnapshot={orderSnapshot}
+            clearCart={clearCart}
+          />
+        );
       default:
         return null;
     }
@@ -54,16 +66,19 @@ export default function CheckoutPage() {
     <div className='max-w-5xl mx-auto px-4 py-8'>
       <Steps currentStep={currentStep} />
 
-      {/* Responsive layout */}
-      {isDesktop ? (
+      {/* {isDesktop ? ( */}
+      <div className='hidden md:block'>
         <CheckoutLayoutDesktop currentStep={currentStep}>
           {renderStepContent()}
         </CheckoutLayoutDesktop>
-      ) : (
+      </div>
+      {/* ) : ( */}
+      <div className='block md:hidden'>
         <CheckoutLayoutMobile currentStep={currentStep}>
           {renderStepContent()}
         </CheckoutLayoutMobile>
-      )}
+      </div>
+      {/* )} */}
       <Toaster />
     </div>
   );

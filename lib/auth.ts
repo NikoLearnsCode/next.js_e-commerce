@@ -17,8 +17,8 @@ export const authOptions: NextAuthOptions = {
   }),
   session: {
     strategy: 'database',
-    maxAge: 2 * 24 * 60 * 60, // 2 dagar
-    updateAge: 24 * 60 * 60, // Förläng varje dag vid aktivitet
+    maxAge: 2 * 24 * 60 * 60,
+    updateAge: 24 * 60 * 60, 
   },
   providers: [
     GoogleProvider({

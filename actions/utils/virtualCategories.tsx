@@ -1,4 +1,3 @@
-// EFTER
 export function parseCollectionSlug(slug: string | null | undefined) {
   const VIRTUAL_CATEGORIES = ['nyheter'];
 

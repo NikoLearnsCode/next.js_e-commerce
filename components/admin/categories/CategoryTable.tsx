@@ -28,6 +28,8 @@ type CategoryManagerProps = {
   categories: CategoryWithChildren[];
 };
 
+
+// TODO: STÄDA KAOSET
 export default function CategoryManager({categories}: CategoryManagerProps) {
   const {openSidebar, setDeleteModalOpen, setItemToDelete, setTriggerElement} =
     useAdmin();

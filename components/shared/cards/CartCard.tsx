@@ -1,4 +1,3 @@
-// components/shared/cards/CartCard.tsx
 'use client';
 
 import Image from 'next/image';

@@ -52,12 +52,10 @@ export default function OrderTable({orders}: OrderTableProps) {
     cell: (order: Order) => {
       const value = order[key as keyof Order];
 
-      // Formatera datum-fält
       if (key === 'created_at' || key === 'updated_at') {
         return <div>{formatDateForAdmin(value as Date)}</div>;
       }
 
-      // Formatera pris-fält
       if (key === 'total_amount') {
         return <div>{formatPrice(value as string | number)}</div>;
       }

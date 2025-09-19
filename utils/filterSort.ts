@@ -15,8 +15,6 @@ export function parseSortParam(sortParam?: string | null): SortParams {
   }
 }
 
-/* ------------------------------------------------- */
-
 const SIZE_ORDER: Record<string, number> = {
   XXS: 0,
   XS: 1,

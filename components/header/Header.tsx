@@ -2,7 +2,7 @@
 
 import {useEffect, useState} from 'react';
 import SearchBar from './HeaderSearchBar';
-import UserButton from './UserButton';
+import UserButton from './UserButtonDropdown';
 import HeaderFavoritesButton from './HeaderFavoritesButton';
 import HeaderCartDropdown from '@/components/header/HeaderCartDropdown';
 import SearchDropdown from './HeaderSearchDropdown';

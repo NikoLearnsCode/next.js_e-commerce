@@ -1,12 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-
 import {User, Loader2, ArrowRight} from 'lucide-react';
 import {useAuth} from '@/hooks/useAuth';
 import {useEffect, useState, useRef} from 'react';
-
-// import SpinningLogo from '../shared/SpinningLogo';
 import {motion} from 'framer-motion';
 import {AnimatePresence} from 'framer-motion';
 import {MotionCloseX} from '../shared/AnimatedSidebar';
@@ -14,6 +11,7 @@ import {useSaveCurrentUrl} from '@/hooks/useLoginRedirect';
 import {useRouter} from 'next/navigation';
 import {signOut} from 'next-auth/react';
 
+// TODO: STÄDA KAOSET
 function LogoutButton() {
   const [isPending, setIsPending] = useState(false);
 

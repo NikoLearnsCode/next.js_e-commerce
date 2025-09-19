@@ -83,3 +83,7 @@ export type FavoriteWithProduct = Favorite & {
 };
 
 export type FavoriteButtonProduct = Pick<CarouselCard, 'id'>;
+
+export type CreateOrderResult =
+  | {success: true; orderId: string}
+  | {success: false; error: string};

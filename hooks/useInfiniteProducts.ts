@@ -4,7 +4,7 @@ import {ProductCard} from '@/lib/types/db-types';
 import {getInfiniteProducts} from '@/actions/product.actions';
 import {useInfiniteQuery} from '@tanstack/react-query';
 import {parseSortParam} from '@/utils/filterSort';
-import {parseCollectionSlug} from '@/actions/lib/virtualCategories';
+import {parseCollectionSlug} from '@/actions/utils/virtualCategories';
 
 export function useInfiniteProducts({
   query,
