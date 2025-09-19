@@ -23,8 +23,10 @@ export default function OrdersClientContent({
       className={`${orders.length === 0 ? 'max-w-lg' : 'max-w-5xl'} w-full`}
     >
       {/* Header */}
-      <div className=' flex justify-between items-center mb-8 pl-4 lg:px-0'>
-        <h1 className='text-lg uppercase font-medium'>Mina beställningar</h1>
+      <div className=' flex justify-between items-center mb-8 pl-4 pr-2 lg:px-0'>
+        <h1 className=' text-base md:text-lg uppercase font-medium'>
+          Mina beställningar
+        </h1>
         <Link
           className='text-xs text-primary font-medium hover:underline flex gap-2 group tracking-wider'
           href='/profile'
@@ -60,9 +62,8 @@ export default function OrdersClientContent({
                 {/* Order Items Carousel with date as title */}
                 <Carousel
                   items={order.order_items}
-                  title={formattedDate} 
-
-                  slidesOffsetBefore={isDesktop ? 30 : 20}
+                  title={formattedDate}
+                  titelDivClassName='pr-2 lg:pr-0'
                   titleClassName='text-sm  text-gray-600 px-4 lg:px-0 sm:text-base'
                   renderItem={(item, _index) => (
                     <div className='aspect-[7/9]'>

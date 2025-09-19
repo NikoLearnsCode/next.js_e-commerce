@@ -4,6 +4,7 @@ import {ProductCard} from '@/lib/types/db';
 import {getInfiniteProducts} from '@/actions/product.actions';
 import {useInfiniteQuery} from '@tanstack/react-query';
 import {parseSortParam} from '@/utils/filterSort';
+import {parseCollectionSlug} from '@/actions/lib/virtualCategories';
 
 export function useInfiniteProducts({
   query,
@@ -27,9 +28,7 @@ export function useInfiniteProducts({
   // Parse sort parameter using the common utility function
   const {sort: sortField, order} = parseSortParam(sort);
 
-  // Handle "nyheter" as special category
-  const isNewOnly = category === 'nyheter';
-  const actualCategory = isNewOnly ? null : category;
+  const {actualCategory, isNewOnly} = parseCollectionSlug(category);
 
   return useInfiniteQuery({
     queryKey: ['products', {query, category, gender, color, sizes, sort}],
