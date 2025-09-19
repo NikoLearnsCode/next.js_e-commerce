@@ -3,12 +3,12 @@
 import {useEffect, useState, useMemo} from 'react';
 import {useRouter, usePathname, useSearchParams} from 'next/navigation';
 
-import {ProductCard} from '@/lib/types/db';
+import {ProductCard} from '@/lib/types/db-types';
 import Link from 'next/link';
 import {ChevronRight} from 'lucide-react';
-import FilterBar from '@/components/products/product-grid/FilterBar';
-import FilterPanel from '@/components/products/product-grid/FilterPanel';
-import InfinitePagination from './InfinitePagination';
+import FilterBar from '@/components/products/product-grid/ProductFilterBar';
+import FilterPanel from '@/components/products/product-grid/ProductFilterPanel';
+import InfinitePagination from './InfiniteProducts';
 
 interface ProductFilterWrapperProps {
   initialProducts: ProductCard[];

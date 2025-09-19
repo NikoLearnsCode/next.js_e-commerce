@@ -2,7 +2,7 @@
 
 import {useEffect, useRef} from 'react';
 import {useInView} from 'react-intersection-observer';
-import {ProductCard} from '@/lib/types/db';
+import {ProductCard} from '@/lib/types/db-types';
 import ProductGrid from '@/components/products/product-grid/ProductGrid';
 import {useInfiniteProducts} from '@/hooks/useInfiniteProducts';
 import SpinningLogo from '@/components/shared/ui/SpinningLogo';

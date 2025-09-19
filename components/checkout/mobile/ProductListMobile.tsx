@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import {useCart} from '@/context/CartProvider';
 import {useState} from 'react';
-import {formatPrice} from '@/utils/format';
+import {formatPrice} from '@/utils/formatPrice';
 import ProductModal from '../shared/ProductModal';
 
 export default function ProductListMobile() {

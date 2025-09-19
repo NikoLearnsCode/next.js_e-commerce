@@ -9,7 +9,7 @@ import {
   PaymentFormData,
   paymentSchema,
   DeliveryFormData,
-} from '@/lib/validators/checkout-validators';
+} from '@/lib/validators/checkout-validation';
 import {Button} from '@/components/shared/ui/button';
 import {Accordion} from '@/components/shared/ui/Accordion';
 import {SiKlarna} from 'react-icons/si';

@@ -1,5 +1,5 @@
 import ProductTable from '@/components/admin/products/ProductTable';
-import {Product} from '@/lib/types/db';
+import {Product} from '@/lib/types/db-types';
 import AdminHeader from '../shared/AdminHeader';
 import AdminSearch from '../shared/AdminSearch';
 

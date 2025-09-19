@@ -1,8 +1,8 @@
 'use client';
 
 import {createContext, useContext, useEffect, useState} from 'react';
-import {Category, CategoryWithChildren} from '@/lib/types/category';
-import {Product} from '@/lib/types/db';
+import {Category, CategoryWithChildren} from '@/lib/types/category-types';
+import {Product} from '@/lib/types/db-types';
 import {deleteProduct as deleteProductAction} from '@/actions/admin/admin.products.actions';
 import {deleteCategory as deleteCategoryAction} from '@/actions/admin/admin.categories.actions';
 import {toast} from 'sonner';
@@ -28,7 +28,7 @@ type AdminContextType = {
   setDeleteModalOpen: (open: boolean) => void;
 
   itemToDelete: {id: string; name: string; type: 'product' | 'category'} | null;
-  
+
   setItemToDelete: (
     item: {id: string; name: string; type: 'product' | 'category'} | null
   ) => void;

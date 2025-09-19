@@ -3,7 +3,7 @@
 import {getServerSession} from 'next-auth';
 import {authOptions} from '@/lib/auth';
 import {getOrCreateSessionId, getSessionId} from '@/utils/cookies';
-import type {NewFavorite} from '@/lib/types/db';
+import type {NewFavorite} from '@/lib/types/db-types';
 import {db} from '@/drizzle/index';
 import {favoritesTable, productsTable} from '@/drizzle/db/schema';
 import {eq, and, isNull, sql, inArray} from 'drizzle-orm';

@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import {usePathname} from 'next/navigation';
 import {motion} from 'framer-motion';
-import {useAdmin} from '@/context/AdminContextProvider';
+import {useAdmin} from '@/context/AdminProvider';
 
 // Letter-based icon component
 const LetterIcon = ({
@@ -154,7 +154,9 @@ export default function AdminSidebar() {
             >
               {!isCollapsed && (
                 <div className='text-base flex group items-center justify-center gap-[1px]'>
-                  <span className='text-[16px] mb-[2px]  text-gray-600 group-hover:text-black'>B</span>
+                  <span className='text-[16px] mb-[2px]  text-gray-600 group-hover:text-black'>
+                    B
+                  </span>
 
                   <span className='text-[11px]  text-gray-600 group-hover:text-black'>
                     ack to store{' '}

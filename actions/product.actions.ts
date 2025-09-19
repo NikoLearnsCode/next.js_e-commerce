@@ -2,9 +2,9 @@
 
 import {and, eq, count, sql, ne, getTableColumns} from 'drizzle-orm';
 import {productsTable} from '@/drizzle/db/schema';
-import type {Params, Result} from '@/lib/types/query';
+import type {Params, Result} from '@/lib/types/query-types';
 import {NEW_PRODUCT_DAYS} from '@/lib/constants';
-import {ProductDetail, CarouselCard} from '@/lib/types/db';
+import {ProductDetail, CarouselCard} from '@/lib/types/db-types';
 import {
   createTextSearchFilters,
   buildCategoryGenderFilters,

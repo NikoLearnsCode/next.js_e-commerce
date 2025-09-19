@@ -2,7 +2,7 @@
 import {useEffect, useRef} from 'react';
 import {useInView} from 'react-intersection-observer';
 import {useSearchParams} from 'next/navigation';
-import type {ProductCard} from '@/lib/types/db';
+import type {ProductCard} from '@/lib/types/db-types';
 import ProductGrid from '@/components/products/product-grid/ProductGrid';
 import {useInfiniteProducts} from '@/hooks/useInfiniteProducts';
 // import {useScrollRestoration} from '@/hooks/useScrollRestoration';

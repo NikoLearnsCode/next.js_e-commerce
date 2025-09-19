@@ -1,12 +1,12 @@
 'use client';
 
-import {Order} from '@/lib/types/db';
+import {Order} from '@/lib/types/db-types';
 import AdminTable from '../shared/ReusableTable.tsx';
 import {
   formatDateForAdmin,
   getAdminHeader,
 } from '@/components/admin/utils/admin-helpers';
-import {formatPrice} from '@/utils/format';
+import {formatPrice} from '@/utils/formatPrice';
 
 type OrderTableProps = {
   orders: Order[];
@@ -38,11 +38,6 @@ export default function OrderTable({orders}: OrderTableProps) {
       ),
     },
   ];
-
-
-  
-  
-      
 
   const simpleKeys = [
     'payment_info',

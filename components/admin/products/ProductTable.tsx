@@ -1,14 +1,14 @@
 'use client';
 
-import {Product} from '@/lib/types/db';
+import {Product} from '@/lib/types/db-types';
 import AdminTable from '../shared/ReusableTable.tsx';
 import {FiEdit, FiTrash} from 'react-icons/fi';
 import {
   formatDateForAdmin,
   getAdminHeader,
 } from '@/components/admin/utils/admin-helpers';
-import {formatPrice} from '@/utils/format';
-import {useAdmin} from '@/context/AdminContextProvider';
+import {formatPrice} from '@/utils/formatPrice';
+import {useAdmin} from '@/context/AdminProvider';
 
 type ProductManagerProps = {
   products: Product[];
@@ -56,8 +56,7 @@ export default function ProductManager({products}: ProductManagerProps) {
   const {openSidebar, setDeleteModalOpen, setItemToDelete, setTriggerElement} =
     useAdmin();
 
-
-    // Skickas till adminProvider > uppdaterar state > formwrapper prenumererar på state
+  // Skickas till adminProvider > uppdaterar state > formwrapper prenumererar på state
   const actions = [
     {
       label: <FiEdit size={16} className='text-gray-600 hover:text-gray-900' />,

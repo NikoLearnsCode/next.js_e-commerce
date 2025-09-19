@@ -7,7 +7,7 @@ import {FloatingLabelInput} from '@/components/shared/ui/floatingLabelInput';
 import {
   DeliveryFormData,
   deliverySchema,
-} from '@/lib/validators/checkout-validators';
+} from '@/lib/validators/checkout-validation';
 import {RadioOption} from '@/components/shared/ui/RadioOption';
 
 interface DeliveryStepProps {

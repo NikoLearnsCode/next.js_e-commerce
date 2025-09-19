@@ -1,4 +1,4 @@
-import AdminContextProvider from '@/context/AdminContextProvider';
+import AdminProvider from '@/context/AdminProvider';
 import {getCategoriesWithChildren} from '@/actions/admin/admin.categories.actions';
 import AdminUIWrapper from '@/components/admin/AdminUIWrapper';
 import {getServerSession} from 'next-auth';
@@ -18,8 +18,8 @@ export default async function AdminLayout({
   const categoryTree = await getCategoriesWithChildren();
 
   return (
-    <AdminContextProvider categories={categoryTree}>
+    <AdminProvider categories={categoryTree}>
       <AdminUIWrapper>{children}</AdminUIWrapper>
-    </AdminContextProvider>
+    </AdminProvider>
   );
 }

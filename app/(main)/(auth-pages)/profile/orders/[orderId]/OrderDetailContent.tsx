@@ -3,11 +3,11 @@
 import Image from 'next/image';
 import {ArrowLeft} from 'lucide-react';
 
-import type {OrderWithItems} from '@/lib/types/db';
+import type {OrderWithItems} from '@/lib/types/db-types';
 import AnimatedAuthContainer from '@/components/shared/AnimatedContainer';
 import Link from 'next/link';
 
-import {formatPrice} from '@/utils/format';
+import {formatPrice} from '@/utils/formatPrice';
 
 interface OrderDetailContentProps {
   order: OrderWithItems;

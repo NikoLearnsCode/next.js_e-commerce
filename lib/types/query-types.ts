@@ -1,5 +1,5 @@
-import type {ProductCard} from '@/lib/types/db';
-import {ProductFormData} from '../validators/admin-validators';
+import type {ProductCard} from '@/lib/types/db-types';
+import {ProductFormData} from '../validators/admin.product-validation';
 
 export type SortField = 'id' | 'price' | 'name';
 

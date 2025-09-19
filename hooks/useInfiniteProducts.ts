@@ -1,6 +1,6 @@
 'use client';
 
-import {ProductCard} from '@/lib/types/db';
+import {ProductCard} from '@/lib/types/db-types';
 import {getInfiniteProducts} from '@/actions/product.actions';
 import {useInfiniteQuery} from '@tanstack/react-query';
 import {parseSortParam} from '@/utils/filterSort';

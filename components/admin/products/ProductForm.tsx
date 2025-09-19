@@ -5,11 +5,11 @@ import {useForm, Controller} from 'react-hook-form';
 import {
   productFormSchema,
   type ProductFormData,
-} from '@/lib/validators/admin-validators';
+} from '@/lib/validators/admin.product-validation';
 import {Button} from '@/components/shared/ui/button';
 import {FloatingLabelInput} from '@/components/shared/ui/floatingLabelInput';
-import {CustomDateInput} from '@/components/shared/ui/DateInput';
-import {useAdmin} from '@/context/AdminContextProvider';
+import {CustomDateInput} from '@/components/admin/shared/DateInput';
+import {useAdmin} from '@/context/AdminProvider';
 import {useState, useEffect, useTransition, useRef} from 'react';
 import {
   DropdownOption,
@@ -17,7 +17,7 @@ import {
 } from '@/components/admin/utils/admin.form-helpers';
 import {generateSlug} from '@/components/admin/utils/slug-generator';
 import Image from 'next/image';
-import {Product} from '@/lib/types/db';
+import {Product} from '@/lib/types/db-types';
 import {X} from 'lucide-react';
 import CustomSelect from '../shared/Select';
 import FileInput from '../shared/FileInput';

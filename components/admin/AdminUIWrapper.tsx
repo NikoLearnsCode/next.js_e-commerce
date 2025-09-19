@@ -3,8 +3,8 @@
 import FormWrapper from '@/components/admin/AdminFormWrapper';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
-import {useAdmin} from '@/context/AdminContextProvider';
-import {Toaster} from 'sonner';
+import {useAdmin} from '@/context/AdminProvider';
+
 
 interface AdminUIWrapperProps {
   children: React.ReactNode;
@@ -78,7 +78,6 @@ export default function AdminUIWrapper({children}: AdminUIWrapperProps) {
           setTriggerElement(null);
         }}
       />
-      
     </div>
   );
 }

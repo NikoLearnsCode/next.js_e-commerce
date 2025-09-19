@@ -2,8 +2,8 @@
 
 import {useState} from 'react';
 import {Button} from '@/components/shared/ui/button';
-import {Product} from '@/lib/types/db';
-import {AddToCartItem} from '@/lib/types/db';
+import {Product} from '@/lib/types/db-types';
+import {AddToCartItem} from '@/lib/types/db-types';
 import {useCart} from '@/context/CartProvider';
 
 type AddToCartButtonProps = {

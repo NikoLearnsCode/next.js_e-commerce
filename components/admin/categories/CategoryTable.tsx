@@ -11,19 +11,18 @@ import {
 } from 'react-icons/fi';
 
 import AdminTable from '../shared/ReusableTable.tsx';
-import {CategoryWithChildren} from '@/lib/types/category';
+import {CategoryWithChildren} from '@/lib/types/category-types.js';
 import {
   formatDateForAdmin,
   getAdminHeader,
 } from '@/components/admin/utils/admin-helpers';
-import {useAdmin} from '@/context/AdminContextProvider';
+import {useAdmin} from '@/context/AdminProvider';
 import {
   flattenCategoriesRecursive,
   FlattenedCategory,
   categoryConfig,
   getAllCategoryIdsRecursive,
 } from '../utils/admin.table-helpers';
-
 
 type CategoryManagerProps = {
   categories: CategoryWithChildren[];
@@ -279,7 +278,6 @@ export default function CategoryManager({categories}: CategoryManagerProps) {
 
   return (
     <div>
-      
       <div className='pb-1 pt-2 flex items-center gap-2'>
         <button
           onClick={expandAll}
@@ -294,7 +292,6 @@ export default function CategoryManager({categories}: CategoryManagerProps) {
           Kollapsa
         </button>
       </div>
-
 
       <AdminTable
         data={flattenedCategories}

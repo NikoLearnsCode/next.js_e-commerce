@@ -3,10 +3,10 @@
 import Image from 'next/image';
 import AddToCartButton from '@/components/products/product-detail/AddToCartButton';
 import {twMerge} from 'tailwind-merge';
-import type {ProductDetail, CarouselCard} from '@/lib/types/db';
+import type {ProductDetail, CarouselCard} from '@/lib/types/db-types';
 import {useState} from 'react';
 import Newsletter from '@/components/shared/Newsletter';
-import FavoriteButton from '@/components/favorites/FavoriteButton';
+import FavoriteButton from '@/components/favorites/AddToFavoriteButton';
 
 import MobileImageSwiper from './MobileImageSwiper';
 import dynamic from 'next/dynamic';
@@ -61,7 +61,10 @@ export default function ProductPage({
                 {/* Desktop view - Display all images in a grid */}
                 <div className='hidden flex-1 relative lg:grid md lg:grid-cols-2 lg:gap-0.5 '>
                   {product.images.map((img: string, idx: number) => (
-                    <div key={idx} className='relative  aspect-[7/9] w-full h-full'>
+                    <div
+                      key={idx}
+                      className='relative  aspect-[7/9] w-full h-full'
+                    >
                       <Image
                         src={img}
                         alt={`${product.name} - bild ${idx + 1}`}

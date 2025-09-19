@@ -1,4 +1,8 @@
-import {Category, CategoryWithChildren, NavLink} from '@/lib/types/category';
+import {
+  Category,
+  CategoryWithChildren,
+  NavLink,
+} from '@/lib/types/category-types';
 
 /**
  * Bygger en nästad trädstruktur från en platt lista av kategorier.

@@ -2,13 +2,13 @@
 
 import {Controller, useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
-import {Category} from '@/lib/types/category';
-import {useAdmin} from '@/context/AdminContextProvider';
+import {Category} from '@/lib/types/category-types';
+import {useAdmin} from '@/context/AdminProvider';
 import {
   categoryFormSchema,
   CategoryFormData,
   CATEGORY_TYPE_OPTIONS,
-} from '@/lib/validators/admin-validators';
+} from '@/lib/validators/admin.category-validation';
 import {useEffect, useMemo, useRef, useState, useTransition} from 'react';
 import {
   createCategoryWithImages,

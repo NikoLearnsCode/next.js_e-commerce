@@ -1,6 +1,6 @@
 import type {Metadata} from 'next';
 import {getInfiniteProducts} from '@/actions/product.actions';
-import SearchInfiniteScroll from '@/components/products/product-grid/SearchInfinitePagination';
+import SearchInfiniteScroll from '@/components/products/product-grid/InfiniteSearchProducts';
 
 type Props = {
   searchParams: Promise<{q?: string}>;

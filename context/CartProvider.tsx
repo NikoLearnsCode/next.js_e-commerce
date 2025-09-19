@@ -15,7 +15,7 @@ import {
   updateCartItemQuantity,
   clearCart,
 } from '@/actions/cart.actions';
-import {AddToCartItem, CartItemWithProduct} from '@/lib/types/db';
+import {AddToCartItem, CartItemWithProduct} from '@/lib/types/db-types';
 // import {useAuth} from '@/hooks/useAuth';
 
 interface CartContextType {
@@ -161,7 +161,6 @@ export function CartProvider({children}: {children: React.ReactNode}) {
     refreshCart();
   }, []);
 
-  
   /*   useEffect(() => {
     if (userIdRef.current !== user?.id) {
       userIdRef.current = user?.id;

@@ -1,12 +1,12 @@
 'use client';
 
 import {useEffect, useState} from 'react';
-import SearchBar from './SearchBar';
+import SearchBar from './HeaderSearchBar';
 import UserButton from './UserButton';
-import HeaderFavoritesButton from './FavoritesButton';
-import HeaderCartDropdown from '@/components/cart/HeaderCartDropdown';
-import SearchDropdown from './SearchDropdown';
-import {NavLink} from '@/lib/types/category';
+import HeaderFavoritesButton from './HeaderFavoritesButton';
+import HeaderCartDropdown from '@/components/header/HeaderCartDropdown';
+import SearchDropdown from './HeaderSearchDropdown';
+import {NavLink} from '@/lib/types/category-types';
 import Navigation from './Navigation';
 import Logo from '../shared/Logo';
 

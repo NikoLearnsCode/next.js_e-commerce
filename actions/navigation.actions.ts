@@ -3,7 +3,7 @@
 import {db} from '@/drizzle/index';
 import {categories} from '@/drizzle/db/schema';
 import {asc, eq, and} from 'drizzle-orm';
-import {NavLink} from '@/lib/types/category';
+import {NavLink} from '@/lib/types/category-types';
 
 import {
   buildCategoryTree,

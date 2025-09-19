@@ -12,7 +12,7 @@ import type {
   NewCartItem,
   AddToCartItem,
   CartItemWithProduct,
-} from '@/lib/types/db';
+} from '@/lib/types/db-types';
 
 import {db} from '@/drizzle/index';
 import {cartsTable, cartItemsTable, productsTable} from '@/drizzle/db/schema';

@@ -3,9 +3,9 @@
 import {useRef, useEffect} from 'react';
 import {useCart} from '@/context/CartProvider';
 import {AnimatePresence, motion} from 'framer-motion';
-import CartItems from './CartItems';
-import CartSummary from './CartSummary';
-import EmptyCart from './EmptyCart';
+import CartItems from '../cart/CartItems';
+import CartSummary from '../cart/CartSummary';
+import EmptyCart from '../cart/EmptyCart';
 import SpinningLogo from '../shared/ui/SpinningLogo';
 import {PiBagSimpleThin} from 'react-icons/pi';
 

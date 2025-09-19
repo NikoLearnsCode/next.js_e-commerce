@@ -1,5 +1,5 @@
 import OrderTable from '@/components/admin/orders/OrderTable';
-import {Order} from '@/lib/types/db';
+import {Order} from '@/lib/types/db-types';
 import AdminHeader from '../shared/AdminHeader';
 import AdminSearch from '../shared/AdminSearch';
 

@@ -9,7 +9,7 @@ import {
   MotionCloseX,
 } from '@/components/shared/AnimatedSidebar';
 import Image from 'next/image';
-import {formatPrice} from '@/utils/format';
+import {formatPrice} from '@/utils/formatPrice';
 import {AnimatePresence} from 'framer-motion';
 
 interface ProductModalProps {

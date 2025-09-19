@@ -3,9 +3,9 @@
 import {db} from '@/drizzle/index';
 import {eq, desc, or, ilike, sql, not, and} from 'drizzle-orm';
 
-import {productApiSchema} from '@/lib/validators/admin-validators';
+import {productApiSchema} from '@/lib/validators/admin.product-validation';
 import {productsTable} from '@/drizzle/db/schema';
-import {ActionResult} from '@/lib/types/query';
+import {ActionResult} from '@/lib/types/query-types';
 import {revalidatePath} from 'next/cache';
 import {uploadProductImages} from './admin.image-upload.actions';
 
@@ -32,7 +32,6 @@ export async function getAllProducts(searchTerm?: string) {
     )
     .orderBy(desc(productsTable.updated_at));
 }
-
 
 export async function deleteProduct(id: string): Promise<ActionResult> {
   try {

@@ -5,9 +5,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import {X, Minus, Plus} from 'lucide-react';
 import {motion} from 'framer-motion';
-import {formatPrice} from '@/utils/format';
+import {formatPrice} from '@/utils/formatPrice';
 import SpinningLogo from '@/components/shared/ui/SpinningLogo';
-import type {CartItemWithProduct} from '@/lib/types/db';
+import type {CartItemWithProduct} from '@/lib/types/db-types';
 
 type CartCardProps = {
   item: CartItemWithProduct;
@@ -50,7 +50,11 @@ export default function CartCard({
     >
       {/* Image section */}
       <div className='relative min-w-2/3 w-full h-full aspect-7/9 group'>
-        <Link className='block h-full w-full relative' tabIndex={-1} href={`/${slug}`}>
+        <Link
+          className='block h-full w-full relative'
+          tabIndex={-1}
+          href={`/${slug}`}
+        >
           {images && images[0] ? (
             <Image
               src={images[0]}

@@ -10,7 +10,7 @@ import {
 } from 'react';
 import {useRouter, useSearchParams} from 'next/navigation';
 import {useCart} from '@/context/CartProvider';
-import {DeliveryFormData} from '@/lib/validators/checkout-validators';
+import {DeliveryFormData} from '@/lib/validators/checkout-validation';
 
 // Checkout steps - en enda source of truth
 export const STEP_INFO = {

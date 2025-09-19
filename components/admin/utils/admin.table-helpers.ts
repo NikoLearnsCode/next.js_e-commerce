@@ -1,4 +1,4 @@
-import {CategoryWithChildren} from '@/lib/types/category';
+import {CategoryWithChildren} from '@/lib/types/category-types';
 
 export type FlattenedCategory = CategoryWithChildren & {
   level: number;

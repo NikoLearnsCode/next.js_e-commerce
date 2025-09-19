@@ -4,7 +4,7 @@
 import {useState, useEffect} from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import {ProductCard as ProductCardType} from '@/lib/types/db';
+import {ProductCard as ProductCardType} from '@/lib/types/db-types';
 import {Swiper, SwiperSlide} from 'swiper/react';
 import {Navigation} from 'swiper/modules';
 import {ChevronLeft, ChevronRight, X} from 'lucide-react';
@@ -13,9 +13,9 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import {usePathname} from 'next/navigation';
 
-import FavoriteButton from '@/components/favorites/FavoriteButton';
+import FavoriteButton from '@/components/favorites/AddToFavoriteButton';
 import NewBadge from '@/components/shared/NewBadge';
-import {formatPrice} from '@/utils/format';
+import {formatPrice} from '@/utils/formatPrice';
 import {useFavorites} from '@/context/FavoritesProvider';
 import SpinningLogo from '@/components/shared/ui/SpinningLogo';
 import {useNavigatedHistory} from '@/context/NavigatedHistoryProvider';

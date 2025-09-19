@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import {Link} from '@/components/shared/ui/link';
 import {useState} from 'react';
-import {Category} from '@/lib/types/category';
+import {Category} from '@/lib/types/category-types';
 
 export default function Homepage({
   mainCategories,

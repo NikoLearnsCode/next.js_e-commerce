@@ -6,15 +6,14 @@ import {
 import {AnimatePresence} from 'framer-motion';
 import ProductForm from './products/ProductForm';
 import CategoryForm from './categories/CategoryForm';
-import {useAdmin} from '@/context/AdminContextProvider';
-import {Product} from '@/lib/types/db';
-import {Category} from '@/lib/types/category';
+import {useAdmin} from '@/context/AdminProvider';
+import {Product} from '@/lib/types/db-types';
+import {Category} from '@/lib/types/category-types';
 
 export default function FormWrapper({onClose}: {onClose: () => void}) {
   const {activeSidebar, editData} = useAdmin();
   // STATE FRÅN ADMIN PROVIDER
   // activeSidebar + editData: category eller product
-
 
   const renderForm = () => {
     const isEditMode = editData !== null;

@@ -3,11 +3,11 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import {CarouselCard} from '@/lib/types/db';
+import {CarouselCard} from '@/lib/types/db-types';
 
-import FavoriteButton from '@/components/favorites/FavoriteButton';
+import FavoriteButton from '@/components/favorites/AddToFavoriteButton';
 import NewBadge from '@/components/shared/NewBadge';
-import {formatPrice} from '@/utils/format';
+import {formatPrice} from '@/utils/formatPrice';
 import {useNavigatedHistory} from '@/context/NavigatedHistoryProvider';
 
 type CarouselProductCardProps = {

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import {usePathname} from 'next/navigation';
 import {AnimatePresence, motion} from 'framer-motion';
 import {ArrowLeft} from 'lucide-react';
-import {NavLink} from '@/lib/types/category';
+import {NavLink} from '@/lib/types/category-types';
 import {useMediaQuery} from '@/hooks/useMediaQuery';
 import {
   MotionCloseX,

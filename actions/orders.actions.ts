@@ -3,12 +3,15 @@
 import {getServerSession} from 'next-auth';
 import {authOptions} from '@/lib/auth';
 import {getSessionId} from '@/utils/cookies';
-import {CartItemWithProduct} from '@/lib/types/db';
-import {DeliveryFormData, deliverySchema} from '@/lib/validators/checkout-validators';
+import {CartItemWithProduct} from '@/lib/types/db-types';
+import {
+  DeliveryFormData,
+  deliverySchema,
+} from '@/lib/validators/checkout-validation';
 import {db} from '@/drizzle/index';
 import {ordersTable, orderItemsTable} from '@/drizzle/db/schema';
 import {eq, desc /* inArray */} from 'drizzle-orm';
-import {PaymentInfo} from '@/lib/types/query';
+import {PaymentInfo} from '@/lib/types/query-types';
 
 export async function createOrder(
   cartItems: CartItemWithProduct[],

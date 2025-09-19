@@ -14,8 +14,8 @@ import {
   pgEnum,
 } from 'drizzle-orm/pg-core';
 import {relations} from 'drizzle-orm';
-import type {DeliveryFormData} from '@/lib/validators/checkout-validators';
-import type {AdapterAccount} from '@/lib/types/auth';
+import type {DeliveryFormData} from '@/lib/validators/checkout-validation';
+import type {AdapterAccount} from '@/lib/types/auth-types';
 
 // LAGRAR INFO OM ANVÄNDARE
 export const usersTable = pgTable('users', {

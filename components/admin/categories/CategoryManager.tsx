@@ -1,7 +1,7 @@
 'use client';
 import CategoryTable from '@/components/admin/categories/CategoryTable';
 import AdminHeader from '../shared/AdminHeader';
-import {useAdmin} from '@/context/AdminContextProvider';
+import {useAdmin} from '@/context/AdminProvider';
 
 export default function CategoryManager() {
   const {categories} = useAdmin();

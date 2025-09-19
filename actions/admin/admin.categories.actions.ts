@@ -12,11 +12,11 @@ import {
   categoryFormSchema,
   insertCategorySchema,
   CategoryFormData,
-} from '@/lib/validators/admin-validators';
-import {ActionResult} from '@/lib/types/query';
+} from '@/lib/validators/admin.product-validation';
+import {ActionResult} from '@/lib/types/query-types';
 import {isUploadedImage} from '@/utils/image-helpers';
 import {uploadCategoryImages} from './admin.image-upload.actions';
-import {Category} from '@/lib/types/category';
+import {Category} from '@/lib/types/category-types';
 
 export async function getCategoriesWithChildren() {
   const flatCategories = await db
@@ -31,7 +31,6 @@ export async function createCategoryWithImages(
 ): Promise<ActionResult> {
   let uploadedImages: {desktop?: string; mobile?: string} = {};
   try {
-
     // Validera formulärdata EN GÅNG
     const rawData = Object.fromEntries(formData.entries());
     const formResult = categoryFormSchema.parse(rawData);
@@ -62,7 +61,7 @@ export async function createCategoryWithImages(
       desktopImage: uploadedImages.desktop || null,
       mobileImage: uploadedImages.mobile || null,
     };
-    
+
     const dbData = insertCategorySchema.parse(finalPayload);
 
     const [newCategory] = await db
@@ -118,8 +117,6 @@ export async function updateCategoryWithImages(
       formData
     );
     uploadedImages = imageUpdateResult.newlyUploaded;
-
-
 
     const [updatedCategory] = await db
       .update(categories)
@@ -202,8 +199,6 @@ export async function deleteCategory(id: number): Promise<ActionResult> {
     return {success: false, error: 'Ett serverfel uppstod vid radering.'};
   }
 }
-
-
 
 async function checkCategoryConflicts(
   data: Pick<CategoryFormData, 'name' | 'slug' | 'parentId'>,
