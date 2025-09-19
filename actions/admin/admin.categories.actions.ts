@@ -12,7 +12,7 @@ import {
   categoryFormSchema,
   insertCategorySchema,
   CategoryFormData,
-} from '@/lib/validators/admin.product-validation';
+} from '@/lib/validators/admin.category-validation';
 import {ActionResult} from '@/lib/types/query-types';
 import {isUploadedImage} from '@/utils/image-helpers';
 import {uploadCategoryImages} from './admin.image-upload.actions';
