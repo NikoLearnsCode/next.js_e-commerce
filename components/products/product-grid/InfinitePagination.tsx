@@ -28,12 +28,11 @@ export default function InfiniteScrollProducts({
   // const hasRestoredRef = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Extract filter parameters from URL
   const color = searchParams.get('color')?.split(',').filter(Boolean) || [];
   const sizes = searchParams.get('sizes')?.split(',').filter(Boolean) || [];
-  const sort = searchParams.get('sort') || undefined; // Let hook handle default
+  // skickar string | undefined, hooken hanterar price | name | id sort order
+  const sort = searchParams.get('sort') || undefined;
 
-  // React Query infinite scroll hook
   const {
     data,
     fetchNextPage,
@@ -52,14 +51,12 @@ export default function InfiniteScrollProducts({
     initialProducts,
   });
 
-  // Intersection Observer for loading more products
   const {ref, inView} = useInView({
     threshold: 0.1,
     rootMargin: '0px 0px 40% 0px',
     triggerOnce: false,
   });
 
-  // Load more products when in view
   useEffect(() => {
     if (inView && hasNextPage) {
       console.log('Loading more search results...');

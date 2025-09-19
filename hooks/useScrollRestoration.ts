@@ -1,5 +1,8 @@
 'use client';
 
+// ANVÄNDS INTE
+// används egentligen av InfinitePagination + SearchInfinitePagination
+
 import {useEffect, useRef} from 'react';
 import {usePathname, useSearchParams} from 'next/navigation';
 

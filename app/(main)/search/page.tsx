@@ -26,8 +26,9 @@ export default async function SearchPage({searchParams}: Props) {
     ? await getInfiniteProducts({
         query: q,
         limit: 8,
+        includeCount: true,
       })
-    : {products: [], hasMore: false, totalCount: 0};
+    : {products: [], hasMore: false};
 
   // console.log('FROM SSR', result);
 

@@ -4,6 +4,7 @@ import ProductFilterWrapper from '@/components/products/product-grid/ProductFilt
 import {notFound} from 'next/navigation';
 import {Metadata} from 'next';
 import {parseSortParam} from '@/utils/filterSort';
+import {parseCollectionSlug} from '@/actions/lib/virtualCategories';
 
 interface CategoryPageProps {
   params: Promise<{
@@ -40,8 +41,7 @@ async function getCategoryProducts(
   );
 
   // Handle "nyheter" as special category - show new products from all categories
-  const isNewOnly = category === 'nyheter';
-  const actualCategory = isNewOnly ? null : category;
+  const {actualCategory, isNewOnly} = parseCollectionSlug(category);
 
   const result = await getInfiniteProducts({
     limit: 8,
@@ -54,6 +54,7 @@ async function getCategoryProducts(
     order,
     metadata: true,
     isNewOnly,
+    includeCount: true,
   });
   if (!result.products || result.products.length === 0) {
     notFound();

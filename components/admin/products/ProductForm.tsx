@@ -3,7 +3,7 @@
 import {zodResolver} from '@hookform/resolvers/zod';
 import {useForm, Controller} from 'react-hook-form';
 import {
-  productSchema,
+  productFormSchema,
   type ProductFormData,
 } from '@/lib/validators/admin-validators';
 import {Button} from '@/components/shared/ui/button';
@@ -56,25 +56,20 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
     reset,
     control,
   } = useForm<ProductFormData>({
-    resolver: zodResolver(productSchema),
+    resolver: zodResolver(productFormSchema),
     mode: 'onChange',
-    // dummydata
     defaultValues: {
       name: 'riktigt bra testprodukt',
       slug: 'riktigt-bra-test-produkt',
       description: 'riktigt bra testbeskrivning',
-      price: 199,
+      price: 987,
       brand: 'riktigt bra testmärke',
       color: 'riktigt färgglad testfärg',
       gender: '',
       category: '',
-      sizes: ['46', '32/32', 'XXL', '28/32', 'S'],
-      specs: [
-        'riktigt bra testspecifikation',
-        'ännu en riktigt bra testspecifikation',
-        'och en till riktigt bra testspecifikation',
-        'och till sist en riktigt bra testspecifikation',
-      ],
+      sizes: '46, 32/32, XXL, 28/32, S',
+      specs:
+        'riktigt bra testspecifikation\nännu en riktigt bra testspecifikation',
       published_at: new Date(),
     },
   });
@@ -94,8 +89,8 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
         color: initialData.color,
         gender: initialData.gender || '',
         category: initialData.category || '',
-        sizes: initialData.sizes,
-        specs: initialData.specs || [],
+        sizes: initialData.sizes.join(', '),
+        specs: (initialData.specs || []).join('\n'),
         published_at: initialData.published_at
           ? new Date(initialData.published_at)
           : undefined,
@@ -174,8 +169,8 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
       color: '',
       gender: '',
       category: '',
-      sizes: [],
-      specs: [],
+      sizes: '',
+      specs: '',
       published_at: new Date(),
     });
     setExistingImages([]);
@@ -185,8 +180,6 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
     if (mode === 'create') setRealtimeUpdate(true);
   };
 
-  // form action + react-hook-form wrapper
-  // client-side validering först innan det skickas vidare till server
   const onSubmit = () => {
     startTransition(async () => {
       if (!formRef.current) return;
@@ -213,7 +206,6 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
     });
   };
 
-  // scrollar till botten av form när nya bilder läggs till
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (container && newImagePreviews.length > 0) {
@@ -334,23 +326,13 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
             hasError={!!errors.color}
             errorMessage={errors.color?.message}
           />
-          <Controller
-            name='sizes'
-            control={control}
-            render={({field}) => (
-              <FloatingLabelInput
-                {...field}
-                id='product-sizes'
-                label='Storlekar * (kommaseparerade)'
-                value={Array.isArray(field.value) ? field.value.join(', ') : ''}
-                onChange={(e) =>
-                  field.onChange(e.target.value.split(',').map((s) => s.trim()))
-                }
-                type='text'
-                hasError={!!errors.sizes}
-                errorMessage={errors.sizes?.message}
-              />
-            )}
+          <FloatingLabelInput
+            {...register('sizes')}
+            id='product-sizes'
+            label='Storlekar * (kommaseparerade)'
+            type='text'
+            hasError={!!errors.sizes}
+            errorMessage={errors.sizes?.message}
           />
           <FloatingLabelInput
             {...register('description')}
@@ -362,23 +344,15 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
             hasError={!!errors.description}
             errorMessage={errors.description?.message}
           />
-          <Controller
-            name='specs'
-            control={control}
-            render={({field}) => (
-              <FloatingLabelInput
-                {...field}
-                id='product-specs'
-                label='Specifikationer (en per rad)'
-                value={Array.isArray(field.value) ? field.value.join('\n') : ''}
-                onChange={(e) => field.onChange(e.target.value.split('\n'))}
-                as='textarea'
-                className='w-full col-span-2'
-                rows={5}
-                hasError={!!errors.specs}
-                errorMessage={errors.specs?.message}
-              />
-            )}
+          <FloatingLabelInput
+            {...register('specs')}
+            id='product-specs'
+            label='Specifikationer (en per rad)'
+            as='textarea'
+            className='w-full col-span-2'
+            rows={5}
+            hasError={!!errors.specs}
+            errorMessage={errors.specs?.message}
           />
           <Controller
             name='published_at'
@@ -403,7 +377,6 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
         <div className='sticky -top-5 z-10 pb-2.5 bg-white'>
           <FileInput
             id='image-upload'
-          
             multiple
             accept='image/*'
             onFilesSelected={handleImageChange}

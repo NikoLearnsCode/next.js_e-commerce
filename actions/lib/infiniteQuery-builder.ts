@@ -49,6 +49,19 @@ export function buildCategoryGenderFilters(
 }
 
 /**
+ * Skapar WHERE-villkor för att filtrera endast nya produkter i Nyheter, vanliga categories ovan sätts till false
+ * @param isNewOnly Om true, filtrerar för produkter skapade inom NEW_PRODUCT_DAYS
+ * @returns Array med SQL-villkor för att hitta nyligen skapade produkter
+ */
+export function buildIsNewFilter(isNewOnly: boolean) {
+  if (!isNewOnly) return [];
+
+  return [
+    sql`${productsTable.published_at} > NOW() - INTERVAL '${sql.raw(NEW_PRODUCT_DAYS.toString())} days'`,
+  ];
+}
+
+/**
  * Skapar WHERE-villkor för storlek- och färgfiltrering
  * @param sizes Array med storlekar att filtrera på (t.ex. ["S", "M", "L"])
  * @param color Array med färger att filtrera på (t.ex. ["svart", "vit"])
@@ -72,19 +85,6 @@ export function buildSizeColorFilters(sizes: string[], color: string[]) {
   }
 
   return conditions;
-}
-
-/**
- * Skapar WHERE-villkor för att filtrera endast nya produkter
- * @param isNewOnly Om true, filtrerar för produkter skapade inom NEW_PRODUCT_DAYS
- * @returns Array med SQL-villkor för att hitta nyligen skapade produkter
- */
-export function buildIsNewFilter(isNewOnly: boolean) {
-  if (!isNewOnly) return [];
-
-  return [
-    sql`${productsTable.published_at} > NOW() - INTERVAL '${sql.raw(NEW_PRODUCT_DAYS.toString())} days'`,
-  ];
 }
 
 /**
@@ -234,50 +234,52 @@ export async function fetchAvailableFilterOptions(
   const metadataConditions = [];
   if (gender) metadataConditions.push(eq(productsTable.gender, gender));
   if (category) metadataConditions.push(eq(productsTable.category, category));
-
-  // Filtrera bort produkter med framtida datum
   metadataConditions.push(sql`${productsTable.published_at} <= NOW()`);
-
-  // Add new products filter if isNewOnly is true
   if (isNewOnly) {
     metadataConditions.push(
       sql`${productsTable.published_at} > NOW() - INTERVAL '${sql.raw(NEW_PRODUCT_DAYS.toString())} days'`
     );
   }
 
-  const facetQuery =
-    metadataConditions.length > 0
-      ? db
-          .select({
-            color: productsTable.color,
-            sizes: productsTable.sizes,
-            category: productsTable.category,
-          })
-          .from(productsTable)
-          .where(and(...metadataConditions))
-      : db
-          .select({
-            color: productsTable.color,
-            sizes: productsTable.sizes,
-            category: productsTable.category,
-          })
-          .from(productsTable);
+  const whereClause =
+    metadataConditions.length > 0 ? and(...metadataConditions) : undefined;
 
-  const rows = await facetQuery;
+  const colorsQuery = db
+    .selectDistinct({color: productsTable.color})
+    .from(productsTable)
+    .where(whereClause)
+    .orderBy(asc(productsTable.color));
 
-  const availableColors = Array.from(
-    new Set(rows?.map((r) => r.color).filter(Boolean))
-  ).sort();
+  const categoriesQuery = db
+    .selectDistinct({category: productsTable.category})
+    .from(productsTable)
+    .where(whereClause);
 
-  const availableCategories = Array.from(
-    new Set(rows?.map((r) => r.category).filter(Boolean))
-  );
+  const sizesQuery = db
+    .select({
+      size: sql<string>`jsonb_array_elements_text(${productsTable.sizes})`.as(
+        'size'
+      ),
+    })
+    .from(productsTable)
+    .where(
+      whereClause
+        ? and(whereClause, sql`jsonb_typeof(${productsTable.sizes}) = 'array'`)
+        : sql`jsonb_typeof(${productsTable.sizes}) = 'array'`
+    )
+    .groupBy(sql`size`);
 
-  const sizeSets: string[][] = (rows ?? [])
-    .map((r) => (r.sizes as string[] | null) ?? [])
-    .filter((arr) => arr.length);
+  const [colorRows, categoryRows, sizeRows] = await Promise.all([
+    colorsQuery,
+    categoriesQuery,
+    sizesQuery,
+  ]);
 
-  const availableSizes = sortSizes(Array.from(new Set(sizeSets.flat())));
+  const availableColors = colorRows.map((r) => r.color).filter(Boolean);
+  const availableCategories = categoryRows
+    .map((r) => r.category)
+    .filter(Boolean);
+  const availableSizes = sortSizes(sizeRows.map((r) => r.size));
 
   return {
     availableColors,

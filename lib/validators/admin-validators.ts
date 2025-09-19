@@ -24,8 +24,6 @@ export const CATEGORY_TYPE_OPTIONS = CREATABLE_CATEGORY_TYPES.map((type) => ({
 
 export const insertCategorySchema = createInsertSchema(categories);
 
-// I din fil med validators
-
 export const categoryFormSchema = insertCategorySchema
   .extend({
     name: z.string().min(1, 'Namn får inte vara tomt.'),
@@ -36,9 +34,9 @@ export const categoryFormSchema = insertCategorySchema
     displayOrder: z.coerce.number().int().min(0),
     isActive: z.coerce.boolean(),
     parentId: z.preprocess(
-      value =>
+      (value) =>
         value === 'null' || value === '' || value === undefined ? null : value,
-      z.coerce.number().int().positive().nullable(),
+      z.coerce.number().int().positive().nullable()
     ),
   })
   .omit({
@@ -48,33 +46,31 @@ export const categoryFormSchema = insertCategorySchema
     created_at: true,
     updated_at: true,
   })
-  // =================================================================
-  // LÄGG TILL DETTA BLOCK FÖR ATT HANTERA FILERNA
-  // =================================================================
+
   .extend({
     desktopImageFile: z
       .any()
       .optional()
-      .refine(file => !file || file instanceof File, {
+      .refine((file) => !file || file instanceof File, {
         message: 'Ogiltig filtyp för desktop-bild.',
       })
-      .transform(file =>
-        file instanceof File && file.size > 0 ? file : null,
+      .transform((file) =>
+        file instanceof File && file.size > 0 ? file : null
       ),
 
     mobileImageFile: z
       .any()
       .optional()
-      .refine(file => !file || file instanceof File, {
+      .refine((file) => !file || file instanceof File, {
         message: 'Ogiltig filtyp för mobil-bild.',
       })
-      .transform(file =>
-        file instanceof File && file.size > 0 ? file : null,
+      .transform((file) =>
+        file instanceof File && file.size > 0 ? file : null
       ),
   })
-  // =================================================================
+
   .refine(
-    data => {
+    (data) => {
       if (
         (data.type === 'SUB-CATEGORY' || data.type === 'CONTAINER') &&
         data.parentId === null
@@ -86,23 +82,25 @@ export const categoryFormSchema = insertCategorySchema
     {
       message: 'En föräldrakategori måste väljas för denna typ.',
       path: ['parentId'],
-    },
+    }
   );
 
 export type CategoryFormData = z.infer<typeof categoryFormSchema>;
 
-// valideringsschema för produkter
-// valideringsschema för produkter
-export const productSchema = createInsertSchema(productsTable, {
-  // definierar/överstyr fält från databas-schemat
+// Beskriver datan exakt som den hanteras i formuläret.
+export const productFormSchema = createInsertSchema(productsTable, {
   price: z.coerce
     .number({required_error: 'Pris måste anges.'})
     .positive('Priset måste vara ett positivt tal.'),
-  images: z.array(z.string()),
-  sizes: z.array(z.string()).min(1, {message: 'Minst en storlek måste anges.'}),
-  specs: z.array(z.string()).optional(),
 
-  published_at: z.date().optional(),
+  sizes: z.string().min(1, {message: 'Minst en storlek måste anges.'}),
+
+  specs: z.string().optional(),
+
+  published_at: z.preprocess(
+    (val) => (val === '' ? undefined : val),
+    z.coerce.date().optional()
+  ),
 })
   .omit({
     images: true,
@@ -111,8 +109,6 @@ export const productSchema = createInsertSchema(productsTable, {
     updated_at: true,
   })
   .extend({
-    // lägger till/överstyr fält som INTE är i databasen,
-    // eller förfinar validering för befintliga fält.
     name: z.string().min(3, 'Produktnamnet måste vara minst 3 tecken.'),
     slug: z
       .string()
@@ -132,4 +128,29 @@ export const productSchema = createInsertSchema(productsTable, {
     color: z.string().min(1, 'Färg får inte vara tom.'),
   });
 
-export type ProductFormData = z.infer<typeof productSchema>;
+export type ProductFormData = z.infer<typeof productFormSchema>;
+
+// Utökar form-schemat och lägger till transformationen.
+export const productApiSchema = productFormSchema.extend({
+  sizes: z.preprocess(
+    (val) => {
+      if (typeof val === 'string' && val.trim().length > 0) {
+        return val
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean);
+      }
+      return [];
+    },
+    z.array(z.string()).min(1, {message: 'Minst en storlek måste anges.'})
+  ),
+  specs: z.preprocess((val) => {
+    if (typeof val === 'string' && val.trim().length > 0) {
+      return val
+        .split('\n')
+        .map((s) => s.trim())
+        .filter(Boolean);
+    }
+    return [];
+  }, z.array(z.string()).optional()),
+});

@@ -26,7 +26,9 @@ type AdminContextType = {
   operationType: CRUDOperationType;
   deleteModalOpen: boolean;
   setDeleteModalOpen: (open: boolean) => void;
+
   itemToDelete: {id: string; name: string; type: 'product' | 'category'} | null;
+  
   setItemToDelete: (
     item: {id: string; name: string; type: 'product' | 'category'} | null
   ) => void;

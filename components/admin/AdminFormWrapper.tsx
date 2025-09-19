@@ -12,6 +12,9 @@ import {Category} from '@/lib/types/category';
 
 export default function FormWrapper({onClose}: {onClose: () => void}) {
   const {activeSidebar, editData} = useAdmin();
+  // STATE FRÅN ADMIN PROVIDER
+  // activeSidebar + editData: category eller product
+
 
   const renderForm = () => {
     const isEditMode = editData !== null;

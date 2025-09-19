@@ -69,12 +69,6 @@ export function transformTreeToNavLinks(
       );
     }
 
-    console.log(navLink);
     return navLink;
   });
 }
-
-
-
-
-

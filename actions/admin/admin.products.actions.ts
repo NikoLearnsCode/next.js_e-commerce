@@ -1,15 +1,16 @@
 'use server';
 
-import {db} from '@/drizzle';
+import {db} from '@/drizzle/index';
 import {eq, desc, or, ilike, sql, not, and} from 'drizzle-orm';
-import {productSchema} from '@/lib/validators/admin-validators';
+
+import {productApiSchema} from '@/lib/validators/admin-validators';
 import {productsTable} from '@/drizzle/db/schema';
 import {ActionResult} from '@/lib/types/query';
 import {revalidatePath} from 'next/cache';
 import {uploadProductImages} from './admin.image-upload.actions';
+
 import {cleanupUploadedImages} from './admin.categories.actions';
 
-// alla produkter + sök productsTable
 export async function getAllProducts(searchTerm?: string) {
   if (!searchTerm?.trim()) {
     return db
@@ -31,6 +32,7 @@ export async function getAllProducts(searchTerm?: string) {
     )
     .orderBy(desc(productsTable.updated_at));
 }
+
 
 export async function deleteProduct(id: string): Promise<ActionResult> {
   try {
@@ -61,37 +63,10 @@ export async function createProductWithImages(
   const imageFiles = formData
     .getAll('images')
     .filter((file): file is File => file instanceof File && file.size > 0);
-  // destrukturera ut images som hanteras separat
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const {images, ...rawData} = Object.fromEntries(formData.entries());
 
-  const preparedData = {
-    ...rawData,
-    price: Number(rawData.price) || 0,
-    // konvertera sizes till array
-    sizes: rawData.sizes
-      ? rawData.sizes
-          .toString()
-          .split(',')
-          .map((s) => s.trim())
-          .filter(Boolean)
-      : [],
-    // konvertera specs till array
-    specs: rawData.specs
-      ? rawData.specs
-          .toString()
-          .split('\n')
-          .map((s) => s.trim())
-          .filter(Boolean)
-      : [],
-    // konvertera published_at till date
-    published_at: rawData.published_at
-      ? new Date(rawData.published_at.toString())
-      : undefined,
-  };
+  const rawData = Object.fromEntries(formData.entries());
 
-  // validerar data utan images
-  const validationResult = productSchema.safeParse(preparedData);
+  const validationResult = productApiSchema.safeParse(rawData);
 
   if (!validationResult.success) {
     return {
@@ -99,9 +74,9 @@ export async function createProductWithImages(
       error: 'Formulärdata är ogiltig.',
     };
   }
+
   const validatedData = validationResult.data;
 
-  // kollar om slug finns redan
   try {
     const existingProduct = await db
       .select({id: productsTable.id})
@@ -116,22 +91,18 @@ export async function createProductWithImages(
         errors: {slug: [`Slug "${validatedData.slug}" används redan.`]},
       };
     }
-    // säkerhetskontroll som inte borde behövas
     if (imageFiles.length === 0) {
       return {success: false, error: 'Minst en bild måste laddas upp.'};
     }
 
-    // laddar upp bilder
     uploadedImageUrls = await uploadProductImages(
       imageFiles,
       validatedData.gender,
       validatedData.category
     );
 
-    // konstruera final data
-    const dbInsertData = validatedData;
     const finalDbData = {
-      ...dbInsertData,
+      ...validatedData,
       images: uploadedImageUrls,
     };
 
@@ -163,41 +134,15 @@ export async function updateProductWithImages(
     .getAll('existingImages')
     .filter((img): img is string => typeof img === 'string' && img.length > 0);
 
-  const {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    images,
-    ...rawData
-  } = Object.fromEntries(formData.entries());
+  const rawData = Object.fromEntries(formData.entries());
 
-  const preparedData = {
-    ...rawData,
-    price: Number(rawData.price) || 0,
-    sizes: rawData.sizes
-      ? rawData.sizes
-          .toString()
-          .split(',')
-          .map((s) => s.trim())
-          .filter(Boolean)
-      : [],
-    specs: rawData.specs
-      ? rawData.specs
-          .toString()
-          .split('\n')
-          .map((s) => s.trim())
-          .filter(Boolean)
-      : [],
-    // konvertera published_at till date
-    published_at: rawData.published_at
-      ? new Date(rawData.published_at.toString())
-      : undefined,
-  };
-
-  const validationResult = productSchema.safeParse(preparedData);
+  const validationResult = productApiSchema.safeParse(rawData);
 
   if (!validationResult.success) {
     return {
       success: false,
       error: 'Formulärdata är ogiltig.',
+      errors: validationResult.error.flatten().fieldErrors,
     };
   }
   const validatedData = validationResult.data;
@@ -248,11 +193,9 @@ export async function updateProductWithImages(
     );
     await cleanupUploadedImages(imagesToDelete);
 
-    const dbUpdateData = validatedData;
     const finalUpdateData = {
-      ...dbUpdateData,
+      ...validatedData,
       images: finalImages,
-
       updated_at: new Date(),
     };
 

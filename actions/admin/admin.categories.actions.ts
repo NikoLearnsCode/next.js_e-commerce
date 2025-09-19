@@ -18,10 +18,6 @@ import {isUploadedImage} from '@/utils/image-helpers';
 import {uploadCategoryImages} from './admin.image-upload.actions';
 import {Category} from '@/lib/types/category';
 
-// =================================================================================
-// PUBLIC API FUNCTIONS
-// =================================================================================
-
 export async function getCategoriesWithChildren() {
   const flatCategories = await db
     .select()
@@ -35,12 +31,18 @@ export async function createCategoryWithImages(
 ): Promise<ActionResult> {
   let uploadedImages: {desktop?: string; mobile?: string} = {};
   try {
+
+    // Validera formulärdata EN GÅNG
     const rawData = Object.fromEntries(formData.entries());
     const formResult = categoryFormSchema.parse(rawData);
+
+    // Plocka ut filerna och resten av datan.
     const {desktopImageFile, mobileImageFile, ...categoryData} = formResult;
 
+    // Kontrollera konflikter
     await checkCategoryConflicts(categoryData);
 
+    // Uppladdning av bilder
     if (
       categoryData.type === 'MAIN-CATEGORY' &&
       (desktopImageFile || mobileImageFile)
@@ -54,11 +56,13 @@ export async function createCategoryWithImages(
       if (mobileImageUrl) uploadedImages.mobile = mobileImageUrl;
     }
 
+    // Skapa det slutgiltiga objektet för databasen.
     const finalPayload = {
       ...categoryData,
       desktopImage: uploadedImages.desktop || null,
       mobileImage: uploadedImages.mobile || null,
     };
+    
     const dbData = insertCategorySchema.parse(finalPayload);
 
     const [newCategory] = await db
@@ -73,7 +77,7 @@ export async function createCategoryWithImages(
   } catch (error: any) {
     console.error('Error creating category:', error);
     await cleanupUploadedImages(Object.values(uploadedImages));
-    // Zod-error block is now removed
+
     if (error.message.startsWith('Conflict:')) {
       return {success: false, error: error.message.replace('Conflict: ', '')};
     }
@@ -85,7 +89,7 @@ export async function updateCategoryWithImages(
   id: number,
   formData: FormData
 ): Promise<ActionResult> {
-  console.log('formData', formData);
+  // console.log('formData', formData);
   let uploadedImages: {desktop?: string; mobile?: string} = {};
   try {
     const [existingCategory] = await db
@@ -101,7 +105,7 @@ export async function updateCategoryWithImages(
     const editedData = Object.fromEntries(formData.entries());
     const formResult = categoryFormSchema.parse(editedData);
 
-    console.log('formResult', formResult);
+    // console.log('formResult', formResult);
     const {desktopImageFile, mobileImageFile, ...categoryData} = formResult;
 
     await checkCategoryConflicts(categoryData, id);
@@ -115,7 +119,7 @@ export async function updateCategoryWithImages(
     );
     uploadedImages = imageUpdateResult.newlyUploaded;
 
-    console.log('imageUpdateResult', imageUpdateResult);
+
 
     const [updatedCategory] = await db
       .update(categories)
@@ -138,7 +142,7 @@ export async function updateCategoryWithImages(
   } catch (error: any) {
     console.error('Error updating category:', error);
     await cleanupUploadedImages(Object.values(uploadedImages));
-    // Zod-error block is now removed
+
     if (error.message.startsWith('Conflict:')) {
       return {success: false, error: error.message.replace('Conflict: ', '')};
     }
@@ -199,9 +203,7 @@ export async function deleteCategory(id: number): Promise<ActionResult> {
   }
 }
 
-// =================================================================================
-// INTERNAL HELPER FUNCTIONS
-// =================================================================================
+
 
 async function checkCategoryConflicts(
   data: Pick<CategoryFormData, 'name' | 'slug' | 'parentId'>,

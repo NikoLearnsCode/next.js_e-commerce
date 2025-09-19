@@ -56,6 +56,8 @@ export default function ProductManager({products}: ProductManagerProps) {
   const {openSidebar, setDeleteModalOpen, setItemToDelete, setTriggerElement} =
     useAdmin();
 
+
+    // Skickas till adminProvider > uppdaterar state > formwrapper prenumererar på state
   const actions = [
     {
       label: <FiEdit size={16} className='text-gray-600 hover:text-gray-900' />,
@@ -70,7 +72,6 @@ export default function ProductManager({products}: ProductManagerProps) {
       ),
       key: 'delete',
       onClick: (product: Product, event?: React.MouseEvent) => {
-        // Spara trigger-elementet för dialogruta
         if (event) {
           setTriggerElement(event.currentTarget as HTMLElement);
         }

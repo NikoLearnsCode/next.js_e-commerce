@@ -2,7 +2,6 @@ import {
   boolean,
   integer,
   jsonb,
-  numeric,
   pgTable,
   text,
   timestamp,

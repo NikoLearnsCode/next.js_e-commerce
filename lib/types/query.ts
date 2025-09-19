@@ -27,12 +27,13 @@ export type Params = {
   sizes?: string[];
   metadata?: boolean;
   isNewOnly?: boolean;
+  includeCount?: boolean;
 };
 
 export type Result = {
   products: ProductCard[];
   hasMore: boolean;
-  totalCount: number;
+  totalCount?: number;
   metadata?: {
     availableColors: string[];
     availableSizes: string[];

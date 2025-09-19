@@ -32,7 +32,6 @@ export async function createOrder(
   const user = session?.user;
 
   try {
-    // Create order
     const orderId = await db.transaction(async (tx) => {
       const now = new Date();
       const newOrder = {

@@ -71,6 +71,7 @@ export default function CategoryManager({categories}: CategoryManagerProps) {
     [categories, expandedCategories]
   );
 
+  // Egna klasser för categoryFOrm
   const columns = useMemo(
     () => [
       {
@@ -217,6 +218,7 @@ export default function CategoryManager({categories}: CategoryManagerProps) {
     [expandedCategories]
   );
 
+  // Skickas till adminProvider > uppdaterar state > formwrapper prenumererar på state
   const actions = [
     {
       label: <FiEdit size={16} className='text-gray-600 hover:text-gray-900' />,

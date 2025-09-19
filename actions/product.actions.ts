@@ -120,33 +120,41 @@ export async function getInfiniteProducts({
   sizes = [],
   metadata = false,
   isNewOnly = false,
+  includeCount = false,
 }: Params): Promise<Result> {
   try {
     const searchConditions = createTextSearchFilters(query);
     const basicFilters = buildCategoryGenderFilters(category, gender);
     const arrayFilters = buildSizeColorFilters(sizes, color);
     const isNewFilters = buildIsNewFilter(isNewOnly);
+
+    const baseWhereConditions = [
+      ...searchConditions,
+      ...basicFilters,
+      ...arrayFilters,
+      ...isNewFilters,
+    ];
+    const baseWhereClause =
+      baseWhereConditions.length > 0 ? and(...baseWhereConditions) : undefined;
+
     const paginationConditions = buildCursorPaginationWhereClause(
       sort,
       order,
       lastId,
       lastValue
     );
-
-    const allConditions = [
-      ...searchConditions,
-      ...basicFilters,
-      ...arrayFilters,
-      ...isNewFilters,
+    const productWhereConditions = [
+      ...baseWhereConditions,
       ...paginationConditions,
     ];
+    const productWhereClause =
+      productWhereConditions.length > 0
+        ? and(...productWhereConditions)
+        : undefined;
 
-    const whereClause =
-      allConditions.length > 0 ? and(...allConditions) : undefined;
     const orderByFields = createSortOrderClause(sort, order);
 
-    const [countResult, productsData] = await Promise.all([
-      db.select({count: count()}).from(productsTable).where(whereClause),
+    const queriesToRun: [Promise<any>, ...Promise<any>[]] = [
       db
         .select({
           id: productsTable.id,
@@ -159,25 +167,35 @@ export async function getInfiniteProducts({
           slug: productsTable.slug,
           created_at: productsTable.created_at,
           isNew:
-            sql<boolean>`${productsTable.created_at} > NOW() - INTERVAL '${sql.raw(NEW_PRODUCT_DAYS.toString())} days'`.as(
-              'isNew'
-            ),
+            sql<boolean>`${productsTable.created_at} > NOW() - INTERVAL '${sql.raw(
+              NEW_PRODUCT_DAYS.toString()
+            )} days'`.as('isNew'),
         })
         .from(productsTable)
-        .where(whereClause)
+        .where(productWhereClause)
         .orderBy(...orderByFields)
         .limit(limit + 1),
-    ]);
+    ];
 
-    const totalCount = countResult[0]?.count ?? 0;
-    const hasMore = productsData.length > limit;
-    const products = hasMore ? productsData.slice(0, limit) : productsData;
+    if (includeCount) {
+      queriesToRun.push(
+        db.select({count: count()}).from(productsTable).where(baseWhereClause)
+      );
+    }
+
+    const [productsResult, countResult] = await Promise.all(queriesToRun);
+
+    const hasMore = productsResult.length > limit;
+    const products = hasMore ? productsResult.slice(0, limit) : productsResult;
 
     const result: Result = {
-      products: products,
+      products,
       hasMore,
-      totalCount,
     };
+
+    if (includeCount) {
+      result.totalCount = countResult?.[0]?.count ?? 0;
+    }
 
     if (metadata) {
       result.metadata = await fetchAvailableFilterOptions(
@@ -193,7 +211,7 @@ export async function getInfiniteProducts({
     return {
       products: [],
       hasMore: false,
-      totalCount: 0,
+      totalCount: includeCount ? 0 : undefined,
       metadata: metadata
         ? {
             availableColors: [],

@@ -16,23 +16,22 @@ async function getGenderProducts(
   gender: string,
   searchParams: {[key: string]: string | string[] | undefined}
 ) {
-  // Parse filter parameters from URL
   const colorParam = searchParams.color;
   const sizeParam = searchParams.sizes;
   const sortParam = searchParams.sort;
 
-  const color = colorParam
-    ? typeof colorParam === 'string'
-      ? colorParam.split(',').filter(Boolean)
-      : colorParam
-    : undefined;
+  const color = colorParam // Finns parametern över huvud taget? (Löser Fall 1)
+    ? typeof colorParam === 'string' // Är det en sträng (Fall 2)?
+      ? colorParam.split(',').filter(Boolean) // Ja, dela upp den till en array
+      : colorParam // Nej, då är det redan en array (Fall 3), använd den direkt
+    : undefined; // Parametern fanns inte, sätt till undefined
   const sizes = sizeParam
     ? typeof sizeParam === 'string'
       ? sizeParam.split(',').filter(Boolean)
       : sizeParam
     : undefined;
 
-  // Parse sort parameter
+  // t.ex price_desc -> sort: 'price', order: 'desc'
   const {sort, order} = parseSortParam(
     typeof sortParam === 'string' ? sortParam : undefined
   );
@@ -47,6 +46,7 @@ async function getGenderProducts(
     sort,
     order,
     metadata: true,
+    includeCount: true,
   });
   if (!result.products || result.products.length === 0) {
     notFound();
