@@ -63,14 +63,18 @@ export async function createProductWithImages(
     .getAll('images')
     .filter((file): file is File => file instanceof File && file.size > 0);
 
-  const rawData = Object.fromEntries(formData.entries());
-
+  if (imageFiles.length === 0) {
+    return {success: false, error: 'Minst en bild måste laddas upp.'};
+  }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const {images, ...rawData} = Object.fromEntries(formData.entries());
   const validationResult = productApiSchema.safeParse(rawData);
 
   if (!validationResult.success) {
     return {
       success: false,
-      error: 'Formulärdata är ogiltig.',
+      error: 'Formulärdata är ogiltig. Vänligen korrigera felen.',
+      // errors: validationResult.error.flatten().fieldErrors,
     };
   }
 
@@ -89,9 +93,6 @@ export async function createProductWithImages(
         error: `Slug "${validatedData.slug}" används redan.`,
         errors: {slug: [`Slug "${validatedData.slug}" används redan.`]},
       };
-    }
-    if (imageFiles.length === 0) {
-      return {success: false, error: 'Minst en bild måste laddas upp.'};
     }
 
     uploadedImageUrls = await uploadProductImages(
@@ -133,7 +134,12 @@ export async function updateProductWithImages(
     .getAll('existingImages')
     .filter((img): img is string => typeof img === 'string' && img.length > 0);
 
-  const rawData = Object.fromEntries(formData.entries());
+  if (newImageFiles.length === 0 && existingImages.length === 0) {
+    return {success: false, error: 'Minst en bild måste finnas kvar.'};
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const {images, ...rawData} = Object.fromEntries(formData.entries());
 
   const validationResult = productApiSchema.safeParse(rawData);
 
@@ -141,7 +147,6 @@ export async function updateProductWithImages(
     return {
       success: false,
       error: 'Formulärdata är ogiltig.',
-      errors: validationResult.error.flatten().fieldErrors,
     };
   }
   const validatedData = validationResult.data;
@@ -172,10 +177,6 @@ export async function updateProductWithImages(
         error: `Slug "${validatedData.slug}" används redan.`,
         errors: {slug: [`Slug "${validatedData.slug}" används redan.`]},
       };
-    }
-
-    if (existingImages.length + newImageFiles.length === 0) {
-      return {success: false, error: 'Minst en bild måste finnas kvar.'};
     }
 
     if (newImageFiles.length > 0) {

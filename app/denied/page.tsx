@@ -1,5 +1,6 @@
 import {Metadata} from 'next';
 import {Link} from '@/components/shared/ui/link';
+import {ArrowLeft} from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Access Denied',
@@ -11,10 +12,15 @@ export default async function Denied() {
       <h1 className='text-3xl uppercase font-syne font-bold'>ACCESS DENIED</h1>
       <Link
         href='/'
-        variant='secondary'
-        className='mt-6 uppercase h-8 text-xs font-bold font-syne '
+        variant='underline'
+        className='mt-6 tracking-wider h-8 gap-2 font-syne  text-sm font-medium  group'
       >
-        go back to homepage
+        <ArrowLeft
+          size={18}
+          strokeWidth={1.25}
+          className='group-hover:-translate-x-1 mb-[1px] transition-transform duration-300'
+        />
+        Gå tillbaka
       </Link>
     </div>
   );

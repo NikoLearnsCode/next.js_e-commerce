@@ -30,10 +30,6 @@ export default async function Checkout({
     );
   }
 
-  if (!user && !session_id) {
-    redirect('/');
-  }
-
   return (
     <CheckoutProvider>
       <CheckoutPage />

@@ -19,7 +19,6 @@ async function getCategoryProducts(
   gender: string,
   searchParams: {[key: string]: string | string[] | undefined}
 ) {
-  // Parse filter parameters from URL
   const colorParam = searchParams.color;
   const sizeParam = searchParams.sizes;
   const sortParam = searchParams.sort;
@@ -35,12 +34,10 @@ async function getCategoryProducts(
       : sizeParam
     : undefined;
 
-  // Parse sort parameter
   const {sort, order} = parseSortParam(
     typeof sortParam === 'string' ? sortParam : undefined
   );
 
-  // Handle "nyheter" as special category - show new products from all categories
   const {actualCategory, isNewOnly} = parseCollectionSlug(category);
 
   const result = await getInfiniteProducts({
@@ -70,7 +67,6 @@ export async function generateMetadata({
   const {gender, category} = await params;
   const capitalizedGender = gender.charAt(0).toUpperCase() + gender.slice(1);
 
-  // Handle "nyheter" as special case
   if (category === 'nyheter') {
     return {
       title: `${capitalizedGender} - Nyheter`,

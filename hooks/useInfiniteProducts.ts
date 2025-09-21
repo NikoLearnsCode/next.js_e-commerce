@@ -91,6 +91,5 @@ export function useInfiniteProducts({
             ],
           }
         : undefined,
-    // refetch on window focus
   });
 }

@@ -11,7 +11,6 @@ type FavoriteButtonProps = {
   variant?: 'default' | 'inverted';
 };
 
-// Ny 'overlay' variant för hjärtat på bilden
 export default function FavoriteButton({
   size = 16,
   strokeWidth = 1.5,

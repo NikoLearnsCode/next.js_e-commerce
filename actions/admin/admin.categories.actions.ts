@@ -29,19 +29,29 @@ export async function getCategoriesWithChildren() {
 export async function createCategoryWithImages(
   formData: FormData
 ): Promise<ActionResult> {
+
+  console.log('formData', formData);
+  const rawData = Object.fromEntries(formData.entries());
+
+  console.log('rawData', rawData);
+  const validationResult = categoryFormSchema.safeParse(rawData);
+
+  if (!validationResult.success) {
+    return {
+      success: false,
+      error: 'Formulärdata är ogiltig. Vänligen korrigera felen.',
+      // errors: validationResult.error.flatten().fieldErrors,
+    };
+  }
+
+  console.log('validationResult', validationResult);
   let uploadedImages: {desktop?: string; mobile?: string} = {};
   try {
-    // Validera formulärdata EN GÅNG
-    const rawData = Object.fromEntries(formData.entries());
-    const formResult = categoryFormSchema.parse(rawData);
+    const {desktopImageFile, mobileImageFile, ...categoryData} =
+      validationResult.data;
 
-    // Plocka ut filerna och resten av datan.
-    const {desktopImageFile, mobileImageFile, ...categoryData} = formResult;
-
-    // Kontrollera konflikter
     await checkCategoryConflicts(categoryData);
 
-    // Uppladdning av bilder
     if (
       categoryData.type === 'MAIN-CATEGORY' &&
       (desktopImageFile || mobileImageFile)
@@ -55,7 +65,6 @@ export async function createCategoryWithImages(
       if (mobileImageUrl) uploadedImages.mobile = mobileImageUrl;
     }
 
-    // Skapa det slutgiltiga objektet för databasen.
     const finalPayload = {
       ...categoryData,
       desktopImage: uploadedImages.desktop || null,
@@ -88,7 +97,18 @@ export async function updateCategoryWithImages(
   id: number,
   formData: FormData
 ): Promise<ActionResult> {
-  // console.log('formData', formData);
+  const editedData = Object.fromEntries(formData.entries());
+
+  const validationResult = categoryFormSchema.safeParse(editedData);
+
+  if (!validationResult.success) {
+    return {
+      success: false,
+      error: 'Formulärdata är ogiltig.',
+      // errors: validationResult.error.flatten().fieldErrors,
+    };
+  }
+
   let uploadedImages: {desktop?: string; mobile?: string} = {};
   try {
     const [existingCategory] = await db
@@ -101,11 +121,8 @@ export async function updateCategoryWithImages(
       return {success: false, error: 'Kategorin kunde inte hittas.'};
     }
 
-    const editedData = Object.fromEntries(formData.entries());
-    const formResult = categoryFormSchema.parse(editedData);
-
-    // console.log('formResult', formResult);
-    const {desktopImageFile, mobileImageFile, ...categoryData} = formResult;
+    const {desktopImageFile, mobileImageFile, ...categoryData} =
+      validationResult.data;
 
     await checkCategoryConflicts(categoryData, id);
 
@@ -121,10 +138,10 @@ export async function updateCategoryWithImages(
     const [updatedCategory] = await db
       .update(categories)
       .set({
-        name: formResult.name,
-        slug: formResult.slug,
-        displayOrder: formResult.displayOrder,
-        isActive: formResult.isActive,
+        name: categoryData.name,
+        slug: categoryData.slug,
+        displayOrder: categoryData.displayOrder,
+        isActive: categoryData.isActive,
         desktopImage: imageUpdateResult.finalImageUrls.desktop,
         mobileImage: imageUpdateResult.finalImageUrls.mobile,
         updated_at: new Date(),
@@ -250,6 +267,7 @@ async function handleImageUpdates(
 ) {
   let finalDesktopUrl = existingCategory.desktopImage;
   let finalMobileUrl = existingCategory.mobileImage;
+
   const newlyUploaded: {desktop?: string; mobile?: string} = {};
 
   if (formData.get('desktopImage') === '') finalDesktopUrl = null;
@@ -267,6 +285,7 @@ async function handleImageUpdates(
       finalDesktopUrl = desktopImageUrl;
       newlyUploaded.desktop = desktopImageUrl;
     }
+
     if (mobileImageUrl) {
       await cleanupUploadedImages([finalMobileUrl]);
       finalMobileUrl = mobileImageUrl;

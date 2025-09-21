@@ -32,14 +32,14 @@ export const productFormSchema = createInsertSchema(productsTable, {
         'Slug får endast innehålla små bokstäver, siffror och bindestreck.'
       ),
     description: z.string().min(1, 'Beskrivning får inte vara tom.'),
-    brand: z.string().min(1, 'Märke får inte vara tomt.'),
+    brand: z.string().min(1, 'Märk måste anges.'),
     gender: z
       .string({required_error: 'Du måste välja en huvudkategori.'})
       .min(1, 'Du måste välja en huvudkategori.'),
     category: z
       .string({required_error: 'Du måste välja en underkategori.'})
       .min(1, 'Du måste välja en underkategori.'),
-    color: z.string().min(1, 'Färg får inte vara tom.'),
+    color: z.string().min(1, 'Färg måste anges.'),
   });
 
 export type ProductFormData = z.infer<typeof productFormSchema>;

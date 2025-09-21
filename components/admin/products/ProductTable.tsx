@@ -26,9 +26,6 @@ export default function ProductManager({products}: ProductManagerProps) {
     'published_at',
   ];
 
-  /*   const filteredKeys = Object.keys(products[0]).filter((key) =>
-    desiredKeys.includes(key)
-  ); */
 
   const columns = desiredKeys.map((header) => ({
     header: getAdminHeader(header),

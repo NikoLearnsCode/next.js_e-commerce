@@ -200,6 +200,7 @@ export default function ProductForm({mode, initialData}: ProductFormProps) {
           mode === 'edit' ? 'Produkt uppdaterad!' : 'Produkt skapad!'
         );
         closeSidebar();
+        handleReset();
       } else {
         toast.error(result.error || 'Något gick galet.');
       }

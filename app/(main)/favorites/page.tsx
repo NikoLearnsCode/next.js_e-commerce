@@ -3,7 +3,7 @@ import {Metadata} from 'next';
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: 'Favoriter',
+    title: 'Dina favoriter',
     description: 'Dina sparade favoriter',
   };
 }

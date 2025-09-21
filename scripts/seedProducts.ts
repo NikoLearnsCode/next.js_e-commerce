@@ -293,7 +293,7 @@ const createDuplicateWithUniqueIds = (
 };
 
 // Huvudfunktion för att generera och spara produkter
-async function seedProducts(count: number = 50) {
+async function seedProducts(count: number = 32) {
   console.log(`Börjar seeda produkter...`);
 
   // Hämta information om befintliga produkter

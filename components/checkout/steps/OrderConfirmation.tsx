@@ -87,7 +87,7 @@ export default function OrderConfirmation({
         </div>
       )}
 
-      <div className='mt-2'>
+      <div className='mt-12'>
         <Link
           className='text-sm text-primary font-medium active:underline hover:underline flex justify-center gap-1  items-center mt-4 group tracking-wider mx-auto text-center'
           href='/'

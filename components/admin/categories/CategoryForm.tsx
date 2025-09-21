@@ -150,6 +150,22 @@ export default function CategoryForm({mode, initialData}: CategoryFormProps) {
     return allPossibleParents;
   };
 
+  const handleReset = () => {
+    reset({
+      name: '',
+      slug: '',
+      type: undefined,
+      displayOrder: 0,
+      isActive: true,
+      parentId: null,
+    });
+
+    setDesktopImage(null);
+    setDesktopPreview('');
+    setMobileImage(null);
+    setMobilePreview('');
+  };
+
   // form action + react-hook-form wrapper
   // client-side validering först innan det skickas vidare till server
   const onSubmit = () => {
@@ -174,6 +190,7 @@ export default function CategoryForm({mode, initialData}: CategoryFormProps) {
 
       if (result.success) {
         closeSidebar();
+        handleReset();
         toast.success(
           mode === 'edit' ? 'Kategori uppdaterad' : 'Kategori skapad'
         );

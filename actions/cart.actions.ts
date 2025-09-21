@@ -264,26 +264,28 @@ export async function transferCartOnLogin(userId: string) {
     const sessionId = await getSessionId();
     if (!sessionId) return {success: true, message: 'No session_id found'};
 
-    // Hämta all data i förväg
-    const sessionCartResult = await db
-      .select()
-      .from(cartsTable)
-      .where(
-        and(eq(cartsTable.session_id, sessionId), isNull(cartsTable.user_id))
-      )
-      .limit(1);
+    const [sessionCartResult, userCartResult] = await Promise.all([
+      db
+        .select()
+        .from(cartsTable)
+        .where(
+          and(eq(cartsTable.session_id, sessionId), isNull(cartsTable.user_id))
+        )
+        .limit(1),
+      db
+        .select()
+        .from(cartsTable)
+        .where(eq(cartsTable.user_id, userId))
+        .limit(1),
+    ]);
+
     const sessionCart = sessionCartResult[0];
+    if (!sessionCart)
+      return {success: true, message: 'No session cart to transfer'};
 
-    if (!sessionCart) return {success: true, message: 'No session cart found'};
-
-    const userCartResult = await db
-      .select()
-      .from(cartsTable)
-      .where(eq(cartsTable.user_id, userId))
-      .limit(1);
     const userCart = userCartResult[0];
 
-    // om ingen användarkorg finns, adoptera sessionskorgen
+    // Användaren har ingen korg, adoptera sessionskorgen.
     if (!userCart) {
       await db
         .update(cartsTable)
@@ -292,72 +294,77 @@ export async function transferCartOnLogin(userId: string) {
       return {success: true, message: 'Cart transferred successfully'};
     }
 
-    // annars, hämta alla items från båda korgarna
-    const sessionItems = await db
-      .select()
-      .from(cartItemsTable)
-      .where(eq(cartItemsTable.cart_id, sessionCart.id));
+    // Båda korgarna finns, slå ihop dem i en enda transaktion
+    await db.transaction(async (tx) => {
+      const sessionItems = await tx
+        .select()
+        .from(cartItemsTable)
+        .where(eq(cartItemsTable.cart_id, sessionCart.id));
+      const userItems = await tx
+        .select()
+        .from(cartItemsTable)
+        .where(eq(cartItemsTable.cart_id, userCart.id));
 
-    const userItems = await db
-      .select()
-      .from(cartItemsTable)
-      .where(eq(cartItemsTable.cart_id, userCart.id));
-
-    // Förbered för snabba uppslag
-    const userItemsMap = new Map(
-      userItems.map((item) => [`${item.product_id}_${item.size}`, item])
-    );
-
-    // Sortera i minnet VAD som ska göras
-    const itemsToUpdateQuantity: {id: string; newQuantity: number}[] = [];
-    const idsToMove: string[] = [];
-
-    for (const sessionItem of sessionItems) {
-      const key = `${sessionItem.product_id}_${sessionItem.size}`;
-      const existingUserItem = userItemsMap.get(key);
-
-      if (existingUserItem) {
-        itemsToUpdateQuantity.push({
-          id: existingUserItem.id,
-          newQuantity: existingUserItem.quantity + sessionItem.quantity,
-        });
-      } else {
-        idsToMove.push(sessionItem.id);
+      if (sessionItems.length === 0) {
+        await tx.delete(cartsTable).where(eq(cartsTable.id, sessionCart.id));
+        return;
       }
-    }
 
-    // Utför operationerna i bulk
-    const promises = [];
+      const userItemsMap = new Map(
+        userItems.map((item) => [`${item.product_id}_${item.size}`, item])
+      );
 
-    if (itemsToUpdateQuantity.length > 0) {
-      const updatePromise = db.transaction(async (tx) => {
-        for (const item of itemsToUpdateQuantity) {
-          await tx
-            .update(cartItemsTable)
-            .set({quantity: item.newQuantity, updated_at: new Date()})
-            .where(eq(cartItemsTable.id, item.id));
+      const itemsToUpdateQuantity: {id: string; newQuantity: number}[] = [];
+      const idsToMove: string[] = [];
+
+      for (const sessionItem of sessionItems) {
+        const key = `${sessionItem.product_id}_${sessionItem.size}`;
+        const existingUserItem = userItemsMap.get(key);
+        if (existingUserItem) {
+          itemsToUpdateQuantity.push({
+            id: existingUserItem.id,
+            newQuantity: existingUserItem.quantity + sessionItem.quantity,
+          });
+        } else {
+          idsToMove.push(sessionItem.id);
         }
-      });
-      promises.push(updatePromise);
-    }
+      }
 
-    if (idsToMove.length > 0) {
-      const movePromise = db
-        .update(cartItemsTable)
-        .set({cart_id: userCart.id, updated_at: new Date()})
-        .where(inArray(cartItemsTable.id, idsToMove));
-      promises.push(movePromise);
-    }
+      // Samla alla operationer som ska utföras
+      const promises = [];
 
-    await Promise.all(promises);
+      // Skapa en promise för varje update som körs parallellt
+      if (itemsToUpdateQuantity.length > 0) {
+        for (const item of itemsToUpdateQuantity) {
+          promises.push(
+            tx
+              .update(cartItemsTable)
+              .set({quantity: item.newQuantity, updated_at: new Date()})
+              .where(eq(cartItemsTable.id, item.id))
+          );
+        }
+      }
 
-    await db.delete(cartsTable).where(eq(cartsTable.id, sessionCart.id));
+      // Flytta resterande items i en bulk-operation
+      if (idsToMove.length > 0) {
+        promises.push(
+          tx
+            .update(cartItemsTable)
+            .set({cart_id: userCart.id, updated_at: new Date()})
+            .where(inArray(cartItemsTable.id, idsToMove))
+        );
+      }
 
-    console.log('Cart transferred successfully');
+      // Vänta på att alla uppdateringar och flyttar blir klara
+      await Promise.all(promises);
 
-    return {success: true, message: `Cart merged successfully`};
+      await tx.delete(cartsTable).where(eq(cartsTable.id, sessionCart.id));
+    });
+
+    return {success: true, message: 'Cart merged successfully'};
   } catch (error) {
     console.error('Unexpected error transferring cart on login:', error);
-    return {success: false, message: 'Failed to transfer cart'};
+
+    return {success: false, message: 'Failed to merge cart'};
   }
 }

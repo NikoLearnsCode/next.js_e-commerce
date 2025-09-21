@@ -119,7 +119,7 @@ export function CheckoutProvider({children}: {children: ReactNode}) {
 
   const completePaymentStep = useCallback(
     (orderData: CreateOrderResult) => {
-      // Spara snapshot av order innan cart töms
+      // Sparar snapshot av order innan cart töms
       setOrderSnapshot({
         items: cartItems,
         totalPrice: totalPrice,

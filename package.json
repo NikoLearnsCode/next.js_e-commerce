@@ -5,7 +5,7 @@
     "build": "next build",
     "start": "next start",
     "seed:c": "npx tsx scripts/seedCategories.ts",
-    "seed:p": "npx tsx scripts/seedProducts.ts",
+    "seed:p": "npx tsx scripts/seedProducts.ts 128",
     "delete:c": "npx tsx scripts/deleteCategories.ts",
     "delete:p": "npx tsx scripts/deleteProducts.ts",
     "db:generate": "drizzle-kit generate",

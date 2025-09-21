@@ -37,7 +37,6 @@ export default async function OrderDetailPage({params}: Props) {
     return notFound();
   }
 
-  // Verify the order belongs to the current user
   if (order.user_id !== session.user.id) {
     return notFound();
   }

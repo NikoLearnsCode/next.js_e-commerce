@@ -5,7 +5,6 @@ import AdminSidebar from '@/components/admin/AdminSidebar';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
 import {useAdmin} from '@/context/AdminProvider';
 
-
 interface AdminUIWrapperProps {
   children: React.ReactNode;
 }
@@ -38,7 +37,6 @@ export default function AdminUIWrapper({children}: AdminUIWrapperProps) {
       </main>
       <FormWrapper onClose={closeSidebar} />
 
-      {/* Delete Confirmation Dialog */}
       <ConfirmDialog
         isOpen={deleteModalOpen}
         title='Bekräfta borttagning'
@@ -49,11 +47,6 @@ export default function AdminUIWrapper({children}: AdminUIWrapperProps) {
               } "${itemToDelete.name}"?`
             : ''
         }
-        /* description={
-          itemToDelete?.type === 'category'
-            ? 'Obs: Detta kommer att påverka alla produkter i denna kategori.'
-            : undefined
-        } */
         confirmText='Ta bort'
         cancelText='Avbryt'
         variant='danger'

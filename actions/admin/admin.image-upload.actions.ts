@@ -154,10 +154,6 @@ export async function uploadCategoryImages(
 
   const files = imagesWithKeys.map((item) => item.file);
 
-  if (files.length === 0) {
-    throw new Error('Minst en bild måste väljas');
-  }
-
   const results = await handleImageUpload(files, {
     destinationPath: path.join('categories', categorySlug),
     fileNameGenerator: (file, index) => {

@@ -19,7 +19,6 @@ export default function CartItems({compact = false}: CartItemsProps) {
     removingItems,
   } = useCart();
 
-  // Handler for removing items from cart
   const handleRemoveItem = async (itemId: string) => {
     try {
       await removeItem(itemId);
@@ -28,7 +27,6 @@ export default function CartItems({compact = false}: CartItemsProps) {
     }
   };
 
-  // Handler for updating item quantities
   const handleUpdateQuantity = async (itemId: string, quantity: number) => {
     if (quantity < 1) return;
 

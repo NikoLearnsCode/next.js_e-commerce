@@ -1,9 +1,6 @@
 'use server';
 
 import {getAllProducts} from '@/actions/admin/admin.products.actions';
-// import {getServerSession} from 'next-auth';
-// import {authOptions} from '@/lib/auth';
-// import {redirect} from 'next/navigation';
 
 import ProductManager from '@/components/admin/products/ProductManager';
 import {Metadata} from 'next';
@@ -19,11 +16,6 @@ interface ProductsPageProps {
 }
 
 export default async function ProductsPage({searchParams}: ProductsPageProps) {
-  // const session = await getServerSession(authOptions);
-
-  // if (session?.user.role !== 1) {
-  //   return redirect('/denied');
-  // }
 
   const {search} = await searchParams;
   const products = await getAllProducts(search);

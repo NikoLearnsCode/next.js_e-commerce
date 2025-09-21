@@ -172,36 +172,39 @@ export const categoryTypeEnum = pgEnum('category_type', [
   'COLLECTION',
 ]);
 
-export const categories = pgTable('categories', {
-  id: serial('id').primaryKey(),
-  name: text('name').notNull(),
-  slug: text('slug').notNull(),
-  type: categoryTypeEnum('type').notNull().default('SUB-CATEGORY'),
-  displayOrder: integer('display_order').notNull().default(0),
-  isActive: boolean('is_active').notNull().default(true),
-  desktopImage: text('desktop_image'),
-  mobileImage: text('mobile_image'),
-  created_at: timestamp('created_at', {withTimezone: true})
-    .notNull()
-    .defaultNow(),
-  updated_at: timestamp('updated_at', {withTimezone: true})
-    .notNull()
-    .defaultNow(),
-
-  parentId: integer('parent_id').references((): AnyPgColumn => categories.id, {
-    onDelete: 'cascade',
-  }),
-});
-
-export const categoriesSlugParentUniqueIndex = unique(
-  'slug_parent_unique_idx'
-).on(categories.slug, categories.parentId);
-
-export const categoriesNameParentUniqueIndex = unique('name_unique_idx').on(
-  categories.name,
-  categories.parentId
+export const categories = pgTable(
+  'categories',
+  {
+    id: serial('id').primaryKey(),
+    name: text('name').notNull(),
+    slug: text('slug').notNull(),
+    type: categoryTypeEnum('type').notNull().default('SUB-CATEGORY'),
+    displayOrder: integer('display_order').notNull().default(0),
+    isActive: boolean('is_active').notNull().default(true),
+    desktopImage: text('desktop_image'),
+    mobileImage: text('mobile_image'),
+    created_at: timestamp('created_at', {withTimezone: true})
+      .notNull()
+      .defaultNow(),
+    updated_at: timestamp('updated_at', {withTimezone: true})
+      .notNull()
+      .defaultNow(),
+    parentId: integer('parent_id').references(
+      (): AnyPgColumn => categories.id,
+      {
+        onDelete: 'cascade',
+      }
+    ),
+  },
+  (table) => {
+    return [
+      unique('slug_parent_unique_idx').on(table.slug, table.parentId),
+      unique('name_unique_idx').on(table.name, table.parentId),
+    ];
+  }
 );
 
+// DRIZZLE RELATIONS
 export const ordersRelations = relations(ordersTable, ({one, many}) => ({
   user: one(usersTable, {
     fields: [ordersTable.user_id],

@@ -2,9 +2,6 @@
 
 import {getAllOrders} from '@/actions/admin/admin.orders.actions';
 import OrderManager from '@/components/admin/orders/OrderManager';
-// import {getServerSession} from 'next-auth';
-// import {authOptions} from '@/lib/auth';
-// import {redirect} from 'next/navigation';
 
 import {Metadata} from 'next';
 
@@ -19,11 +16,6 @@ interface OrdersPageProps {
 }
 
 export default async function OrdersPage({searchParams}: OrdersPageProps) {
-  // const session = await getServerSession(authOptions);
-
-  // if (session?.user.role !== 1) {
-  //   return redirect('/denied');
-  // }
   const {search} = await searchParams;
   const orders = await getAllOrders(search);
 
