@@ -11,21 +11,18 @@ export default function Homepage({
   mainCategories: Category[];
 }) {
   const [currentView, setCurrentView] = useState<string>(() => {
-    // Försök Dam först
     const dam = mainCategories.find((cat) => cat.slug === 'dam');
     if (dam && (dam.desktopImage || dam.mobileImage)) return 'dam';
 
-    // Annars första kategorin med bilder
     const first = mainCategories.find(
       (cat) => cat.desktopImage || cat.mobileImage
     );
-    return first?.slug || 'dam'; // Fallback till 'dam' för hårdkodade bilder
+    return first?.slug || 'dam';
   });
 
-  // Hover handlers - byt bara bild om kategorin har bilder
   const handleLinkHover = (categorySlug: string) => {
     const category = mainCategories.find((cat) => cat.slug === categorySlug);
-    if (category && (category.desktopImage || category.mobileImage)) {
+    if (category && category.desktopImage && category.mobileImage) {
       setCurrentView(categorySlug);
     }
   };
@@ -36,16 +33,12 @@ export default function Homepage({
         {/* Mobile bilder */}
         <div className='sm:hidden absolute w-full h-full'>
           {mainCategories.map((category, index) => {
-            // Hoppa över kategorier utan bilder
-            if (!category.desktopImage && !category.mobileImage) return null;
-
-            const fallbackMobile = `/images/LP.${category.slug.toUpperCase()}.MOBILE.avif`;
-            const mobileImage = category.mobileImage || fallbackMobile;
+            if (!category.mobileImage) return null;
 
             return (
               <Image
                 key={`mobile-${category.slug}`}
-                src={mobileImage}
+                src={category.mobileImage}
                 alt={`Landing-Page-${category.name}-Mobil`}
                 fill
                 priority={index === 0}
@@ -63,16 +56,11 @@ export default function Homepage({
         {/* Desktop bilder */}
         <div className='hidden sm:block w-full h-full absolute'>
           {mainCategories.map((category, index) => {
-            // Hoppa över kategorier utan bilder
-            if (!category.desktopImage && !category.mobileImage) return null;
-
-            const fallbackDesktop = `/images/LP.${category.slug.toUpperCase()}.avif`;
-            const desktopImage = category.desktopImage || fallbackDesktop;
-
+            if (!category.desktopImage) return null;
             return (
               <Image
                 key={`desktop-${category.slug}`}
-                src={desktopImage}
+                src={category.desktopImage}
                 alt={`Landing-Page-${category.name}`}
                 fill
                 priority={index === 0}
