@@ -57,30 +57,30 @@ const categoryTreeDefinition: CategoryBlueprint[] = [
           {title: 'T-shirts', slug: 't-shirts', type: 'SUB-CATEGORY'},
           {title: 'Overshirt', slug: 'overshirt', type: 'SUB-CATEGORY'},
           {title: 'Byxor', slug: 'byxor', type: 'SUB-CATEGORY'},
-          // Nivå 3
-          // {
-          //   title: 'Byxor',
-          //   slug: 'byxor',
-          //   type: 'CONTAINER',
-          //   children: [
-          //     {title: 'Jeans', slug: 'jeans', type: 'SUB-CATEGORY'},
-          //     // Nivå 4
-          //     {
-          //       title: 'Chinos',
-          //       slug: 'chinos',
-          //       type: 'CONTAINER',
-          //       children: [
-          //         {title: 'Slim Fit', slug: 'slim-fit', type: 'SUB-CATEGORY'},
-          //         // Nivå 5
-          //         {
-          //           title: 'Regular Fit',
-          //           slug: 'regular-fit',
-          //           type: 'SUB-CATEGORY',
-          //         },
-          //       ],
-          //     },
-          //   ],
-          // },
+          /*      // Nivå 3
+          {
+            title: 'Byxorr',
+            slug: 'byxorr',
+            type: 'CONTAINER',
+            children: [
+              {title: 'Jeans', slug: 'jeans', type: 'SUB-CATEGORY'},
+              // Nivå 4
+              {
+                title: 'Chinos',
+                slug: 'chinos',
+                type: 'CONTAINER',
+                children: [
+                  {title: 'Slim', slug: 'slim', type: 'SUB-CATEGORY'},
+                  // Nivå 5
+                  {
+                    title: 'Regular',
+                    slug: 'regular',
+                    type: 'SUB-CATEGORY',
+                  },
+                ],
+              },
+            ],
+          }, */
         ],
       },
       {
@@ -98,12 +98,61 @@ const categoryTreeDefinition: CategoryBlueprint[] = [
     desktopImage: '/images/hem.desktop.avif',
     mobileImage: '/images/hem.mobile.webp',
     children: [
-
       {title: 'Heminredning', slug: 'himinredning', type: 'SUB-CATEGORY'},
       {title: 'Bestick', slug: 'bestick', type: 'SUB-CATEGORY'},
       {title: 'Tavlor', slug: 'tavlor', type: 'SUB-CATEGORY'},
     ],
   },
+  /* {
+    title: 'Random',
+    slug: 'random',
+    type: 'MAIN-CATEGORY',
+    desktopImage: '/images/dam.desktop.avif',
+    mobileImage: '/images/dam.mobile.avif',
+    children: [
+      {title: 'Random1', slug: 'random1', type: 'COLLECTION'},
+      {
+        title: 'Random2',
+        slug: 'random2',
+        type: 'CONTAINER',
+        children: [
+          {title: 'Random3', slug: 'random3', type: 'SUB-CATEGORY'},
+          {title: 'Random4', slug: 'random4', type: 'SUB-CATEGORY'},
+          {title: 'Random5', slug: 'random5', type: 'SUB-CATEGORY'},
+          // Nivå 3
+          {
+            title: 'Random6',
+            slug: 'random6',
+            type: 'CONTAINER',
+            children: [
+              {title: 'Random7', slug: 'random7', type: 'SUB-CATEGORY'},
+              // Nivå 4
+              {
+                title: 'Random8',
+                slug: 'random8',
+                type: 'CONTAINER',
+                children: [
+                  {title: 'Random9', slug: 'random9', type: 'SUB-CATEGORY'},
+                  // Nivå 5
+                  {
+                    title: 'Random10',
+                    slug: 'random10',
+                    type: 'SUB-CATEGORY',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        title: 'Random11',
+        slug: 'random11',
+        type: 'CONTAINER',
+        children: [{title: 'Random12', slug: 'random12', type: 'SUB-CATEGORY'}],
+      },
+    ],
+  }, */
 ];
 
 type InsertCategory = InferInsertModel<typeof categories>;
@@ -119,7 +168,7 @@ const byggKategoriMedDessBarn = async (
     parentId: parentId,
     displayOrder: displayOrder,
     isActive: true,
-    type: ritningForKategorin.type, 
+    type: ritningForKategorin.type,
     desktopImage: ritningForKategorin.desktopImage || null,
     mobileImage: ritningForKategorin.mobileImage || null,
   };

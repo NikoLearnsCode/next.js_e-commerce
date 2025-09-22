@@ -13,6 +13,8 @@ import {
   MotionDropdown,
 } from '@/components/shared/AnimatedSidebar';
 
+// TODO: städa kaoset
+
 // ============================================================================
 //   DESKTOP-NAVIGERING
 // ============================================================================
@@ -110,8 +112,20 @@ function DesktopNavView({navLinks}: {navLinks: NavLink[]}) {
     return columns;
   }, [activePath, navLinks]);
 
-  const shouldExpand =
-    columnsToRender.length > 1 && columnsToRender.some((col) => col.length > 0);
+  // Dynamisk breddberäkning
+  const calculateDropdownWidth = useMemo(() => {
+    const baseWidth = 250; // Basbredd för första kolumnen
+    const additionalColumnWidth = 180; // Bredd för varje extra kolumn
+    const minWidth = 400;
+    const maxWidth = Math.min(800, window.innerWidth * 0.8);
+
+    if (columnsToRender.length === 0) return minWidth;
+
+    const totalWidth =
+      baseWidth +
+      Math.max(0, columnsToRender.length - 1) * additionalColumnWidth;
+    return Math.min(Math.max(totalWidth, minWidth), maxWidth);
+  }, [columnsToRender.length]);
 
   return (
     <nav className='uppercase'>
@@ -161,7 +175,7 @@ function DesktopNavView({navLinks}: {navLinks: NavLink[]}) {
               initial={{clipPath: 'inset(0% 100% 0% 0%)'}}
               animate={{
                 clipPath: 'inset(0% 0% 0% 0%)',
-                width: shouldExpand ? '450px' : '330px',
+                width: `${calculateDropdownWidth}px`,
               }}
               exit={{clipPath: 'inset(0% 100% 0% 0%)'}}
               transition={{type: 'tween', ease: 'easeOut', duration: 0.3}}
@@ -177,8 +191,14 @@ function DesktopNavView({navLinks}: {navLinks: NavLink[]}) {
 
               <div className='flex h-full'>
                 {columnsToRender.map((columnItems, columnIndex) => (
-                  <div key={columnIndex} className='min-w-[180px] pr-8'>
-                    <ul className='flex flex-col overflow-y-auto text-nowrap space-y-6'>
+                  <motion.div
+                    key={columnIndex}
+                    className='min-w-[180px] pr-8'
+                    initial={{opacity: 0}}
+                    animate={{opacity: 1}}
+                    transition={{duration: 0.3, delay: columnIndex * 0.1}}
+                  >
+                    <ul className='flex flex-col  overflow-y-auto text-nowrap space-y-6'>
                       {columnItems.map((item, itemIndex) => {
                         const isActive =
                           activePath[columnIndex + 1] === itemIndex;
@@ -191,7 +211,7 @@ function DesktopNavView({navLinks}: {navLinks: NavLink[]}) {
                           >
                             {item.isFolder ? (
                               <span
-                                className={`cursor-pointer transition focus:border-black outline-none block not-first:pt-2 text-sm font-medium border-b border-transparent hover:border-b hover:border-black w-fit ${
+                                className={`cursor-pointer transition focus:border-black outline-none block not-first:pt-2 text-sm  font-medium border-b border-transparent hover:border-b hover:border-black w-fit ${
                                   isActive
                                     ? 'text-black !border-b opacity-70 !border-black'
                                     : columnsToRender.length > columnIndex + 1
@@ -223,7 +243,7 @@ function DesktopNavView({navLinks}: {navLinks: NavLink[]}) {
                         );
                       })}
                     </ul>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             </motion.div>
@@ -263,12 +283,6 @@ function MobileNavView({navLinks}: {navLinks: NavLink[]}) {
     setNavigationStack([]);
   }, [navLinks, pathname]);
 
-  const currentLevel = navigationStack[navigationStack.length - 1];
-  const activeTopLevelCategory = navLinks[activeCategoryIndex];
-  const linksToDisplay =
-    currentLevel?.children ?? activeTopLevelCategory?.children ?? [];
-  const currentTitle = currentLevel?.title ?? activeTopLevelCategory?.title;
-
   const toggleMenu = () => {
     document.body.style.overflow = !isMenuOpen ? 'hidden' : '';
     setIsMenuOpen(!isMenuOpen);
@@ -305,6 +319,131 @@ function MobileNavView({navLinks}: {navLinks: NavLink[]}) {
     return () => document.removeEventListener('keydown', handleEscape);
   }, []);
 
+  // Render main category selection page
+  const renderMainPage = () => (
+    <motion.div
+      key='main-page'
+      initial={{x: -300}}
+      animate={{x: 0}}
+      exit={{x: -300, opacity: 0}}
+      transition={{type: 'tween', ease: 'easeInOut', duration: 0.3}}
+      className='h-full w-full'
+    >
+      {/* Category tabs */}
+      <ul className='flex uppercase px-2 text-sm font-semibold font-syne py-5 items-center'>
+        {navLinks.map((link, index) => (
+          <li
+            key={link.title}
+            onClick={() => changeCategory(index)}
+            className={`mx-3 cursor-pointer border-b ${
+              activeCategoryIndex === index
+                ? 'text-black border-black'
+                : 'text-gray-500 border-transparent'
+            }`}
+          >
+            {link.title}
+          </li>
+        ))}
+      </ul>
+
+      {/* Links for selected category */}
+      <div className='p-2 pt-5'>
+        <ul className='space-y-4 text-sm'>
+          {(navLinks[activeCategoryIndex]?.children || []).map((link) => (
+            <li key={link.href + link.title} className='not-first:pt-2'>
+              {link.isFolder ? (
+                <button
+                  onClick={() => handleLinkClick(link)}
+                  className='block mx-4 font-medium border-b border-transparent active:border-b active:border-black uppercase w-fit transition text-left'
+                >
+                  {link.title}
+                </button>
+              ) : (
+                <Link
+                  href={link.href || ''}
+                  onClick={() => handleLinkClick(link)}
+                  className={`block mx-4 font-medium border-b border-transparent active:border-b active:border-black w-fit transition ${
+                    link.title === 'Nyheter'
+                      ? 'text-red-800 hover:border-red-800'
+                      : ''
+                  }`}
+                >
+                  {link.title}
+                </Link>
+              )}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </motion.div>
+  );
+
+  // Render sub-level pages
+  const renderSubPage = () => {
+    const currentLevel = navigationStack[navigationStack.length - 1];
+    const linksToDisplay = currentLevel?.children || [];
+
+    return (
+      <motion.div
+        key={`sub-page-${navigationStack.length}`}
+        initial={{x: 300}}
+        animate={{x: 0}}
+        exit={{x: 300, opacity: 0}}
+        transition={{type: 'tween', ease: 'easeInOut', duration: 0.3}}
+        className='h-full w-full'
+      >
+        {/* Back button header */}
+        <div className='flex items-center px-2 py-5 '>
+          <button
+            onClick={goBack}
+            className='text-sm font-medium pl-3 pr-4 transition flex items-center gap-2'
+          >
+            <ArrowLeft strokeWidth={1.25} className='w-5 h-5 text-gray-600' />
+            <div className='flex items-center gap-1 ml-1'>
+              <span className='text-sm font-semibold text-gray-600 uppercase'>
+                {currentLevel?.title}
+              </span>
+              <span className='text-gray-400'></span>
+              <span className='text-xs font-medium text-gray-500 uppercase'>
+                {navLinks[activeCategoryIndex]?.title}
+              </span>
+            </div>
+          </button>
+        </div>
+
+        {/* Sub-level links */}
+        <div className='p-2 pt-5'>
+          <ul className='space-y-4 text-sm'>
+            {linksToDisplay.map((link) => (
+              <li key={link.href + link.title} className='not-first:pt-2'>
+                {link.isFolder ? (
+                  <button
+                    onClick={() => handleLinkClick(link)}
+                    className='block mx-4 font-medium border-b border-transparent active:border-b active:border-black uppercase w-fit transition text-left'
+                  >
+                    {link.title}
+                  </button>
+                ) : (
+                  <Link
+                    href={link.href || ''}
+                    onClick={() => handleLinkClick(link)}
+                    className={`block mx-4 font-medium border-b border-transparent active:border-b active:border-black w-fit transition ${
+                      link.title === 'Nyheter'
+                        ? 'text-red-800 hover:border-red-800'
+                        : ''
+                    }`}
+                  >
+                    {link.title}
+                  </Link>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </motion.div>
+    );
+  };
+
   return (
     <nav className='relative uppercase'>
       <button
@@ -331,22 +470,7 @@ function MobileNavView({navLinks}: {navLinks: NavLink[]}) {
               isMobile={true}
               className='overflow-y-auto'
             >
-              <ul className='flex uppercase px-2 text-sm font-semibold font-syne py-5 items-center'>
-                {navLinks.map((link, index) => (
-                  <li
-                    key={link.title}
-                    onClick={() => changeCategory(index)}
-                    className={`mx-3 cursor-pointer border-b ${
-                      activeCategoryIndex === index
-                        ? 'text-black border-black'
-                        : 'text-gray-500 border-transparent'
-                    }`}
-                  >
-                    {link.title}
-                  </li>
-                ))}
-              </ul>
-              <div className='absolute top-0 right-1.5'>
+              <div className='absolute top-0 right-1.5 z-10'>
                 <MotionCloseX
                   onClick={closeMenu}
                   size={14}
@@ -355,49 +479,12 @@ function MobileNavView({navLinks}: {navLinks: NavLink[]}) {
                 />
               </div>
 
-              <div className='p-2 pt-5'>
-                {navigationStack.length > 0 && (
-                  <div className='flex items-center mb-6'>
-                    <button
-                      onClick={goBack}
-                      className='text-sm font-medium pl-3 pr-2    transition'
-                    >
-                      <ArrowLeft
-                        strokeWidth={1}
-                        className='w-5 h-5 inline text-gray-600'
-                      />
-                    </button>
-                    <span className='text-[11px] font-semibold text-gray-600'>
-                      {currentTitle}
-                    </span>
-                  </div>
-                )}
-                <ul className='space-y-4 text-sm'>
-                  {linksToDisplay.map((link) => (
-                    <li key={link.href + link.title} className='not-first:pt-2'>
-                      {link.isFolder ? (
-                        <button
-                          onClick={() => handleLinkClick(link)}
-                          className='block mx-4 font-medium border-b border-transparent active:border-b active:border-black uppercase w-fit transition text-left'
-                        >
-                          {link.title}
-                        </button>
-                      ) : (
-                        <Link
-                          href={link.href || ''}
-                          onClick={() => handleLinkClick(link)}
-                          className={`block mx-4 font-medium border-b border-transparent active:border-b active:border-black w-fit transition ${
-                            link.title === 'Nyheter'
-                              ? 'text-red-800 hover:border-red-800'
-                              : ''
-                          }`}
-                        >
-                          {link.title}
-                        </Link>
-                      )}
-                    </li>
-                  ))}
-                </ul>
+              <div className='relative h-full overflow-hidden'>
+                <AnimatePresence>
+                  {navigationStack.length === 0
+                    ? renderMainPage()
+                    : renderSubPage()}
+                </AnimatePresence>
               </div>
             </MotionDropdown>
           </>
